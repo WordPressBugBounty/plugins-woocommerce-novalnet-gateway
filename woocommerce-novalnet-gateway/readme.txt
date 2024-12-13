@@ -1,4 +1,4 @@
-=== WooCommerce payment plugin - Novalnet AG ===
+=== WooCommerce payment plugin - Novalnet AG === 
 Contributors: Novalnet AG
 Donate link: https://www.novalnet.de
 Tags: Credit cards, Payments, Payment gateway, Novalnet payment
@@ -201,7 +201,7 @@ Please check out our ssl certified [Demo Store](https://woocommerce.novalnet.de/
 
 = Compatibility =   
 
-Novalnet payment plugin compatible for WooCommerce 4.0.0-9.3.3 and compatible for subscription 2.0.0-6.7.0.
+Novalnet payment plugin compatible for WooCommerce 4.0.0-9.4.2 and compatible for subscription 2.0.0-6.9.0.
 
 = Automatic Installation: =
 
