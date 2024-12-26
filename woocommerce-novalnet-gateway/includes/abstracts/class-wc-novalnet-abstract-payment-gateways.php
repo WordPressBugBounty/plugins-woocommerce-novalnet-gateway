@@ -556,7 +556,9 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 				novalnet()->helper()->novalnet_update_wc_order_meta( $wc_order, '_novalnet_gateway_status', $server_response ['status'] );
 			}
 
-			$wc_order->update_status( 'failed' );
+			if ( empty( $wc_order->get_transaction_id() ) ) {
+				$wc_order->update_status( 'failed' );
+			}
 
 			if ( ( isset( novalnet()->request ['nn_pay_order'] ) && 1 === (int) novalnet()->request ['nn_pay_order'] && is_object( $wc_order ) )
 			|| ( isset( $server_response['response_type'] ) && 'redirect_return' === $server_response['response_type'] )

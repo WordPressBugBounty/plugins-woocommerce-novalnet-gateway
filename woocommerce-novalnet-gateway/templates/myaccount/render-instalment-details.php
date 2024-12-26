@@ -16,10 +16,10 @@ if ( 1 < count( $contents ) ) {
 <table class="shop_table my_account_orders order_details wc_novalnet_instalment_show_table">
 <thead>
 	<tr>
-		<th><?php esc_attr_e( 'S.no', 'woocommerce-novalnet-gateway' ); ?></th>
+		<th><?php esc_attr_e( 'S.No', 'woocommerce-novalnet-gateway' ); ?></th>
+		<th><?php esc_attr_e( 'Novalnet Transaction ID', 'woocommerce-novalnet-gateway' ); ?></th>
 		<th><?php esc_attr_e( 'Amount', 'woocommerce-novalnet-gateway' ); ?></th>
-		<th><?php esc_attr_e( 'Date', 'woocommerce-novalnet-gateway' ); ?></th>
-		<th><?php esc_attr_e( 'Novalnet transaction ID', 'woocommerce-novalnet-gateway' ); ?></th>
+		<th><?php esc_attr_e( 'Next Instalment Date', 'woocommerce-novalnet-gateway' ); ?></th>
 		<th><?php esc_attr_e( 'Status', 'woocommerce-novalnet-gateway' ); ?></th>
 	</tr>
 </thead>
@@ -43,13 +43,13 @@ if ( 1 < count( $contents ) ) {
 				<?php echo esc_attr( $cycle ); ?>
 			</td>
 			<td>
+				<?php echo esc_attr( ! empty( $instalment['tid'] ) ? $instalment['tid'] : '-' ); ?>
+			</td>
+			<td>
 				<?php echo esc_html( wc_novalnet_shop_amount_format( $instalment['amount'] ) ); ?>
 			</td>
 			<td>
-				<?php echo esc_attr( $instalment['date'] ); ?>
-			</td>
-			<td>
-				<?php echo esc_attr( ! empty( $instalment['tid'] ) ? $instalment['tid'] : '-' ); ?>
+				<?php echo esc_attr( ! empty( $instalment['date'] ) ? $instalment['date'] : '-' ); ?>
 			</td>
 			<td>
 				<?php echo esc_html( $instalment['status_text'] ); ?>

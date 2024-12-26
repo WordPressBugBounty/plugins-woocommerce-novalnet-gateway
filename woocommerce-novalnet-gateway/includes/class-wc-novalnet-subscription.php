@@ -1031,6 +1031,9 @@ class WC_Novalnet_Subscription {
 						'subscription' => array(
 							'tid' => novalnet()->helper()->get_novalnet_subscription_tid( $wcs_order->get_parent_id(), $wcs_order->get_id() ),
 						),
+						'custom'       => array(
+							'lang' => wc_novalnet_shop_language(),
+						),
 					);
 					$endpoint   = 'subscription_update';
 				} else {
@@ -1183,12 +1186,6 @@ class WC_Novalnet_Subscription {
 				'render-ach-form.php',
 				array_merge(
 					$settings,
-					array(
-						'customer' => array(
-							'first_name' => $subscription->get_billing_first_name(),
-							'last_name'  => $subscription->get_billing_last_name(),
-						),
-					)
 				),
 				'novalnet_ach',
 			);
@@ -1687,7 +1684,7 @@ class WC_Novalnet_Subscription {
 						}
 
 						$nn_txn_token = null;
-						if ( in_array( $payment, array( 'novalnet_sepa', 'novalnet_cc', 'novalnet_paypal', 'novalnet_guaranteed_sepa', 'novalnet_applepay', 'novalnet_googlepay' ), true ) ) {
+						if ( in_array( $payment, array( 'novalnet_sepa', 'novalnet_cc', 'novalnet_paypal', 'novalnet_guaranteed_sepa', 'novalnet_applepay', 'novalnet_googlepay', 'novalnet_ach' ), true ) ) {
 							if ( ! empty( $server_response['transaction']['payment_data']['token'] ) ) {
 								$nn_txn_token = $server_response['transaction']['payment_data']['token'];
 							} elseif ( ! empty( $server_response['custom']['reference_token'] ) ) {

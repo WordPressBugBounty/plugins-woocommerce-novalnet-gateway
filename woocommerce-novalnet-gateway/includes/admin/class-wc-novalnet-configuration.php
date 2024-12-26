@@ -956,6 +956,13 @@ class WC_Novalnet_Configuration extends WC_Settings_API {
 				'description_de' => 'Sie werden zu giropay weitergeleitet. Um eine erfolgreiche Zahlung zu gewährleisten, darf die Seite nicht geschlossen oder neu geladen werden, bis die Bezahlung abgeschlossen ist',
 				'admin_desc'     => __( 'German based online payment method where funds are instantly transferred from buyer\'s account to your account', 'woocommerce-novalnet-gateway' ),
 			),
+			'novalnet_twint'                => array(
+				'title_en'       => 'TWINT',
+				'title_de'       => 'TWINT',
+				'description_en' => 'You will be redirected to TWINT. Please don’t close or refresh the browser until the payment is completed',
+				'description_de' => 'Sie werden zu TWINT weitergeleitet. Um eine erfolgreiche Zahlung zu gewährleisten, darf die Seite nicht geschlossen oder neu geladen werden, bis die Bezahlung abgeschlossen ist',
+				'admin_desc'     => __( 'A digital wallet that allows buyer\'s to make payments using their smartphones by scanning a QR code', 'woocommerce-novalnet-gateway' ),
+			),
 			'novalnet_eps'                  => array(
 				'title_en'       => 'eps',
 				'title_de'       => 'Eps',

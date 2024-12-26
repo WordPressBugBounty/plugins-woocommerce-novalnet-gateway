@@ -655,8 +655,8 @@ class WC_Novalnet_Webhook {
 
 		if ( 'CONFIRMED' === $this->event_data['transaction']['status'] && ! empty( $this->event_data['instalment']['cycles_executed'] ) ) {
 
-			/* translators: %1$s: parent_tid, %2$s: amount, %3$s: date, %4$s: tid */
-			$this->response ['message'] = sprintf( __( 'A new instalment has been received for the Transaction ID:%1$s with amount %2$s. The new instalment transaction ID is: %3$s', 'woocommerce-novalnet-gateway' ), $this->parent_tid, wc_novalnet_shop_amount_format( $this->event_data['instalment']['cycle_amount'] ), $this->event_tid );
+			/* translators: %1$s: parent_tid, %2$s: tid, %3$s: amount, %4$s: date */
+			$this->response ['message'] = sprintf( __( 'A new instalment transaction has been received for the Transaction ID: %1$s . The new instalment Transaction ID is %2$s with the amount %3$s on %4$s. ', 'woocommerce-novalnet-gateway' ), $this->parent_tid, $this->event_tid, wc_novalnet_shop_amount_format( $this->event_data['instalment']['cycle_amount'] ), wc_novalnet_formatted_date() );
 
 			// Store Bank details.
 			$this->order_reference ['additional_info'] = apply_filters( 'novalnet_store_instalment_data_webhook', $this->event_data );

@@ -107,6 +107,24 @@ class WC_Gateway_Novalnet_Instalment_Sepa extends WC_Novalnet_Abstract_Payment_G
 	}
 
 	/**
+	 * Returns the payment description html string for block checkout.
+	 *
+	 * @since 12.7.1
+	 *
+	 * @return string.
+	 */
+	public function get_payment_description_html() {
+		$payment_description_html = '';
+		$additional_info[]        = wc_novalnet_sepa_mandate_text( $this->id );
+
+		$payment_description_html = $this->test_mode_notification( true );
+
+		$payment_description_html .= $this->show_description( $additional_info, true );
+
+		return $payment_description_html;
+	}
+
+	/**
 	 * Validate payment fields on the frontend.
 	 */
 	public function validate_fields() {

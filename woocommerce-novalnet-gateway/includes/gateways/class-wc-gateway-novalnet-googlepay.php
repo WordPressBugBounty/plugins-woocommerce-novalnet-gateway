@@ -172,9 +172,8 @@ class WC_Gateway_Novalnet_GooglePay extends WC_Novalnet_Abstract_Payment_Gateway
 		WC_Novalnet_Configuration::wallet_settings( $this->form_fields, $this->id );
 
 		$this->form_fields ['google_pay_configuration_setting'] = array(
-			'title'       => __( 'Button Design', 'woocommerce-novalnet-gateway' ),
-			'type'        => 'title',
-			'description' => sprintf( '<strong>%s</strong>', __( 'Style for Google pay button', 'woocommerce-novalnet-gateway' ) ),
+			'title' => __( 'Button Design', 'woocommerce-novalnet-gateway' ),
+			'type'  => 'title',
 		);
 
 		$this->form_fields ['google_pay_button_type'] = array(

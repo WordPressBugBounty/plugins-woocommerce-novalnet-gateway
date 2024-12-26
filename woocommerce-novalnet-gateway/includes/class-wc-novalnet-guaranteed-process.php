@@ -133,22 +133,25 @@ class WC_Novalnet_Guaranteed_Process {
 	public function store_instalment_data( $data ) {
 
 		if ( ! empty( $data['instalment'] ) ) {
-			$order_amount = novalnet()->db()->get_entry_by_tid( $data ['transaction'] ['tid'], 'amount' );
-			if ( ! empty( $order_amount ) ) {
-				$data['transaction']['amount'] = $order_amount;
+			$tid_details                = novalnet()->db()->get_entry_by_tid( $data ['transaction'] ['tid'], 'additional_info' );
+			$instalment_additional_info = ! empty( $tid_details['additional_info'] ) ? wc_novalnet_unserialize_data( $tid_details['additional_info'] ) : null;
+
+			if ( ! empty( $instalment_additional_info ) && ! empty( $instalment_additional_info['instalment_total_amount'] ) ) {
+				$data['instalment']['total_amount'] = $instalment_additional_info['instalment_total_amount'];
 			}
 
 			$instalment = $data['instalment'];
 			if ( ! empty( $instalment['cycles_executed'] ) ) {
 				$instalment_details ['instalment_cycle_amount'] = $instalment['cycle_amount'];
 				$instalment_details ['instalment_total_cycles'] = count( $instalment['cycle_dates'] );
+				$instalment_details ['instalment_total_amount'] = $data['instalment']['total_amount'];
 				$last_cycle_amount                              = 0;
 				for ( $i = 1; $i <= $instalment_details['instalment_total_cycles']; $i++ ) {
 					$instalment_details [ 'instalment' . $i ] = array();
 					if ( 1 < $i && $i < $instalment_details ['instalment_total_cycles'] ) {
 						$instalment_details [ 'instalment' . $i ] ['amount'] = $instalment['cycle_amount'];
 					} elseif ( $i === $instalment_details ['instalment_total_cycles'] ) {
-						$instalment_details [ 'instalment' . $i ] ['amount'] = $data['transaction']['amount'] - $last_cycle_amount;
+						$instalment_details [ 'instalment' . $i ] ['amount'] = $data['instalment']['total_amount'] - $last_cycle_amount;
 					}
 					$last_cycle_amount += $instalment['cycle_amount'];
 					if ( ! empty( $instalment['cycle_dates'] [ $i + 1 ] ) ) {
@@ -213,7 +216,6 @@ class WC_Novalnet_Guaranteed_Process {
 				}
 
 				if ( ! empty( $instalment[ "instalment$i" ]['paid_date'] ) ) {
-					$instalment_rows[ $i ]['date']   = $instalment[ "instalment$i" ]['paid_date'];
 					$instalment_rows[ $i ]['amount'] = $instalment_rows[ $i ]['amount'];
 				}
 				if ( ! empty( $instalment[ "instalment$i" ]['tid'] ) ) {
@@ -226,11 +228,7 @@ class WC_Novalnet_Guaranteed_Process {
 					$has_pending_cycles = true;
 				}
 
-				if ( empty( $instalment_rows[ $i ]['date'] ) && ! empty( $future_instalment_dates [ $i - 1 ] ) ) {
-					$instalment_rows[ $i ]['date'] = $future_instalment_dates [ $i - 1 ];
-				}
-
-				$instalment_rows[ $i ]['date']        = wc_novalnet_formatted_date( $instalment_rows[ $i ]['date'] );
+				$instalment_rows[ $i ]['date']        = ( ! empty( $future_instalment_dates [ $i ] ) ) ? wc_novalnet_formatted_date( $future_instalment_dates [ $i ] ) : '';
 				$instalment_rows[ $i ]['status_text'] = wc_get_order_status_name( $instalment_rows[ $i ]['status'] );
 				$instalment_rows[ $i ]['status_text'] = wc_get_order_status_name( $instalment_rows[ $i ]['status'] );
 
