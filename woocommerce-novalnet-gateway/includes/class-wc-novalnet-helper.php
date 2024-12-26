@@ -1141,11 +1141,6 @@ class WC_Novalnet_Helper {
 			true
 		);
 
-		wp_set_script_translations(
-			'wc-novalnet-block-inputs',
-			'woocommerce-novalnet-gateway'
-		);
-
 		if ( $novalnet_payment && ! is_admin() ) {
 
 			if ( ! wp_script_is( 'woocommerce-novalnet-gateway-external-script-payment', 'registered' ) ) {

@@ -144,8 +144,9 @@ class WC_Gateway_Novalnet_ApplePay extends WC_Novalnet_Abstract_Payment_Gateways
 		WC_Novalnet_Configuration::wallet_settings( $this->form_fields, $this->id );
 
 		$this->form_fields ['apple_pay_configuration_setting'] = array(
-			'title' => __( 'Button Design', 'woocommerce-novalnet-gateway' ),
-			'type'  => 'title',
+			'title'       => __( 'Button Design', 'woocommerce-novalnet-gateway' ),
+			'type'        => 'title',
+			'description' => sprintf( '<strong>%s</strong>', __( 'Style for Apple pay button', 'woocommerce-novalnet-gateway' ) ),
 		);
 
 		$this->form_fields ['apple_pay_button_type'] = array(

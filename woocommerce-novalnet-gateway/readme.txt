@@ -1,10 +1,10 @@
-=== WooCommerce payment plugin - Novalnet AG === 
+=== WooCommerce payment plugin - Novalnet AG ===
 Contributors: Novalnet AG
 Donate link: https://www.novalnet.de
 Tags: Credit cards, Payments, Payment gateway, Novalnet payment
 Requires at least: 5.0
-Tested up to: 6.6
-Stable tag: 12.8.0
+Tested up to: 6.5
+Stable tag: 12.7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -76,7 +76,7 @@ Die vielfach automatisierten Abläufe sorgen dafür, dass Sie Kosten sparen und 
 * [Kreditkarte](https://www.novalnet.de/zahlungsart-kreditkarte/ "Kreditkarte"): Visa, Mastercard, American Express, JCB, UnionPay, Diners Club, Discover
 * Debitkarte: Maestro, Carte Bleue, CartaSi, Postepay, PostFinance, dankort
 * Online-Überweisung: Sofortüberweisung, Onlineüberweisung eps, iDEAL, giropay, Przelewy24, Alipay, WeChat Pay, Trustly & Blik etc.
-* Wallet: Apple Pay, Google Pay, Payconiq, MB Way, PayPal & TWINT.
+* Wallet: Apple Pay, Google Pay, Payconiq, MB Way & PayPal.
 * Vorkasse, Kauf auf Rechnung, Kauf auf Rechnung mit Zahlungsgarantie
 * [SEPA-Lastschrift](https://www.novalnet.de/sepa-lastschrift/ "SEPA-Lastschrift"), Lastschrift ACH
 * Barzahlen/viacash
@@ -123,7 +123,7 @@ Novalnet’s WooCommerce Payment Plugin supports:
 
 * Online bank transfers: Sofort, Online bank transfer, eps, iDEAL, giropay, Przelewy24, PostFinance Card, PostFinance E-Finance, Bancontact, Alipay, WeChat Pay, Trustly & Blik etc.
 
-* E-wallets:  [PayPal](https://www.novalnet.com/payment-processing/paypal/ "PayPal"), Apple Pay, Google Pay, Payconiq, MB Way & TWINT.
+* E-wallets:  [PayPal](https://www.novalnet.com/payment-processing/paypal/ "PayPal"), Apple Pay, Google Pay, Payconiq & MB Way.
 
 * Prepayment, Invoice, [Direct Debit SEPA](https://www.novalnet.com/solutions/payment-processing/sepa-direct-debit/ "Direct Debit SEPA"), Direct Debit ACH, [Barzahlen/viacash](https://www.novalnet.com/solutions/payment-processing/barzahlen/ "Barzahlen") & Multibanco.
 
@@ -153,7 +153,7 @@ Novalnet’s WooCommerce Payment Plugin integrates your shop with one payment pl
 * Custom CSS configuration for Credit/Debit Card iframe
 * Automated invoice generation
 * Easy confirmation/cancellation of on-hold transactions for Direct Debit SEPA, Direct Debit SEPA with payment guarantee, Instalment payment for Direct Debit SEPA, Credit/Debit Card, Invoice, Invoice with payment guarantee, Instalment payment for Invoice, Prepayment, PayPal, Apple Pay & Google Pay
-* Refund option for Credit/Debit Cards, Direct Debit SEPA, Direct Debit ACH, Direct Debit SEPA with payment guarantee, Instalment by Direct Debit SEPA, Invoice, Invoice with payment guarantee, Instalment by Invoice, Prepayment, Barzahlen/viacash, Sofort, iDEAL, eps, giropay, PayPal, MB Way, Przelewy24, PostFinance Card, PostFinance E-Finance, Bancontact, Apple Pay, Google Pay, Online bank transfer, Alipay, WeChat pay, Trustly, Blik, Payconiq & TWINT.
+* Refund option for Credit/Debit Cards, Direct Debit SEPA, Direct Debit ACH, Direct Debit SEPA with payment guarantee, Instalment by Direct Debit SEPA, Invoice, Invoice with payment guarantee, Instalment by Invoice, Prepayment, Barzahlen/viacash, Sofort, iDEAL, eps, giropay, PayPal, MB Way, Przelewy24, PostFinance Card, PostFinance E-Finance, Bancontact, Apple Pay, Google Pay, Online bank transfer, Alipay, WeChat pay, Trustly, Blik & Payconiq
 * Automated e-mail notifications for staying up to date on the payment status
 * Clear overview of payment status from checkout to receivables
 * Secure end customer portal for payment inquiries 
@@ -201,12 +201,12 @@ Please check out our ssl certified [Demo Store](https://woocommerce.novalnet.de/
 
 = Compatibility =   
 
-Novalnet payment plugin compatible for WooCommerce 4.0.0-9.4.2 and compatible for subscription 2.0.0-6.9.0.
+Novalnet payment plugin compatible for WooCommerce 4.0.0-9.0.2 and compatible for subscription 2.0.0-6.4.0.
 
 = Automatic Installation: =
 
 * Go to Plugins > “Add New”.
-* Download the WooCommerce payment plugin - Novalnet from WordPress repository and Click "Install Now" to install the plugin. A popup window will ask you to confirm your wish to install the plugin 12.8.0.
+* Download the WooCommerce payment plugin - Novalnet from WordPress repository and Click "Install Now" to install the plugin. A popup window will ask you to confirm your wish to install the plugin 12.7.0.
 = Note: = If this is the first time you've installed a WordPress plugin, you may need to enter the FTP login credential information. If you've installed the plugin before, it will still have the login information. This information is available through your web server host.
 
 * Click “Proceed” to continue the installation. The resulting installation screen will list the installation as successful or note any problems during the install.
@@ -273,12 +273,6 @@ This online payment plugin only works with the WooCommerce webshop. Are you look
 5. Novalnet payments are displayed in the checkout
 
 == Changelog ==
-
-= 12.8.0 =
-
-   * [New] Implemented TWINT payment
-   * [Fix] Order status is now correctly updated to reflect successful transactions made on the second attempt via PayPal payment
-   * [Enhanced] API/Webhook Response is normalized in the payment plugin for Instalment Payments
 
 = 12.7.0 =
 

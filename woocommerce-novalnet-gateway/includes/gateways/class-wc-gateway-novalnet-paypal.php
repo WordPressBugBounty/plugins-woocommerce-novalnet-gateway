@@ -159,7 +159,7 @@ class WC_Gateway_Novalnet_Paypal extends WC_Novalnet_Abstract_Payment_Gateways {
 
 		$this->form_fields ['notice'] = array(
 			/* translators: %1$s: anchor tag starts %2$s: anchor tag end */
-			'title' => '<div class="updated inline notice"><p>' . sprintf( __( 'To accept PayPal transactions, configure your PayPal API info in the  %1$sNovalnet Admin Portal%2$s > Projects > Choose your project > Payment Methods > PayPal > Configure.', 'woocommerce-novalnet-gateway' ), '<a href="https://admin.novalnet.de" target="_new">', '</a>' ) . '</p></div>',
+			'title' => '<div class="updated inline notice"><p>' . sprintf( __( 'To accept PayPal transactions, configure your PayPal API info in the  %1$sNovalnet Admin Portal%2$s > PROJECT > "Project" Information > Payment Methods > Paypal > Configure.', 'woocommerce-novalnet-gateway' ), '<a href="https://admin.novalnet.de" target="_new">', '</a>' ) . '</p></div>',
 			'type'  => 'title',
 		);
 

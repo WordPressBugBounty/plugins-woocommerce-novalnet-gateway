@@ -138,7 +138,7 @@
                         name: paymentType + '_holder',
                         className : 'wc-block-gateway-input',
                         autoComplete: 'OFF',
-                        placeholder: Object(i18n.__)("Account Holder ","woocommerce-novalnet-gateway"),
+                        placeholder:'Jhon Brito',
 						value: holderValue,
 						onKeyPress:(e) => {
                             setIsEditing(e.target.value);

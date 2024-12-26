@@ -1,8 +1,8 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: Novalnet payment plugin - WooCommerce - 12.8.0\n"
-"POT-Creation-Date: 2024-07-09 19:09+0530\n"
+"Project-Id-Version: Novalnet payment plugin - WooCommerce - 12.7.0\n"
+"POT-Creation-Date: 2024-05-16 20:42+0530\n"
 "PO-Revision-Date: 2017-05-26 18:35+0530\n"
 "Last-Translator: Novalnet AG <sales@novalnet.de>\n"
 "Language-Team: Novalnet <sales@novalnet.de>\n"
@@ -20,24 +20,24 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: class-wc-novalnet.php:1082
+#: class-wc-novalnet.php:1081
 msgid "Please enter valid birth date"
 msgstr ""
 
-#: class-wc-novalnet.php:1083 includes/class-wc-novalnet-subscription.php:1071
-#: includes/class-wc-novalnet-subscription.php:1109
+#: class-wc-novalnet.php:1082 includes/class-wc-novalnet-subscription.php:1068
+#: includes/class-wc-novalnet-subscription.php:1106
 #: includes/gateways/class-wc-gateway-novalnet-ach.php:164
 #: includes/gateways/class-wc-gateway-novalnet-ach.php:170
 #: includes/gateways/class-wc-gateway-novalnet-guaranteed-sepa.php:162
 #: includes/gateways/class-wc-gateway-novalnet-guaranteed-sepa.php:171
-#: includes/gateways/class-wc-gateway-novalnet-instalment-sepa.php:159
-#: includes/gateways/class-wc-gateway-novalnet-instalment-sepa.php:169
+#: includes/gateways/class-wc-gateway-novalnet-instalment-sepa.php:141
+#: includes/gateways/class-wc-gateway-novalnet-instalment-sepa.php:151
 #: includes/gateways/class-wc-gateway-novalnet-sepa.php:156
 #: includes/gateways/class-wc-gateway-novalnet-sepa.php:163
 msgid "Your account details are invalid"
 msgstr ""
 
-#: class-wc-novalnet.php:1085
+#: class-wc-novalnet.php:1084
 msgid ""
 "Unfortunately, previously chosen payment method is not available. Please "
 "choose another payment type."
@@ -53,8 +53,8 @@ msgid "#"
 msgstr ""
 
 #: includes/abstracts/class-wc-novalnet-abstract-payment-gateways.php:442
-#: includes/class-wc-novalnet-subscription.php:1797
-#: includes/class-wc-novalnet-subscription.php:1801
+#: includes/class-wc-novalnet-subscription.php:1800
+#: includes/class-wc-novalnet-subscription.php:1804
 #: includes/class-wc-novalnet-webhook.php:482
 #, php-format
 msgid "Successfully changed the payment method for next subscription on %s"
@@ -66,25 +66,25 @@ msgid ""
 "Your action to change payment method failed for the renewal order due to %s"
 msgstr ""
 
-#: includes/abstracts/class-wc-novalnet-abstract-payment-gateways.php:758
+#: includes/abstracts/class-wc-novalnet-abstract-payment-gateways.php:756
 msgid "Please note some data has been changed while redirecting"
 msgstr ""
 
-#: includes/abstracts/class-wc-novalnet-abstract-payment-gateways.php:902
+#: includes/abstracts/class-wc-novalnet-abstract-payment-gateways.php:900
 msgid ""
 "This order will be processed as zero amount booking which store your payment "
 "data for further online purchases."
 msgstr ""
 
-#: includes/abstracts/class-wc-novalnet-abstract-payment-gateways.php:1084
+#: includes/abstracts/class-wc-novalnet-abstract-payment-gateways.php:1082
 msgid "Pay now with Barzahlen"
 msgstr ""
 
-#: includes/abstracts/class-wc-novalnet-abstract-payment-gateways.php:1108
+#: includes/abstracts/class-wc-novalnet-abstract-payment-gateways.php:1106
 msgid "TESTMODE"
 msgstr ""
 
-#: includes/abstracts/class-wc-novalnet-abstract-payment-gateways.php:1322
+#: includes/abstracts/class-wc-novalnet-abstract-payment-gateways.php:1320
 msgid "Save for future purchase"
 msgstr ""
 
@@ -815,7 +815,7 @@ msgid ""
 msgstr ""
 
 #: includes/admin/class-wc-novalnet-configuration.php:936
-#: includes/admin/class-wc-novalnet-configuration.php:992
+#: includes/admin/class-wc-novalnet-configuration.php:985
 msgid ""
 "Poland based payment method which allows buyers pay using bank transfers or "
 "any other methods"
@@ -841,69 +841,63 @@ msgstr ""
 
 #: includes/admin/class-wc-novalnet-configuration.php:964
 msgid ""
-"A digital wallet that allows buyer's to make payments using their "
-"smartphones by scanning a QR code"
-msgstr ""
-
-#: includes/admin/class-wc-novalnet-configuration.php:971
-msgid ""
 "Austria based online banking method that allows your buyers to pay using any "
 "form of electronic payments"
 msgstr ""
 
+#: includes/admin/class-wc-novalnet-configuration.php:971
 #: includes/admin/class-wc-novalnet-configuration.php:978
-#: includes/admin/class-wc-novalnet-configuration.php:985
 msgid ""
 "Pan European payment method allows buyers to pay through their own internet "
 "banking system"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:997
+#: includes/admin/class-wc-novalnet-configuration.php:990
 msgid ""
 "Payment is debited after order confirmation and, the goods are then delivered"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:1002
+#: includes/admin/class-wc-novalnet-configuration.php:995
 msgid "A payable credit note with the order details"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:1009
+#: includes/admin/class-wc-novalnet-configuration.php:1002
 msgid ""
 "Transaction is completed through cash payments using cash slips in countries "
 "like Germany and Austria"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:1016
+#: includes/admin/class-wc-novalnet-configuration.php:1009
 msgid ""
 "Voucher based payment method where buyer pays in ATM or at retail outlets "
 "using a reference ID"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:1023
+#: includes/admin/class-wc-novalnet-configuration.php:1016
 msgid ""
 "Belgium based online payment method where buyers are redirected to "
 "Bancontact site/app for payment authorization"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:1030
+#: includes/admin/class-wc-novalnet-configuration.php:1023
 msgid ""
 "Guaranteed payment made to you either from the buyer or from payment "
 "guarantee for the purchase made through invoice"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:1039
+#: includes/admin/class-wc-novalnet-configuration.php:1032
 msgid ""
 "Guaranteed payment made to you either from the buyer or from payment "
 "guarantee for the purchase made through SEPA"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:1044
+#: includes/admin/class-wc-novalnet-configuration.php:1037
 msgid ""
 "Buyer pays his bill as instalment payments through a single or recurring "
 "invoice(s)"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:1051
+#: includes/admin/class-wc-novalnet-configuration.php:1044
 msgid ""
 "Through this payment method you can collect amount periodically like "
 "subscription or instalment payments through SEPA"
@@ -916,25 +910,25 @@ msgstr ""
 #: includes/admin/meta-boxes/views/html-instalment-summary.php:17
 #: templates/emails/render-instalment-details.php:32
 #: templates/myaccount/render-instalment-details.php:19
-msgid "S.No"
+msgid "S.no"
 msgstr ""
 
 #: includes/admin/meta-boxes/views/html-instalment-summary.php:18
 #: templates/emails/render-instalment-details.php:33
 #: templates/myaccount/render-instalment-details.php:20
-msgid "Novalnet Transaction ID"
+msgid "Amount"
 msgstr ""
 
 #: includes/admin/meta-boxes/views/html-instalment-summary.php:19
 #: templates/emails/render-instalment-details.php:34
 #: templates/myaccount/render-instalment-details.php:21
-msgid "Amount"
+msgid "Date"
 msgstr ""
 
 #: includes/admin/meta-boxes/views/html-instalment-summary.php:20
 #: templates/emails/render-instalment-details.php:35
 #: templates/myaccount/render-instalment-details.php:22
-msgid "Next Instalment Date"
+msgid "Novalnet transaction ID"
 msgstr ""
 
 #: includes/admin/meta-boxes/views/html-instalment-summary.php:21
@@ -943,7 +937,7 @@ msgid "Status"
 msgstr ""
 
 #: includes/admin/meta-boxes/views/html-instalment-summary.php:22
-msgid "Instalment Refund"
+msgid "Instalment refund"
 msgstr ""
 
 #: includes/admin/meta-boxes/views/html-instalment-summary.php:99
@@ -991,7 +985,7 @@ msgstr ""
 msgid "Book transaction"
 msgstr ""
 
-#: includes/class-wc-novalnet-guaranteed-process.php:265
+#: includes/class-wc-novalnet-guaranteed-process.php:267
 #, php-format
 msgid "%1$s x %2$s (per month)"
 msgstr ""
@@ -1171,7 +1165,7 @@ msgid ""
 msgstr ""
 
 #: includes/class-wc-novalnet-subscription.php:595
-#: includes/class-wc-novalnet-subscription.php:1277
+#: includes/class-wc-novalnet-subscription.php:1280
 msgid "Change Payment"
 msgstr ""
 
@@ -1212,21 +1206,21 @@ msgstr ""
 msgid "Please accept the change of payment method by clicking on the checkbox."
 msgstr ""
 
-#: includes/class-wc-novalnet-subscription.php:1089
+#: includes/class-wc-novalnet-subscription.php:1086
 #: includes/gateways/class-wc-gateway-novalnet-cc.php:163
 msgid "Your card details are invalid"
 msgstr ""
 
-#: includes/class-wc-novalnet-subscription.php:1219
+#: includes/class-wc-novalnet-subscription.php:1222
 msgid "Card type not accepted, try using another card type"
 msgstr ""
 
-#: includes/class-wc-novalnet-subscription.php:1227
+#: includes/class-wc-novalnet-subscription.php:1230
 #: templates/checkout/render-cc-form.php:40
 msgid "More security with the new Payment Policy (PSD2) Info"
 msgstr ""
 
-#: includes/class-wc-novalnet-subscription.php:1228
+#: includes/class-wc-novalnet-subscription.php:1231
 #: templates/checkout/render-cc-form.php:41
 msgid ""
 "European card issuing banks often requires a password or some other form of "
@@ -1356,9 +1350,8 @@ msgstr ""
 #: includes/class-wc-novalnet-webhook.php:659
 #, php-format
 msgid ""
-"A new instalment transaction has been received for the Transaction ID: "
-"%1$s . The new instalment Transaction ID is %2$s with the amount %3$s on "
-"%4$s. "
+"A new instalment has been received for the Transaction ID:%1$s with amount "
+"%2$s. The new instalment transaction ID is: %3$s"
 msgstr ""
 
 #: includes/class-wc-novalnet-webhook.php:744
@@ -1496,63 +1489,67 @@ msgstr ""
 msgid "Button Design"
 msgstr ""
 
-#: includes/gateways/class-wc-gateway-novalnet-applepay.php:152
-#: includes/gateways/class-wc-gateway-novalnet-googlepay.php:180
+#: includes/gateways/class-wc-gateway-novalnet-applepay.php:149
+msgid "Style for Apple pay button"
+msgstr ""
+
+#: includes/gateways/class-wc-gateway-novalnet-applepay.php:153
+#: includes/gateways/class-wc-gateway-novalnet-googlepay.php:181
 msgid "Button Type"
 msgstr ""
 
-#: includes/gateways/class-wc-gateway-novalnet-applepay.php:173
+#: includes/gateways/class-wc-gateway-novalnet-applepay.php:174
 msgid "Button Theme"
 msgstr ""
 
-#: includes/gateways/class-wc-gateway-novalnet-applepay.php:185
-#: includes/gateways/class-wc-gateway-novalnet-googlepay.php:197
+#: includes/gateways/class-wc-gateway-novalnet-applepay.php:186
+#: includes/gateways/class-wc-gateway-novalnet-googlepay.php:198
 msgid "Button Height"
 msgstr ""
 
-#: includes/gateways/class-wc-gateway-novalnet-applepay.php:188
-#: includes/gateways/class-wc-gateway-novalnet-applepay.php:202
-#: includes/gateways/class-wc-gateway-novalnet-googlepay.php:200
+#: includes/gateways/class-wc-gateway-novalnet-applepay.php:189
+#: includes/gateways/class-wc-gateway-novalnet-applepay.php:203
+#: includes/gateways/class-wc-gateway-novalnet-googlepay.php:201
 #, php-format
 msgid "Range from %1$s to %2$s pixels"
 msgstr ""
 
-#: includes/gateways/class-wc-gateway-novalnet-applepay.php:199
+#: includes/gateways/class-wc-gateway-novalnet-applepay.php:200
 msgid "Button Corner Radius"
 msgstr ""
 
-#: includes/gateways/class-wc-gateway-novalnet-applepay.php:214
+#: includes/gateways/class-wc-gateway-novalnet-applepay.php:215
 msgid "Display the Apple Pay Button on"
 msgstr ""
 
-#: includes/gateways/class-wc-gateway-novalnet-applepay.php:218
+#: includes/gateways/class-wc-gateway-novalnet-applepay.php:219
 msgid ""
 "The selected pages will display the Apple pay button to pay instantly as an "
 "express checkout option"
 msgstr ""
 
-#: includes/gateways/class-wc-gateway-novalnet-applepay.php:221
-#: includes/gateways/class-wc-gateway-novalnet-googlepay.php:219
-msgid "Shopping cart page"
-msgstr ""
-
 #: includes/gateways/class-wc-gateway-novalnet-applepay.php:222
 #: includes/gateways/class-wc-gateway-novalnet-googlepay.php:220
-msgid "Mini cart page"
+msgid "Shopping cart page"
 msgstr ""
 
 #: includes/gateways/class-wc-gateway-novalnet-applepay.php:223
 #: includes/gateways/class-wc-gateway-novalnet-googlepay.php:221
-msgid "Product page"
+msgid "Mini cart page"
 msgstr ""
 
 #: includes/gateways/class-wc-gateway-novalnet-applepay.php:224
 #: includes/gateways/class-wc-gateway-novalnet-googlepay.php:222
-msgid "Guest checkout page"
+msgid "Product page"
 msgstr ""
 
 #: includes/gateways/class-wc-gateway-novalnet-applepay.php:225
 #: includes/gateways/class-wc-gateway-novalnet-googlepay.php:223
+msgid "Guest checkout page"
+msgstr ""
+
+#: includes/gateways/class-wc-gateway-novalnet-applepay.php:226
+#: includes/gateways/class-wc-gateway-novalnet-googlepay.php:224
 msgid "Checkout page"
 msgstr ""
 
@@ -1630,11 +1627,15 @@ msgstr ""
 msgid "CSS Text"
 msgstr ""
 
-#: includes/gateways/class-wc-gateway-novalnet-googlepay.php:212
+#: includes/gateways/class-wc-gateway-novalnet-googlepay.php:177
+msgid "Style for Google pay button"
+msgstr ""
+
+#: includes/gateways/class-wc-gateway-novalnet-googlepay.php:213
 msgid "Display the Google Pay Button on"
 msgstr ""
 
-#: includes/gateways/class-wc-gateway-novalnet-googlepay.php:216
+#: includes/gateways/class-wc-gateway-novalnet-googlepay.php:217
 msgid ""
 "The selected pages will display the Google Pay button to pay instantly as an "
 "express checkout option"
@@ -1644,8 +1645,8 @@ msgstr ""
 #, php-format
 msgid ""
 "To accept PayPal transactions, configure your PayPal API info in the  "
-"%1$sNovalnet Admin Portal%2$s > Projects > Choose your project > Payment "
-"Methods > PayPal > Configure."
+"%1$sNovalnet Admin Portal%2$s > PROJECT > \"Project\" Information > Payment "
+"Methods > Paypal > Configure."
 msgstr ""
 
 #: includes/wc-novalnet-functions.php:140
@@ -1757,19 +1758,15 @@ msgid ""
 "and seamless integration for easy adaptability"
 msgstr ""
 
-#: templates/checkout/render-ach-form.php:25
-msgid "Account Holder"
+#: templates/checkout/render-ach-form.php:27
+msgid "Account holder"
 msgstr ""
 
-#: templates/checkout/render-ach-form.php:39
-msgid "Account Holder Name"
-msgstr ""
-
-#: templates/checkout/render-ach-form.php:54
+#: templates/checkout/render-ach-form.php:48
 msgid "Account Number"
 msgstr ""
 
-#: templates/checkout/render-ach-form.php:74
+#: templates/checkout/render-ach-form.php:68
 msgid "Routing Number (ABA)"
 msgstr ""
 

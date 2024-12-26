@@ -14,12 +14,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<table>
 		<thead>
 			<tr>
-				<th><?php esc_attr_e( 'S.No', 'woocommerce-novalnet-gateway' ); ?></th>
-				<th><?php esc_attr_e( 'Novalnet Transaction ID', 'woocommerce-novalnet-gateway' ); ?></th>
+				<th><?php esc_attr_e( 'S.no', 'woocommerce-novalnet-gateway' ); ?></th>
 				<th><?php esc_attr_e( 'Amount', 'woocommerce-novalnet-gateway' ); ?></th>
-				<th><?php esc_attr_e( 'Next Instalment Date', 'woocommerce-novalnet-gateway' ); ?></th>
+				<th><?php esc_attr_e( 'Date', 'woocommerce-novalnet-gateway' ); ?></th>
+				<th><?php esc_attr_e( 'Novalnet transaction ID', 'woocommerce-novalnet-gateway' ); ?></th>
 				<th><?php esc_attr_e( 'Status', 'woocommerce-novalnet-gateway' ); ?></th>
-				<th style="text-align:center" ><?php esc_attr_e( 'Instalment Refund', 'woocommerce-novalnet-gateway' ); ?></th>
+				<th style="text-align:center" ><?php esc_attr_e( 'Instalment refund', 'woocommerce-novalnet-gateway' ); ?></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -66,17 +66,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<?php echo esc_attr( $cycle ); ?>
 					</td>
 					<td>
+						<?php echo esc_attr( wc_novalnet_shop_amount_format( $instalment['amount'] ) ); ?>
+					</td>
+					<td>
+						<?php echo esc_attr( $instalment['date'] ); ?>
+					</td>
+					<td>
 						<?php
 						if ( ! empty( $instalment['tid'] ) ) :
 							echo esc_attr( $instalment['tid'] );
 						endif;
 						?>
-					</td>
-					<td>
-						<?php echo esc_attr( wc_novalnet_shop_amount_format( $instalment['amount'] ) ); ?>
-					</td>
-					<td>
-						<?php echo esc_attr( $instalment['date'] ); ?>
 					</td>
 					<td class="order_status column-order_status">
 						<?php
