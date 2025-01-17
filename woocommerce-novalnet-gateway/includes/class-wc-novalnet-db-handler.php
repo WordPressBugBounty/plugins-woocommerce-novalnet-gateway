@@ -137,6 +137,42 @@ class WC_Novalnet_DB_Handler {
 	}
 
 	/**
+	 * Get post ID of the given meta
+	 *
+	 * @since 12.0.0
+	 * @since 12.8.1 Update the to HPOS compatibility.
+	 * @param string $meta_value The meta value.
+	 * @param string $meta_key The meta Key.
+	 *
+	 * @return string
+	 */
+	public function get_post_id_by_meta_data( $meta_value, $meta_key = '' ) {
+		global $wpdb;
+
+		if ( ! empty( $meta_key ) && ! empty( $meta_value ) ) {
+			if ( class_exists( 'Automattic\WooCommerce\Utilities\OrderUtil' ) && OrderUtil::custom_orders_table_usage_is_enabled() ) {
+				$wc_orders = wc_get_orders(
+					array(
+						'limit'        => 1,
+						'meta_key'     => $meta_key,
+						'meta_value'   => $meta_value,
+						'meta_compare' => '=',
+					)
+				);
+
+				$wc_order_id = ( is_array( $wc_orders ) && current( $wc_orders ) ) ? current( $wc_orders )->get_id() : false;
+				if ( ! empty( $wc_order_id ) ) {
+					return $wc_order_id;
+				}
+			} else {
+				return $this->handle_query( $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = %s AND meta_value = %s", $meta_key, $meta_value ) ) );
+			}
+		}
+		// Check for column exists.
+		return $this->handle_query( $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_value =%s", $meta_value ) ) ); // db call ok; no-cache ok.
+	}
+
+	/**
 	 * Returns the transaction details
 	 *
 	 * @since 12.0.0
@@ -174,19 +210,19 @@ class WC_Novalnet_DB_Handler {
 	 * Returns the subscription details
 	 *
 	 * @since 12.0.0
-	 * @param int $tid The TID value.
-	 *
+	 * @param int $value The TID or order id value.
 	 * @return array
 	 */
-	public function get_subscription_details( $tid = '' ) {
+	public function get_subscription_details( $value = '' ) {
 
 		global $wpdb;
 		$result = array();
 
 		// Select transaction details based on TID.
-		if ( '' !== $tid ) {
-			$result = $this->handle_query( $wpdb->get_row( $wpdb->prepare( "SELECT order_no, subs_order_no, recurring_payment_type, tid, recurring_tid FROM `{$wpdb->prefix}novalnet_subscription_details` WHERE recurring_tid=%s OR tid=%s", $tid, $tid ), ARRAY_A ) );// db call ok; no-cache ok.
+		if ( '' !== $value ) {
+			$result = $this->handle_query( $wpdb->get_row( $wpdb->prepare( "SELECT order_no, subs_order_no, recurring_payment_type, tid, recurring_tid, subs_id, shop_based_subs, termination_reason, termination_at FROM `{$wpdb->prefix}novalnet_subscription_details` WHERE recurring_tid=%s OR tid=%s OR subs_order_no=%s", $value, $value, $value ), ARRAY_A ) );// db call ok; no-cache ok.
 		}
+
 		return $result;
 	}
 
@@ -360,20 +396,6 @@ class WC_Novalnet_DB_Handler {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Get post ID of the given meta
-	 *
-	 * @since 12.0.0
-	 * @param string $meta_value The meta value.
-	 *
-	 * @return string
-	 */
-	public function get_post_id_by_meta_data( $meta_value ) {
-		global $wpdb;
-		// Check for column exists.
-		return $this->handle_query( $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_value =%s", $meta_value ) ) ); // db call ok; no-cache ok.
 	}
 
 	/**

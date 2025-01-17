@@ -46,15 +46,10 @@ class WC_Novalnet_Install {
 	 * when reloading the page after update.
 	 *
 	 * @since 12.0.0
+	 * @since 12.8.1 Remove the hold stock duration.
+	 * Handled the pending order auto cancel prevention in hook.
 	 */
 	public static function update() {
-
-		// Update the hold stock notification to be one week.
-		$hold_stock_duration = get_option( 'woocommerce_hold_stock_minutes' );
-
-		if ( 60 === (int) $hold_stock_duration ) {
-			update_option( 'woocommerce_hold_stock_minutes', 60 * 24 * 14 );
-		}
 
 		$current_db_version = get_option( 'novalnet_db_version' );
 

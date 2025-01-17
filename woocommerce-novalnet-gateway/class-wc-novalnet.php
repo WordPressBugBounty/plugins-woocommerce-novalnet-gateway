@@ -296,6 +296,26 @@ final class WC_Novalnet {
 		add_action( 'before_woocommerce_init', array( $this, 'novalnet_wc_hpos_compatibility' ) );
 
 		add_filter( 'woocommerce_order_needs_payment', array( $this, 'needs_payment_pending_order' ), 10, 3 );
+
+		// Prevents unpaid order auto cancelling.
+		add_action( 'woocommerce_cancel_unpaid_order', array( $this, 'prevent_unpaid_order_cancelling' ), 10, 2 );
+	}
+
+	/**
+	 * Prevents WooCommerce's hold stock feature from cancelling Novalnet orders.
+	 *
+	 * @since 12.8.1
+	 * @param bool     $cancel_order Order cancelling status.
+	 * @param WC_Order $order        The order object.
+	 */
+	public function prevent_unpaid_order_cancelling( $cancel_order, $order ) {
+		if ( ! $cancel_order || ! $order instanceof WC_Order ) {
+			return $cancel_order;
+		}
+		if ( WC_Novalnet_Validation::check_string( $order->get_payment_method() ) ) {
+			$cancel_order = false;
+		}
+		return $cancel_order;
 	}
 
 	/**
@@ -1003,7 +1023,7 @@ final class WC_Novalnet {
 		$wc_order->set_currency( get_woocommerce_currency() );
 		$wc_order->update_meta_data( '_customer_user', get_current_user_id() );
 		if ( 'billing' === get_option( 'woocommerce_tax_based_on' ) ) {
-			$wc_order->calculate_totals();
+			$wc_order->calculate_totals( ! empty( $wc_order->get_shipping_tax() ) ? true : false );
 		}
 
 		// Check subscription condition.
@@ -1100,10 +1120,9 @@ final class WC_Novalnet {
 	 * @return string
 	 */
 	public function customize_script( $tag, $handle, $src ) {
-
 		$sri = array(
 			'woocommerce-novalnet-gateway-script'        => 'sha384-8ZYWJ8Q/m/pjhu2t/z2KTywdiMNrCkltZbLWohy3W6jCtxiuKkc5IHhqyxCV9LtF',
-			'woocommerce-novalnet-gateway-admin-script'  => 'sha384-SYw9BDvLqD3v5nAXflaHEphrT18xAW727kNxfijcjomeLRE9en3BefgCvvMLds8V',
+			'woocommerce-novalnet-gateway-admin-script'  => 'sha384-OnegYHNDIFSRLr42KO/nK8TQGeAmPRo6iwVeS1xx+y6YYRiWjO87nOK4R0UPS5P6',
 			'woocommerce-novalnet-gateway-cc-script'     => 'sha384-3ZHfvOQB6dn7UBPIsOKcDZktjQz0NSPoInNhZOtXv4f75IggqcBGB1RrV+93utiI',
 			'woocommerce-novalnet-gateway-subscription-script' => 'sha384-5frcLecRDKnrzRRixoMQPeMmZ6KrO736KrXk3k5Va0FjhCJT6yMi/0R3qnp9eLDn',
 			'woocommerce-novalnet-gateway-wallet-script' => 'sha384-Dd8xzwCGanNfU3zwiKBxIHlK6IH4BF7C32tRoqUgjAY4UifShi554P5Tyo0iHOov',

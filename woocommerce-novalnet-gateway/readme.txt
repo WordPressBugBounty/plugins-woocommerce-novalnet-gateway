@@ -4,7 +4,7 @@ Donate link: https://www.novalnet.de
 Tags: Credit cards, Payments, Payment gateway, Novalnet payment
 Requires at least: 5.0
 Tested up to: 6.5
-Stable tag: 12.8.0
+Stable tag: 12.8.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -201,12 +201,12 @@ Please check out our ssl certified [Demo Store](https://woocommerce.novalnet.de/
 
 = Compatibility =   
 
-Novalnet payment plugin compatible for WooCommerce 4.0.0-9.5.1 and compatible for subscription 2.0.0-7.0.0.
+Novalnet payment plugin compatible for WooCommerce 4.0.0-9.5.2 and compatible for subscription 2.0.0-7.1.0.
 
 = Automatic Installation: =
 
 * Go to Plugins > “Add New”.
-* Download the WooCommerce payment plugin - Novalnet from WordPress repository and Click "Install Now" to install the plugin. A popup window will ask you to confirm your wish to install the plugin 12.8.0.
+* Download the WooCommerce payment plugin - Novalnet from WordPress repository and Click "Install Now" to install the plugin. A popup window will ask you to confirm your wish to install the plugin 12.8.1.
 = Note: = If this is the first time you've installed a WordPress plugin, you may need to enter the FTP login credential information. If you've installed the plugin before, it will still have the login information. This information is available through your web server host.
 
 * Click “Proceed” to continue the installation. The resulting installation screen will list the installation as successful or note any problems during the install.
@@ -273,6 +273,11 @@ This online payment plugin only works with the WooCommerce webshop. Are you look
 5. Novalnet payments are displayed in the checkout
 
 == Changelog ==
+
+= 12.8.1 =
+
+   * [Enhanced] A renewal order will be created automatically if the transaction fails during the renewal process
+   * [Enhanced] Subscriptions are automatically canceled when the associated customer or subscription order is deleted
 
 = 12.8.0 =
 

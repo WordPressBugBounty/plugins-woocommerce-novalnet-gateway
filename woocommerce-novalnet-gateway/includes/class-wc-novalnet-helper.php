@@ -563,10 +563,11 @@ class WC_Novalnet_Helper {
 	 * @param string $message     Message to be logged.
 	 * @param int    $wc_order_id The post ID value.
 	 * @param bool   $override_log Flag to override the debug log.
+	 * @param string $debug_method Flag to identifie the debug method.
 	 *
 	 * @since 12.0.0
 	 */
-	public function debug( $message, $wc_order_id = '', $override_log = false ) {
+	public function debug( $message, $wc_order_id = '', $override_log = false, $debug_method = 'debug' ) {
 		global $current_user;
 
 		if ( 'yes' === WC_Novalnet_Configuration::get_global_settings( 'debug_log' ) || true === $override_log ) {
@@ -576,7 +577,8 @@ class WC_Novalnet_Helper {
 			if ( ! empty( $current_user->user_login ) ) {
 				$message .= " - $current_user->user_login";
 			}
-			wc_novalnet_logger()->add( 'woocommerce-novalnet-gateway', $message, WC_Log_Levels::DEBUG );
+			$debug_level = constant( 'WC_Log_Levels::' . strtoupper( $debug_method ) );
+			wc_novalnet_logger()->add( 'woocommerce-novalnet-gateway', $message, $debug_level );
 		}
 	}
 
@@ -933,12 +935,14 @@ class WC_Novalnet_Helper {
 
 		$post_id = '';
 		if ( ! empty( $wc_order_id ) ) {
-			$wc_order = wc_get_order( $wc_order_id );
+			$post_id = novalnet()->db()->get_post_id_by_order_number( $wc_order_id );
 
-			if ( is_object( $wc_order ) && method_exists( $wc_order, 'get_id' ) && (string) $wc_order_id === (string) $wc_order->get_id() ) {
-				$post_id = $wc_order->get_id();
-			} else {
-				$post_id = novalnet()->db()->get_post_id_by_order_number( $wc_order_id );
+			if ( empty( $post_id ) ) {
+				$wc_order = wc_get_order( $wc_order_id );
+
+				if ( is_object( $wc_order ) && method_exists( $wc_order, 'get_id' ) && (string) $wc_order_id === (string) $wc_order->get_id() ) {
+					$post_id = $wc_order->get_id();
+				}
 			}
 
 			if ( empty( $post_id ) ) {
@@ -977,7 +981,7 @@ class WC_Novalnet_Helper {
 	 * @param boolean  $save_order To save the order.
 	 */
 	public function novalnet_delete_wc_order_meta( $wc_order, $meta_key, $save_order = false ) {
-		if ( method_exists( $wc_order, 'delete_meta_data' ) ) {
+		if ( ! empty( $wc_order ) && method_exists( $wc_order, 'delete_meta_data' ) ) {
 			$wc_order->delete_meta_data( $meta_key );
 		}
 		delete_post_meta( $wc_order->get_id(), $meta_key );
@@ -1051,9 +1055,14 @@ class WC_Novalnet_Helper {
 				}
 			}
 
+			$payment_description = '';
+			if ( ! empty( $gateway ) ) {
+				$payment_description = method_exists( $gateway, 'get_payment_description_html' ) ? $gateway->get_payment_description_html() : ( method_exists( $gateway, 'get_description' ) ? $gateway->get_description() : null );
+			}
+
 			return array(
 				'title'       => $gateway->get_title(),
-				'description' => method_exists( $gateway, 'get_payment_description_html' ) ? $gateway->get_payment_description_html() : $gateway->get_description(),
+				'description' => $payment_description,
 				'supports'    => $gateway->supports,
 				'icons'       => $icons,
 			);

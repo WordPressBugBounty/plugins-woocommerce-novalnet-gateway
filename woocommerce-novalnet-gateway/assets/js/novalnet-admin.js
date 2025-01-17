@@ -379,6 +379,7 @@
 				function() {
 					var selected_tariff_type = $("option:selected", this).attr("tariff_type");
 					$( '#novalnet_tariff_type' ).val( $.trim( selected_tariff_type ) );
+					$('.woocommerce-save-button').removeAttr('disabled');
 				}
 			);
 			return true;

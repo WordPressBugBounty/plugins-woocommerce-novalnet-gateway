@@ -151,6 +151,99 @@ class WC_Novalnet_Subscription {
 		add_filter( 'woocommerce_get_checkout_payment_url', array( $this, 'replace_nn_failed_order_payment_url' ), 10, 2 );
 
 		add_action( 'woocommerce_subscription_payment_method_updated', array( $this, 'check_subscription_payment_method_update' ), 10, 3 );
+
+		// Fires subscription cancel immediately after a subscription is deleted from the database.
+		add_action( 'woocommerce_subscription_deleted', array( $this, 'subscription_cancel_for_subs_deleted_or_trashed' ), 10, 1 );
+
+		// Fires subscription cancel immediately after a subscription is trashed.
+		add_action( 'woocommerce_subscription_trashed', array( $this, 'subscription_cancel_for_subs_deleted_or_trashed' ), 10, 1 );
+
+		// Get subscription related order.
+		add_filter( 'novalnet_get_subscription_related_order', array( $this, 'get_subscription_related_orders' ), 10, 1 );
+	}
+
+	/**
+	 * Get subscription related orders count.
+	 *
+	 * @since 12.8.1
+	 * @param WC_Subscription $wcs_order The subscription order object.
+	 */
+	public function get_subscription_related_orders( $wcs_order ) {
+		$related_orders_count = 0;
+		if ( ! empty( $wcs_order ) && is_object( $wcs_order ) ) {
+			$related_orders_ids = $wcs_order->get_related_orders();
+			if ( ! empty( $related_orders_ids ) && is_array( $related_orders_ids ) ) {
+				foreach ( $related_orders_ids as $order_id ) {
+					$order = wc_get_order( $order_id );
+					if ( $order && ! in_array( $order->get_status(), array( 'failed', 'pending-cancel' ), true ) ) {
+						$related_orders_count++;
+					}
+				}
+			}
+		}
+
+		if ( ! empty( $wcs_order->get_trial_period() ) ) {
+			return $related_orders_count - 1;
+		} else {
+			return $related_orders_count;
+		}
+	}
+
+	/**
+	 * Cancel the subscription if the subscription was delete or moved to trash.
+	 *
+	 * @since 12.8.1
+	 * @param object $wcs_order_id Subscription order id.
+	 */
+	public function subscription_cancel_for_subs_deleted_or_trashed( $wcs_order_id ) {
+		if ( ! empty( $wcs_order_id ) ) {
+			$subs_data = novalnet()->db()->get_subscription_details( $wcs_order_id );
+			if ( ! empty( $subs_data ) && ! empty( $subs_data['tid'] ) && ! empty( $subs_data['subs_id'] ) && empty( $subs_data['shop_based_subs'] ) && empty( $subs_data['termination_reason'] ) && empty( $subs_data['termination_at'] ) ) {
+
+				novalnet()->helper()->debug( 'The subscription cancel has been initiated from the shop due to subscription deleted (or) subscription moved to trash (or) deleted the customer details. The subscription order ID: ' . $wcs_order_id, '', '', 'notice' );
+
+				$parameters = array(
+					'subscription' => array(
+						'tid'    => $subs_data['tid'],
+						'reason' => 'Subscription has been deleted from the shop.',
+					),
+					'custom'       => array(
+						'lang'         => wc_novalnet_shop_language(),
+						'shop_invoked' => 1,
+					),
+				);
+
+				$server_response = novalnet()->helper()->submit_request( $parameters, novalnet()->helper()->get_action_endpoint( 'subscription_cancel' ), array( 'post_id' => $subs_data['order_no'] ) );
+
+				if ( WC_Novalnet_Validation::is_success_status( $server_response ) ) {
+					novalnet()->db()->update(
+						array(
+							'termination_at'     => ! empty( $subs_data['termination_at'] ) ? $subs_data['termination_at'] : gmdate( 'Y-m-d H:i:s' ),
+							'termination_reason' => ! empty( $subs_data['termination_reason'] ) ? $subs_data['termination_reason'] : $parameters['subscription']['reason'],
+						),
+						array(
+							'order_no'      => $subs_data['order_no'],
+							'subs_order_no' => $wcs_order_id,
+						),
+						'novalnet_subscription_details'
+					);
+
+					/* translators: %s: reason  */
+					$comments = wc_novalnet_format_text( sprintf( __( 'Subscription has been cancelled due to: %1$s Subscription order ID : %2$s', 'woocommerce-novalnet-gateway' ), $parameters['subscription']['reason'], $wcs_order_id ) );
+					if ( function_exists( 'wcs_add_admin_notice' ) ) {
+						wcs_add_admin_notice( $comments );
+					}
+					novalnet()->helper()->debug( 'The subscription has been cancelled successfully. The subscription order ID: ' . $wcs_order_id, '', '', 'notice' );
+				} else {
+					/* translators: %s: Message */
+					$message = wc_novalnet_format_text( sprintf( __( 'Recent action failed due to: %1$s. Subscription order ID : %2$s', 'woocommerce-novalnet-gateway' ), wc_novalnet_response_text( $server_response ), $wcs_order_id ) );
+					if ( function_exists( 'wcs_add_admin_notice' ) ) {
+						wcs_add_admin_notice( $message, 'error' );
+					}
+					novalnet()->helper()->debug( 'SUBSCIPTION_DELETED_FROM_SHOP: ' . $message . 'for subscripion id' . $wcs_order_id . 'on ' . gmdate( 'Y-m-d H:i:s' ), '', '', 'notice' );
+				}
+			}
+		}
 	}
 
 	/**
@@ -406,7 +499,7 @@ class WC_Novalnet_Subscription {
 			$is_shop_scheduled = novalnet()->db()->get_subs_data_by_order_id( $subscription->get_parent_id(), $wcs_order_id, 'shop_based_subs' );
 			$nn_subs_id        = novalnet()->db()->get_subs_data_by_order_id( $subscription->get_parent_id(), $wcs_order_id, 'subs_id' );
 			$shop_based_subs   = novalnet()->helper()->novalnet_get_wc_order_meta( $subscription, 'novalnet_shopbased_subs' );
-			if ( 1 === (int) $is_shop_scheduled || ! empty( $shop_based_subs ) || ( empty( $nn_subs_id ) ) ) {
+			if ( ( 1 === (int) $is_shop_scheduled || ! empty( $shop_based_subs ) ) && ( empty( $nn_subs_id ) ) ) {
 				return true;
 			}
 			return false;
@@ -784,7 +877,7 @@ class WC_Novalnet_Subscription {
 	 * @since 12.0.0
 	 * @param WC_Subscription $wcs_order    The subscription object.
 	 * @param parameters      $parameters   The formed parameters.
-	 * @param string          $action       The action name..
+	 * @param string          $action       The action name.
 	 * @param int             $exception    The exception.
 	 */
 	public function perform_action_api( $wcs_order, $parameters, $action, $exception = true ) {
@@ -816,7 +909,9 @@ class WC_Novalnet_Subscription {
 
 					// Handle subscription reactive.
 				} elseif ( 'subscription_reactivate' === $action ) {
-					$update_data['suspended_date'] = '';
+					$update_data['suspended_date']     = null;
+					$update_data['termination_at']     = null;
+					$update_data['termination_reason'] = null;
 					/* translators: %1$s: date, %2$s: amount, %3$s: charging date  */
 					$comments = wc_novalnet_format_text( sprintf( __( 'Subscription has been reactivated for the TID: %1$s on %2$s. Next charging date : %3$s', 'woocommerce-novalnet-gateway' ), $server_response ['transaction']['tid'], wc_novalnet_formatted_date(), $next_payment_date ) );
 
@@ -1372,7 +1467,7 @@ class WC_Novalnet_Subscription {
 
 			if ( ! empty( $wcs_order_id ) ) {
 				$subscription_order = wcs_get_subscription( $wcs_order_id );
-				if ( WC_Novalnet_Validation::check_string( $subscription_order->get_meta( 'payment_method' ) ) && $is_change_payment ) {
+				if ( ( WC_Novalnet_Validation::check_string( $subscription_order->get_meta( 'payment_method' ) ) || WC_Novalnet_Validation::check_string( $subscription_order->get_payment_method() ) ) && $is_change_payment ) {
 					$parameters ['subscription']['tid'] = novalnet()->helper()->get_novalnet_subscription_tid( $subscription_order->get_parent_id(), $subscription_order->get_id() );
 					return $parameters;
 				}

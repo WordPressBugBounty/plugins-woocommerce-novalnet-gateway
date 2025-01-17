@@ -587,8 +587,8 @@ class WC_Novalnet_Configuration extends WC_Settings_API {
 	public static function due_date( &$form_fields, $payment_type ) {
 
 		$title       = __( 'Payment due date (in days)', 'woocommerce-novalnet-gateway' );
-		$description = __( 'Number of days after which the payment is debited (must be between 2 and 14 days).', 'woocommerce-novalnet-gateway' );
-		$min         = '2';
+		$description = __( 'Number of days after which the payment is debited (must be between 3 and 14 days).', 'woocommerce-novalnet-gateway' );
+		$min         = '3';
 		$max         = '14';
 		if ( 'novalnet_invoice' === $payment_type ) {
 			$description = __( 'Number of days given to the buyer to transfer the amount to Novalnet (must be greater than 7 days). If this field is left blank, 14 days will be set as due date by default.', 'woocommerce-novalnet-gateway' );

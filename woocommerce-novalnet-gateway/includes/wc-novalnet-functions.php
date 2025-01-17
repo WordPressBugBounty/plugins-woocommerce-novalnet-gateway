@@ -50,9 +50,7 @@ function wc_novalnet_format_text( $text ) {
 function wc_novalnet_next_cycle_date( $data ) {
 
 	// Check for next subscription cycle parameter.
-	if ( ! empty( $data ['next_cycle_date'] ) ) {
-		return $data ['next_cycle_date'];
-	}
+	return ( ! empty( $data ['next_cycle_date'] ) ) ? $data ['next_cycle_date'] : '';
 }
 
 /**
@@ -1255,4 +1253,17 @@ function wcs_novalnet_is_manual_renewal_required() {
 			return wcs_is_manual_renewal_required();
 		}
 	}
+}
+
+/**
+ * Checks if the subscription exists in the shop.
+ *
+ * @since  12.8.1
+ * @param  mixed $subscription Post object or post ID of the order.
+ */
+function wcs_novalnet_subscription_exists( $subscription ) {
+	if ( ! empty( $subscription ) && wcs_get_subscription( $subscription ) ) {
+		return true;
+	}
+	return false;
 }

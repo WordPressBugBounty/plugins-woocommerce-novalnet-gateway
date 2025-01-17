@@ -42,7 +42,7 @@ class WC_Novalnet_Meta_Box_Amount_Book {
 			$txn_booking_amount = wc_novalnet_formatted_amount( wc_format_decimal( $txn_booking_amount ) );
 			$wc_order           = wc_get_order( $post_id );
 			$payment_gateway    = wc_get_payment_gateway_by_order( $wc_order );
-			if ( method_exists( $payment_gateway, 'process_payment' ) ) {
+			if ( ! empty( $payment_gateway ) && method_exists( $payment_gateway, 'process_payment' ) ) {
 				$additional_info                       = novalnet()->db()->get_entry_by_order_id( $post_id, 'additional_info' );
 				$parameters                            = $payment_gateway->generate_basic_parameters( $wc_order, false );
 				$parameters ['transaction'] ['amount'] = $txn_booking_amount;
@@ -77,7 +77,7 @@ class WC_Novalnet_Meta_Box_Amount_Book {
 				}
 			} else {
 				WC_Admin_Meta_Boxes::add_error( __( 'Payment method currently not available.', 'woocommerce-novalnet-gateway' ) );
-				novalnet()->helper()->debug( 'Zero amount booking payment gateway not has required method.', $post_id, true );
+				novalnet()->helper()->debug( 'For processing Zero amount booking the required method in payment gateway is not available.', $post_id, true );
 			}
 			// Redirect to order view page.
 			wc_novalnet_safe_redirect(

@@ -153,18 +153,25 @@ class WC_Novalnet_Webhook {
 	protected $update_data = array();
 
 	/**
-	 * Recived Event TID.
+	 * Received Event TID.
 	 *
 	 * @var int
 	 */
 	protected $event_tid;
 
 	/**
-	 * Recived Event parent TID.
+	 * Received Event parent TID.
 	 *
 	 * @var int
 	 */
 	protected $parent_tid;
+
+	/**
+	 * Check is subscription.
+	 *
+	 * @var bool
+	 */
+	protected $is_subscription;
 
 	/**
 	 * Novalnet_Webhooks constructor.
@@ -187,27 +194,35 @@ class WC_Novalnet_Webhook {
 		// Get order reference.
 		$this->get_order_reference();
 
+		$order_reference_match = true;
+		// Order number check.
 		if ( ! empty( $this->event_data ['transaction'] ['order_no'] ) ) {
-			$org_post_id = novalnet()->helper()->get_post_id( $this->event_data ['transaction'] ['order_no'] );
+			// Retrieve the post ID using the transaction order number.
+			$org_post_id           = novalnet()->helper()->get_post_id( $this->event_data ['transaction'] ['order_no'] );
+			$order_reference_match = ( ! empty( $org_post_id ) && (string) $this->order_reference ['order_no'] === (string) $org_post_id );
 		}
 
-		// Order number check.
-		if ( ! empty( $org_post_id ) && (string) $this->order_reference ['order_no'] !== (string) $org_post_id ) {
+		if ( ! empty( $this->event_data['custom']['nn_order_id'] ) ) {
+			$org_post_id           = novalnet()->helper()->get_post_id( $this->event_data['custom']['nn_order_id'] );
+			$order_reference_match = ( ! empty( $org_post_id ) && (string) $this->order_reference['order_no'] === (string) $org_post_id );
+		}
+
+		if ( ! empty( $this->parent_tid ) ) {
+			$org_post_id = novalnet()->db()->get_post_id_by_meta_data( $this->parent_tid, '_novalnet_renewal_tid' );
+			if ( ! empty( $this->wcs_order ) && 'CREDIT' === $this->event_type && ! empty( $org_post_id ) && (string) $this->order_reference['order_no'] === (string) $org_post_id ) {
+				$order_reference_match = true;
+			}
+		}
+		if ( ! $order_reference_match ) {
 			$this->display_message( array( 'message' => 'Order reference not matching.' ) );
 		}
-
 		// Create order object.
-		$this->wc_order    = wc_get_order( $this->order_reference ['order_no'] );
-		$this->wc_order_id = $this->wc_order->get_id();
-
+		$this->wc_order             = wc_get_order( $this->order_reference ['order_no'] );
+		$this->wc_order_id          = $this->wc_order->get_id();
 		$this->response ['message'] = __( 'Notification received from Novalnet for this order. ', 'woocommerce-novalnet-gateway' );
 
-		if ( 'RENEWAL' === $this->event_type && ! WC_Novalnet_Validation::is_success_status( $this->event_data ) && ! empty( $this->event_data['result']['status_text'] ) ) {
-			novalnet()->helper()->novalnet_update_wc_order_meta( $this->wc_order, '_subs_cancelled_reason', $this->event_data['result']['status_text'], true );
-		}
-
-		if ( WC_Novalnet_Validation::is_success_status( $this->event_data ) || novalnet()->helper()->is_subs_renewal_active_with_collection( $this->event_data ) ) {
-			$is_subscription       = false;
+		if ( WC_Novalnet_Validation::is_success_status( $this->event_data ) || novalnet()->helper()->is_subs_renewal_active_with_collection( $this->event_data ) || ( 'RENEWAL' === $this->event_type && ! WC_Novalnet_Validation::is_success_status( $this->event_data ) && ! empty( $this->event_data['result']['status_text'] ) ) || in_array( $this->event_type, array( 'PAYMENT_REMINDER_1', 'PAYMENT_REMINDER_2', 'SUBMISSION_TO_COLLECTION_AGENCY' ), true ) ) {
+			$this->is_subscription = false;
 			$this->notify_customer = false;
 			switch ( $this->event_type ) {
 
@@ -244,27 +259,22 @@ class WC_Novalnet_Webhook {
 					break;
 				case 'RENEWAL':
 					$this->handle_renewal();
-					$is_subscription = true;
 					break;
 				case 'SUBSCRIPTION_SUSPEND':
 					$this->handle_subscription_suspend();
 					$this->notify_customer = true;
-					$is_subscription       = true;
 					break;
 				case 'SUBSCRIPTION_REACTIVATE':
 					$this->handle_subscription_reactivate();
 					$this->notify_customer = true;
-					$is_subscription       = true;
 					break;
 				case 'SUBSCRIPTION_CANCEL':
 					$this->handle_subscription_cancel();
 					$this->notify_customer = true;
-					$is_subscription       = true;
 					break;
 				case 'SUBSCRIPTION_UPDATE':
 					$this->handle_subscription_update();
 					$this->notify_customer = true;
-					$is_subscription       = true;
 					break;
 				case 'PAYMENT_REMINDER_1':
 					$this->handle_payment_reminder( 1 );
@@ -292,7 +302,7 @@ class WC_Novalnet_Webhook {
 			}
 
 			// Update order comments.
-			if ( $this->update_comments && $is_subscription ) {
+			if ( $this->update_comments && $this->is_subscription ) {
 				novalnet()->helper()->update_comments( $this->wcs_order, $this->response['message'], 'note', $this->notify_customer );
 			} elseif ( $this->update_comments ) {
 				novalnet()->helper()->update_comments( $this->wc_order, $this->response['message'], 'note', $this->notify_customer );
@@ -338,18 +348,26 @@ class WC_Novalnet_Webhook {
 	 */
 	public function handle_subscription_suspend() {
 
-		/* translators: %1$s: parent_tid, %3$s: date*/
-		$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'This subscription transaction has been suspended on %s', 'woocommerce-novalnet-gateway' ), wc_novalnet_formatted_date() ) );
+		if ( wcs_novalnet_subscription_exists( $this->wcs_order ) ) {
+			/* translators: %1$s: parent_tid, %3$s: date*/
+			$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'This subscription transaction has been suspended on %s', 'woocommerce-novalnet-gateway' ), wc_novalnet_formatted_date() ) );
 
-		add_post_meta( $this->wcs_order->get_id(), '_nn_subscription_updated', true );
+			add_post_meta( $this->wcs_order->get_id(), '_nn_subscription_updated', true );
 
-		$this->wcs_order->update_status( 'on-hold' );
+			$this->wcs_order->update_status( 'on-hold' );
 
-		delete_post_meta( $this->wcs_order->get_id(), '_nn_subscription_updated' );
-		$this->update_data ['table']  = 'novalnet_subscription_details';
-		$this->update_data ['update'] = array(
-			'suspended_date' => gmdate( 'Y-m-d H:i:s' ),
-		);
+			delete_post_meta( $this->wcs_order->get_id(), '_nn_subscription_updated' );
+			$this->update_data ['table']  = 'novalnet_subscription_details';
+			$this->update_data ['update'] = array(
+				'suspended_date' => gmdate( 'Y-m-d H:i:s' ),
+			);
+			$this->is_subscription        = true;
+		} else {
+			/* translators: %1$s: event_tid, %2$s: wc_order_id*/
+			$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Subscription suspend for TID %1$s not processed: No subscription found for Order ID %2$s', 'woocommerce-novalnet-gateway' ), $this->event_tid, $this->wc_order_id ) );
+			return true;
+		}
+
 	}
 
 	/**
@@ -358,39 +376,45 @@ class WC_Novalnet_Webhook {
 	 * @since 12.0.0
 	 */
 	public function handle_subscription_cancel() {
-
-		// Flag to check renewal for subscription is failed.
-		$subs_cancel_reason = novalnet()->helper()->novalnet_get_wc_order_meta( $this->wc_order, '_subs_cancelled_reason' );
-		if ( ! empty( $subs_cancel_reason ) ) {
-			$this->event_data ['subscription']['reason'] = ( empty( $this->event_data ['subscription']['reason'] ) ) ? $subs_cancel_reason : $this->event_data ['subscription']['reason'];
-			novalnet()->helper()->novalnet_delete_wc_order_meta( $this->wc_order, '_subs_cancelled_reason', true );
-		}
-
-		/* translators: %1$s: parent_tid, %2$s: amount, %3$s: next_cycle_date*/
-		$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Subscription has been cancelled due to: %s. ', 'woocommerce-novalnet-gateway' ), $this->event_data ['subscription']['reason'] ) );
-
-		add_post_meta( $this->wcs_order->get_id(), '_nn_subscription_updated', true );
-
-		try {
-			$this->wcs_order->update_status( 'pending-cancel' );
-			if ( ! empty( $subs_cancel_reason ) && $this->wcs_order->can_be_updated_to( 'cancelled' ) ) { // Set subscription status to cancelled if the renewal is failed.
-				$this->wcs_order->update_status( 'cancelled' );
+		if ( wcs_novalnet_subscription_exists( $this->wcs_order ) ) {
+			// Flag to check renewal for subscription is failed.
+			$subs_cancel_reason = novalnet()->helper()->novalnet_get_wc_order_meta( $this->wc_order, '_subs_cancelled_reason' );
+			if ( ! empty( $subs_cancel_reason ) ) {
+				$this->event_data ['subscription']['reason'] = ( empty( $this->event_data ['subscription']['reason'] ) ) ? $subs_cancel_reason : $this->event_data ['subscription']['reason'];
+				novalnet()->helper()->novalnet_delete_wc_order_meta( $this->wc_order, '_subs_cancelled_reason', true );
 			}
-		} catch ( Exception $e ) {
-			if ( $this->wcs_order->has_status( 'cancelled' ) ) {
-				$this->response ['message'] .= 'Order already cancelled.';
-			} else {
-				$this->response ['message'] .= $e->getMessage();
+
+			/* translators: %1$s: parent_tid, %2$s: amount, %3$s: next_cycle_date*/
+			$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Subscription has been cancelled due to: %s. ', 'woocommerce-novalnet-gateway' ), $this->event_data ['subscription']['reason'] ) );
+
+			add_post_meta( $this->wcs_order->get_id(), '_nn_subscription_updated', true );
+
+			try {
+				$this->wcs_order->update_status( 'pending-cancel' );
+				if ( ! empty( $subs_cancel_reason ) && $this->wcs_order->can_be_updated_to( 'cancelled' ) ) { // Set subscription status to cancelled if the renewal is failed.
+					$this->wcs_order->update_status( 'cancelled' );
+				}
+			} catch ( Exception $e ) {
+				if ( $this->wcs_order->has_status( 'cancelled' ) ) {
+					$this->response ['message'] .= 'Order already cancelled.';
+				} else {
+					$this->response ['message'] .= $e->getMessage();
+				}
 			}
+
+			delete_post_meta( $this->wcs_order->get_id(), '_nn_subscription_updated' );
+
+			$this->update_data ['table']  = 'novalnet_subscription_details';
+			$this->update_data ['update'] = array(
+				'termination_at'     => gmdate( 'Y-m-d H:i:s' ),
+				'termination_reason' => $this->event_data ['subscription']['reason'],
+			);
+			$this->is_subscription        = true;
+		} else {
+			/* translators: %1$s: event_tid, %2$s: wc_order_id*/
+			$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Subscription cancel for TID %1$s not processed: No subscription found for Order ID %2$s', 'woocommerce-novalnet-gateway' ), $this->event_tid, $this->wc_order_id ) );
+			return true;
 		}
-
-		delete_post_meta( $this->wcs_order->get_id(), '_nn_subscription_updated' );
-
-		$this->update_data ['table']  = 'novalnet_subscription_details';
-		$this->update_data ['update'] = array(
-			'termination_at'     => gmdate( 'Y-m-d H:i:s' ),
-			'termination_reason' => $this->event_data ['subscription']['reason'],
-		);
 	}
 
 	/**
@@ -400,59 +424,69 @@ class WC_Novalnet_Webhook {
 	 */
 	public function handle_subscription_reactivate() {
 
-		/* translators: %1$s: date, %2$s: amount, %3$s: next_cycle_date*/
-		$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Subscription has been reactivated for the TID:%1$s on %2$s. Next charging date :%3$s', 'woocommerce-novalnet-gateway' ), $this->parent_tid, wc_novalnet_formatted_date(), wc_novalnet_next_cycle_date( $this->event_data ['subscription'] ) ) );
+		if ( wcs_novalnet_subscription_exists( $this->wcs_order ) ) {
+			/* translators: %1$s: date, %2$s: amount, %3$s: next_cycle_date*/
+			$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Subscription has been reactivated for the TID:%1$s on %2$s. Next charging date :%3$s', 'woocommerce-novalnet-gateway' ), $this->parent_tid, wc_novalnet_formatted_date(), wc_novalnet_next_cycle_date( $this->event_data ['subscription'] ) ) );
 
-		add_post_meta( $this->wcs_order->get_id(), '_nn_subscription_updated', true );
+			add_post_meta( $this->wcs_order->get_id(), '_nn_subscription_updated', true );
 
-		// Set requires_manual_renewal flag to activate the cancelled subscription.
-		if ( $this->wcs_order->has_status( wcs_get_subscription_ended_statuses() ) ) {
-			$this->wcs_order->set_requires_manual_renewal( true );
-		}
+			// Set requires_manual_renewal flag to activate the cancelled subscription.
+			if ( $this->wcs_order->has_status( wcs_get_subscription_ended_statuses() ) ) {
+				$this->wcs_order->set_requires_manual_renewal( true );
+			}
 
-		$current_status = $this->wcs_order->get_status();
+			$current_status = $this->wcs_order->get_status();
 
-		if ( 'pending-cancel' !== $current_status ) {
-			novalnet()->helper()->update_subscription_dates(
-				$this->wcs_order,
-				array( 'next_payment' => $this->event_data ['subscription']['next_cycle_date'] ),
-				( ! empty( $this->wcs_order->get_date( 'cancelled' ) ) )
+			if ( 'pending-cancel' !== $current_status ) {
+				novalnet()->helper()->update_subscription_dates(
+					$this->wcs_order,
+					array( 'next_payment' => $this->event_data ['subscription']['next_cycle_date'] ),
+					( ! empty( $this->wcs_order->get_date( 'cancelled' ) ) )
+				);
+			}
+
+			try {
+				$this->wcs_order->update_status( 'active' );
+			} catch ( Exception $e ) {
+				$novalnet_log = wc_novalnet_logger();
+				$novalnet_log->add( 'novalneterrorlog', 'Error occured during status change: ' . $e->getMessage() . '. So, manually updated the status' );
+				wp_update_post(
+					array(
+						'ID'     => $this->wcs_order_id,
+						'status' => 'active',
+					)
+				);
+			}
+
+			// Reset requires_manual_renewal flag after successful activation of the cancelled subscription.
+			if ( $this->wcs_order->get_requires_manual_renewal() ) {
+				$this->wcs_order->set_requires_manual_renewal( false );
+			}
+
+			if ( 'pending-cancel' === $current_status ) {
+				novalnet()->helper()->update_subscription_dates(
+					$this->wcs_order,
+					array( 'next_payment' => $this->event_data ['subscription']['next_cycle_date'] ),
+				);
+			}
+
+			$this->wcs_order->save();
+
+			delete_post_meta( $this->wcs_order->get_id(), '_nn_subscription_updated' );
+
+			$this->update_data ['table']  = 'novalnet_subscription_details';
+			$this->update_data ['update'] = array(
+				'suspended_date'     => null,
+				'termination_at'     => null,
+				'termination_reason' => null,
 			);
+			$this->is_subscription        = true;
+		} else {
+			/* translators: %1$s: event_tid, %2$s: wc_order_id*/
+			$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Subscription reactivation for TID %1$s not processed: No subscription found for Order ID %2$s', 'woocommerce-novalnet-gateway' ), $this->event_tid, $this->wc_order_id ) );
+			return true;
 		}
 
-		try {
-			$this->wcs_order->update_status( 'active' );
-		} catch ( Exception $e ) {
-			$novalnet_log = wc_novalnet_logger();
-			$novalnet_log->add( 'novalneterrorlog', 'Error occured during status change: ' . $e->getMessage() . '. So, manually updated the status' );
-			wp_update_post(
-				array(
-					'ID'     => $this->wcs_order_id,
-					'status' => 'active',
-				)
-			);
-		}
-
-		// Reset requires_manual_renewal flag after successful activation of the cancelled subscription.
-		if ( $this->wcs_order->get_requires_manual_renewal() ) {
-			$this->wcs_order->set_requires_manual_renewal( false );
-		}
-
-		if ( 'pending-cancel' === $current_status ) {
-			novalnet()->helper()->update_subscription_dates(
-				$this->wcs_order,
-				array( 'next_payment' => $this->event_data ['subscription']['next_cycle_date'] ),
-			);
-		}
-
-		$this->wcs_order->save();
-
-		delete_post_meta( $this->wcs_order->get_id(), '_nn_subscription_updated' );
-
-		$this->update_data ['table']  = 'novalnet_subscription_details';
-		$this->update_data ['update'] = array(
-			'suspended_date' => '',
-		);
 	}
 
 	/**
@@ -462,48 +496,55 @@ class WC_Novalnet_Webhook {
 	 */
 	public function handle_subscription_update() {
 
-		// Handle change payment method.
-		$payment_types               = novalnet()->get_payment_types();
-		$this->update_data ['table'] = 'novalnet_subscription_details';
-		$next_cycle_date             = wc_novalnet_next_cycle_date( $this->event_data['subscription'] );
+		if ( wcs_novalnet_subscription_exists( $this->wcs_order ) ) {
+			// Handle change payment method.
+			$payment_types               = novalnet()->get_payment_types();
+			$this->update_data ['table'] = 'novalnet_subscription_details';
+			$next_cycle_date             = wc_novalnet_next_cycle_date( $this->event_data['subscription'] );
 
-		if ( ! empty( $this->event_data ['subscription']['update_type'] ) ) {
-			if ( ! empty( $this->event_data ['subscription']['amount'] ) && ( in_array( 'RENEWAL_AMOUNT', $this->event_data ['subscription']['update_type'], true ) || in_array( 'RENEWAL_DATE', $this->event_data ['subscription']['update_type'], true ) ) ) {
+			if ( ! empty( $this->event_data ['subscription']['update_type'] ) ) {
+				if ( ! empty( $this->event_data ['subscription']['amount'] ) && ( in_array( 'RENEWAL_AMOUNT', $this->event_data ['subscription']['update_type'], true ) || in_array( 'RENEWAL_DATE', $this->event_data ['subscription']['update_type'], true ) ) ) {
 
-				/* translators: %1$s: amount, %2$s: next_cycle_date */
-				$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Subscription updated successfully. You will be charged %1$s on %2$s.', 'woocommerce-novalnet-gateway' ), ( wc_novalnet_shop_amount_format( $this->event_data ['subscription'] ['amount'] ) ), wc_novalnet_next_cycle_date( $this->event_data ['subscription'] ) ) );
+					/* translators: %1$s: amount, %2$s: next_cycle_date */
+					$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Subscription updated successfully. You will be charged %1$s on %2$s.', 'woocommerce-novalnet-gateway' ), ( wc_novalnet_shop_amount_format( $this->event_data ['subscription'] ['amount'] ) ), wc_novalnet_next_cycle_date( $this->event_data ['subscription'] ) ) );
+				}
+
+				if ( in_array( 'PAYMENT_DATA', $this->event_data ['subscription']['update_type'], true ) && ! empty( $this->event_data ['transaction'] ['payment_type'] ) ) {
+
+					$payment_types = array_flip( $payment_types );
+
+					/* translators: %s: next_cycle_date */
+					$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Successfully changed the payment method for next subscription on %s', 'woocommerce-novalnet-gateway' ), wc_novalnet_next_cycle_date( $this->event_data ['subscription'] ) ) );
+
+					// Set new payment method.
+					WC_Subscriptions_Change_Payment_Gateway::update_payment_method( $this->wcs_order, $payment_types[ $this->event_data ['transaction'] ['payment_type'] ] );
+
+					// Update recurring payment process.
+					do_action( 'novalnet_update_recurring_payment', $this->event_data, $this->wcs_order->get_parent_id(), $this->wcs_order->get_payment_method(), $this->wcs_order );
+
+					// 'novalnet_update_recurring_payment' action already update response message customer note.
+					$this->update_comments = false;
+				}
+
+				if ( in_array( 'STATUS', $this->event_data ['subscription']['update_type'], true ) ) {
+					/* translators: %1$s: date */
+					$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Subscription has been successfully activated on %1$s', 'woocommerce-novalnet-gateway' ), wc_novalnet_formatted_date() ) );
+				}
+
+				if ( ! empty( $next_cycle_date ) ) {
+					novalnet()->helper()->update_subscription_dates(
+						$this->wcs_order,
+						array( 'next_payment' => $next_cycle_date ),
+					);
+				}
+			} else {
+				$this->display_message( array( 'message' => 'Subscription update type has not been received.' ) );
 			}
-
-			if ( in_array( 'PAYMENT_DATA', $this->event_data ['subscription']['update_type'], true ) && ! empty( $this->event_data ['transaction'] ['payment_type'] ) ) {
-
-				$payment_types = array_flip( $payment_types );
-
-				/* translators: %s: next_cycle_date */
-				$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Successfully changed the payment method for next subscription on %s', 'woocommerce-novalnet-gateway' ), wc_novalnet_next_cycle_date( $this->event_data ['subscription'] ) ) );
-
-				// Set new payment method.
-				WC_Subscriptions_Change_Payment_Gateway::update_payment_method( $this->wcs_order, $payment_types[ $this->event_data ['transaction'] ['payment_type'] ] );
-
-				// Update recurring payment process.
-				do_action( 'novalnet_update_recurring_payment', $this->event_data, $this->wcs_order->get_parent_id(), $this->wcs_order->get_payment_method(), $this->wcs_order );
-
-				// 'novalnet_update_recurring_payment' action already update response message customer note.
-				$this->update_comments = false;
-			}
-
-			if ( in_array( 'STATUS', $this->event_data ['subscription']['update_type'], true ) ) {
-				/* translators: %1$s: date */
-				$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Subscription has been successfully activated on %1$s', 'woocommerce-novalnet-gateway' ), wc_novalnet_formatted_date() ) );
-			}
-
-			if ( ! empty( $next_cycle_date ) ) {
-				novalnet()->helper()->update_subscription_dates(
-					$this->wcs_order,
-					array( 'next_payment' => $next_cycle_date ),
-				);
-			}
+			$this->is_subscription = true;
 		} else {
-			$this->display_message( array( 'message' => 'Subscription update type has not been received.' ) );
+			/* translators: %1$s: event_tid, %2$s: wc_order_id*/
+			$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Subscription update for TID %1$s not processed: No subscription found for Order ID %2$s', 'woocommerce-novalnet-gateway' ), $this->event_tid, $this->wc_order_id ) );
+			return true;
 		}
 	}
 
@@ -534,8 +575,7 @@ class WC_Novalnet_Webhook {
 	 * @since 12.0.0
 	 */
 	public function handle_renewal() {
-		if ( in_array( $this->event_data['transaction']['status'], array( 'CONFIRMED', 'PENDING' ), true ) || novalnet()->helper()->is_subs_renewal_active_with_collection( $this->event_data ) ) {
-
+		if ( wcs_novalnet_subscription_exists( $this->wcs_order ) ) {
 			// Get next cycle date from the event data.
 			$next_cycle_date = wc_novalnet_next_cycle_date( $this->event_data['subscription'] );
 
@@ -560,19 +600,36 @@ class WC_Novalnet_Webhook {
 			$recurring_order->set_payment_method( $this->wcs_order->get_payment_method() );
 			$recurring_order->set_payment_method_title( $this->wcs_order->get_payment_method_title() );
 
-			/* translators: %1$s: tid, %2$s: amount, %3$s: date */
+			/* translators: %1$s: tid, %2$s: amount, %3$s: date, %4$s: tid */
 			$this->response ['message'] = wc_novalnet_format_text( sprintf( __( 'Subscription has been successfully renewed for the TID: %1$s with the amount %2$s on %3$s. The renewal TID is:%4$s.', 'woocommerce-novalnet-gateway' ), $this->parent_tid, wc_novalnet_shop_amount_format( $this->event_data ['transaction']['amount'] ), wc_novalnet_formatted_date(), $this->event_tid ) );
 
 			// Do Novalnet process after verify the successful recurring order creation.
 			if ( ! empty( $recurring_order->get_id() ) ) {
 				/* Update renewal order number */
 				$this->response ['order_no'] = $recurring_order->get_id();
-				if ( novalnet()->helper()->is_subs_renewal_active_with_collection( $this->event_data ) ) {
-					novalnet()->helper()->novalnet_update_wc_order_meta( $recurring_order, 'nn_failed_renewal', true, true );
+				$wcsr_order = wc_get_order( $recurring_order->get_id() );
+
+				if ( ! is_null( $wcsr_order ) && ! empty( $wcsr_order->get_order_number() ) ) {
+					novalnet()->helper()->novalnet_update_wc_order_meta( $wcsr_order, '_novalnet_order_number', $wcsr_order->get_order_number(), true );
+					$this->response['order_no'] = $wcsr_order->get_order_number();
+				}
+				novalnet()->helper()->novalnet_update_wc_order_meta( $recurring_order, '_novalnet_renewal_tid', $this->event_data['transaction']['tid'], true );
+				if ( ! WC_Novalnet_Validation::is_success_status( $this->event_data ) && ! empty( $this->event_data['result']['status_text'] ) && ! novalnet()->helper()->is_subs_renewal_active_with_collection( $this->event_data ) ) {
+
+					/* translators: %1$s: tid, %2$s: date, %3$s: status_text */
+					$this->response ['message'] = wc_novalnet_format_text( sprintf( __( 'The subscription renewal for TID %1$s was failed on %2$s due to following reason: %3$s', 'woocommerce-novalnet-gateway' ), $this->parent_tid, wc_novalnet_formatted_date(), $this->event_data['result']['status_text'] ) );
+					
+					novalnet()->helper()->novalnet_update_wc_order_meta( $recurring_order, '_novalnet_renewal_subscription_order', $this->wcs_order_id, true );
+					novalnet()->helper()->novalnet_update_wc_order_meta( $this->wc_order, '_subs_cancelled_reason', $this->event_data['result']['status_text'], true );
 					$insert_data = novalnet()->helper()->prepare_transaction_table_data( $recurring_order, $recurring_order->get_payment_method(), $this->event_data );
 					novalnet()->db()->insert( $insert_data, 'novalnet_transaction_detail' );
 					$this->update_comments = false;
 				}
+
+				if ( novalnet()->helper()->is_subs_renewal_active_with_collection( $this->event_data ) ) {
+					novalnet()->helper()->novalnet_update_wc_order_meta( $recurring_order, 'nn_failed_renewal', true, true );
+				}
+
 				$payment_gateway->check_transaction_status( $this->event_data, $recurring_order, true );
 			}
 
@@ -595,42 +652,17 @@ class WC_Novalnet_Webhook {
 				}
 			}
 
-			if ( ! empty( $this->wcs_order->get_trial_period() ) ) {
-				$related_orders = ( count( $this->wcs_order->get_related_orders() ) ) - 1;
-			} else {
-				$related_orders = count( $this->wcs_order->get_related_orders() );
-			}
-
 			novalnet()->helper()->update_subscription_dates(
 				$this->wcs_order,
 				array( 'next_payment' => gmdate( 'Y-m-d H:i:s', strtotime( $next_cycle_date ) ) ),
 				( ! empty( $this->wcs_order->get_date( 'cancelled' ) ) )
 			);
 
+			// Suscription related order counts.
+			$related_orders = apply_filters( 'novalnet_get_subscription_related_order', $this->wcs_order );
 			if ( ! empty( $total_length ) && $related_orders >= $total_length ) {
-
-				add_post_meta( $this->wcs_order->get_id(), '_nn_subscription_updated', true );
-
-				$tid = ( ! empty( $this->event_data ['event'] ['parent_tid'] ) ) ? $this->event_data ['event'] ['parent_tid'] : novalnet()->db()->get_subs_data_by_order_id( $this->wcs_order->get_parent_id(), $this->wcs_order->get_id(), 'tid', false );
-				if ( empty( $tid ) ) {
-					$tid = novalnet()->db()->get_transaction_details( $this->wc_order_id, $this->parent_tid, $this->wcs_order->get_id() );
-				}
-
-				$parameters['subscription']['tid']    = ( is_array( $tid ) && isset( $tid['tid'] ) ) ? $tid['tid'] : $tid;
-				$parameters['subscription']['reason'] = '';
-				$parameters['custom']['lang']         = wc_novalnet_shop_language();
-				$parameters['custom']['shop_invoked'] = 1;
-
-				novalnet()->helper()->submit_request( $parameters, novalnet()->helper()->get_action_endpoint( 'subscription_cancel' ), array( 'post_id' => $this->wc_order_id ) );
-				novalnet()->helper()->update_comments( $this->wcs_order, $this->response['message'], 'note', $this->notify_customer );
-				/* translators: %s: tid */
-				$subscription_cancel_note = PHP_EOL . PHP_EOL . wc_novalnet_format_text( sprintf( __( 'Subscription has been cancelled since the subscription has exceeded the maximum time period for the TID: %s', 'woocommerce-novalnet-gateway' ), $tid ) );
-				if ( $this->wcs_order->can_be_updated_to( 'pending-cancel' ) ) {
-					$this->wcs_order->update_status( 'pending-cancel', $subscription_cancel_note );
-				}
-				$this->update_comments = false;
-				delete_post_meta( $this->wcs_order->get_id(), '_nn_subscription_updated' );
-			} elseif ( ! empty( $next_cycle_date ) ) {
+				$this->subscription_cancel_to_server();
+			} elseif ( ! empty( $next_cycle_date ) && WC_Novalnet_Validation::is_success_status( $this->event_data ) ) {
 				/* translators: %s: next cycle date */
 				$this->response ['message'] .= wc_novalnet_format_text( sprintf( __( ' Next charging date will be on %1$s', 'woocommerce-novalnet-gateway' ), $next_cycle_date ) );
 			}
@@ -644,8 +676,47 @@ class WC_Novalnet_Webhook {
 			if ( ! empty( $coupon_discount_payment_count ) && (int) $related_orders === (int) $coupon_discount_payment_count ) {
 				$this->update_recurring_order_amount();
 			}
+
+			$this->is_subscription = true;
+		} else {
+			/* translators: %1$s: event_tid, %2$s: wc_order_id*/
+			$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Renewal creation for TID %1$s not processed: No subscription found for Order ID %2$s', 'woocommerce-novalnet-gateway' ), $this->event_tid, $this->wc_order_id ) );
+			return true;
+		}
+
+	}
+
+	/**
+	 * Send the subscription cancel call to the server.
+	 *
+	 * @since 12.8.1
+	 */
+	public function subscription_cancel_to_server() {
+		add_post_meta( $this->wcs_order->get_id(), '_nn_subscription_updated', true );
+
+		$tid = ( ! empty( $this->event_data ['event'] ['parent_tid'] ) ) ? $this->event_data ['event'] ['parent_tid'] : novalnet()->db()->get_subs_data_by_order_id( $this->wcs_order->get_parent_id(), $this->wcs_order->get_id(), 'tid', false );
+		if ( empty( $tid ) ) {
+			$tid = novalnet()->db()->get_transaction_details( $this->wc_order_id, $this->parent_tid, $this->wcs_order->get_id() );
+		}
+
+		$parameters['subscription']['tid']    = ( is_array( $tid ) && isset( $tid['tid'] ) ) ? $tid['tid'] : $tid;
+		$parameters['subscription']['reason'] = '';
+		$parameters['custom']['lang']         = wc_novalnet_shop_language();
+		$parameters['custom']['shop_invoked'] = 1;
+
+		$response = novalnet()->helper()->submit_request( $parameters, novalnet()->helper()->get_action_endpoint( 'subscription_cancel' ), array( 'post_id' => $this->wc_order_id ) );
+		novalnet()->helper()->update_comments( $this->wcs_order, $this->response['message'], 'note', $this->notify_customer );
+		if ( WC_Novalnet_Validation::is_success_status( $response ) ) {
+			/* translators: %s: tid */
+			$subscription_cancel_note = PHP_EOL . PHP_EOL . wc_novalnet_format_text( sprintf( __( 'Subscription has been cancelled since the subscription has exceeded the maximum time period for the TID: %s', 'woocommerce-novalnet-gateway' ), $tid ) );
+			if ( $this->wcs_order->can_be_updated_to( 'pending-cancel' ) ) {
+				$this->wcs_order->update_status( 'pending-cancel', $subscription_cancel_note );
+			}
+			$this->update_comments = false;
+			delete_post_meta( $this->wcs_order->get_id(), '_nn_subscription_updated' );
 		}
 	}
+
 	/**
 	 * Handle instalment
 	 *
@@ -758,9 +829,19 @@ class WC_Novalnet_Webhook {
 							if ( ! $this->wc_order->has_status( $payment_settings['order_success_status'] ) ) {
 								$this->wc_order->update_status( $payment_settings['order_success_status'] ); // Update callback status.
 							}
-						} elseif ( WC_Novalnet_Validation::check_string( $subscription->get_payment_method() ) && novalnet()->helper()->novalnet_get_wc_order_meta( $this->wc_order, 'nn_failed_renewal' ) ) {
+						} elseif ( WC_Novalnet_Validation::check_string( $subscription->get_payment_method() ) ) {
 							novalnet()->helper()->novalnet_update_wc_order_meta( $this->wc_order, 'nn_credit_tid', $this->event_data['transaction']['tid'], true );
 							$this->update_payment_credit_status_amount( $payment_settings['order_success_status'], true );
+
+							if ( novalnet()->helper()->novalnet_get_wc_order_meta( $this->wc_order, '_novalnet_renewal_subscription_order' ) ) {
+								novalnet()->helper()->novalnet_delete_wc_order_meta( $this->wc_order, '_novalnet_renewal_subscription_order', true );
+							}
+							// Suscription related order counts.
+							$related_orders = apply_filters( 'novalnet_get_subscription_related_order', $this->wcs_order );
+
+							if ( ! empty( $total_length ) && $related_orders >= $total_length ) {
+								$this->subscription_cancel_to_server();
+							}
 						}
 					}
 				}
@@ -798,7 +879,7 @@ class WC_Novalnet_Webhook {
 			}
 
 			if ( (int) $paid_amount > (int) $amount_to_be_paid ) {
-				$this->response ['message'] .= sprintf( __( 'The amount has been over paided', 'woocommerce-novalnet-gateway' ) );
+				$this->response ['message'] .= sprintf( __( 'The amount has been overpaid', 'woocommerce-novalnet-gateway' ) );
 			}
 		}
 	}
@@ -1283,7 +1364,12 @@ class WC_Novalnet_Webhook {
 			if ( ! empty( $this->order_reference ['order_no'] ) ) {
 				$this->wcs_order_id = apply_filters( 'novalnet_get_subscription_id', $this->order_reference ['order_no'] );
 				if ( 'shop_subscription' === novalnet()->helper()->novalnet_get_wc_order_type( $this->wcs_order_id ) ) {
-					$this->wcs_order                        = wcs_get_subscription( $this->wcs_order_id );
+					$this->wcs_order = wcs_get_subscription( $this->wcs_order_id );
+					if ( empty( $this->wcs_order ) || ! is_object( $this->wcs_order ) ) {
+						/* translators: %d refers to the subscription order ID */
+						$message = sprintf( __( 'Subscription order reference not found in the shop for the subscription order: %d', 'novalnet' ), $this->wcs_order_id );
+						$this->display_message( array( 'message' => $message ) );
+					}
 					$this->order_reference ['payment_type'] = $this->wcs_order->get_payment_method();
 				}
 			}

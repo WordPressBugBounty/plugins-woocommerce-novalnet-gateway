@@ -5,14 +5,14 @@
  * Description: PCI compliant payment solution, covering a full scope of payment services and seamless integration for easy adaptability
  * Author:      Novalnet AG
  * Author URI:  https://www.novalnet.de
- * Version:     12.8.0
+ * Version:     12.8.1
  *
  * Requires at least: 5.0.0
- * Tested up to: 6.5.3
+ * Tested up to: 6.7.1
  *
  * Requires Plugins: woocommerce
  * WC requires at least: 4.0.0
- * WC tested up to: 8.8.3
+ * WC tested up to: 9.5.1
  * Text Domain: woocommerce-novalnet-gateway
  * Domain Path: /i18n/languages/
  * License:     GPLv2
@@ -30,7 +30,7 @@ if ( ! class_exists( 'WC_Novalnet' ) ) :
 
 	// Define constants.
 	if ( ! defined( 'NOVALNET_VERSION' ) ) {
-		define( 'NOVALNET_VERSION', '12.8.0' );
+		define( 'NOVALNET_VERSION', '12.8.1' );
 	}
 	if ( ! defined( 'NN_PLUGIN_FILE' ) ) {
 		define( 'NN_PLUGIN_FILE', __FILE__ );

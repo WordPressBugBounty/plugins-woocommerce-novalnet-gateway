@@ -240,7 +240,9 @@ class WC_Gateway_Novalnet_Sepa extends WC_Novalnet_Abstract_Payment_Gateways {
 
 		// Add SEPA due date.
 		if ( ! empty( $this->settings ['payment_duration'] ) ) {
-			$parameters ['transaction']['due_date'] = wc_novalnet_format_due_date( $this->settings ['payment_duration'] );
+			// Due date update min 2 days to 3 days.
+			$due_date                               = ( 2 === (int) $this->settings ['payment_duration'] ) ? 3 : $this->settings ['payment_duration'];
+			$parameters ['transaction']['due_date'] = wc_novalnet_format_due_date( $due_date );
 		}
 	}
 

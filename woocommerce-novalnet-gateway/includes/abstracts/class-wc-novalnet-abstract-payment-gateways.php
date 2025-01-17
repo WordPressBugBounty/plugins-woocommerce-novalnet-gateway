@@ -80,18 +80,31 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 			$this->generate_payment_parameters( $wc_order, $parameters );
 		}
 
-		$is_subscription = apply_filters( 'novalnet_check_is_subscription', $wc_order );
-
-		$is_shop_based_subs = true;
-		if ( class_exists( 'WC_Subscriptions' ) && WC_Novalnet_Validation::is_change_payment_method() && WC()->session->__isset( 'novalnet_change_payment_method' ) ) {
-			$is_shop_based_subs = apply_filters( 'novalnet_check_is_shop_scheduled_subscription', $wc_order_id );
+		$is_subscription         = apply_filters( 'novalnet_check_is_subscription', $wc_order );
+		$failed_renewal_order_id = novalnet()->helper()->novalnet_get_wc_order_meta( $wc_order, '_novalnet_renewal_subscription_order' );
+		$is_shop_based_subs      = true;
+		if ( class_exists( 'WC_Subscriptions' ) && ( ( WC_Novalnet_Validation::is_change_payment_method() && WC()->session->__isset( 'novalnet_change_payment_method' ) ) || ! empty( $failed_renewal_order_id ) ) ) {
+			$order_id           = ( ! empty( $failed_renewal_order_id ) ) ? $failed_renewal_order_id : $wc_order_id;
+			$is_shop_based_subs = apply_filters( 'novalnet_check_is_shop_scheduled_subscription', $order_id );
 		}
 
 		// Set endpoint.
-		if ( wc_novalnet_check_session() && WC()->session->__isset( 'novalnet_change_payment_method' ) && WC_Novalnet_Validation::check_string( $wc_order->get_meta( '_old_payment_method' ) ) && ! $is_shop_based_subs ) {
+		if ( wc_novalnet_check_session() && ( ( WC()->session->__isset( 'novalnet_change_payment_method' ) && WC_Novalnet_Validation::check_string( $wc_order->get_meta( '_old_payment_method' ) ) ) || ! empty( $failed_renewal_order_id ) ) && ! $is_shop_based_subs ) {
+			$parent_order_id = $wc_order->get_parent_id();
+			$subscription_id = $wc_order->get_id();
+			if ( ! empty( $failed_renewal_order_id ) ) {
+				$wcs_order = wcs_get_subscription( $failed_renewal_order_id );
+				if ( is_object( $wcs_order ) ) {
+					$parent_order_id = $wcs_order->get_parent_id();
+					$subscription_id = $wcs_order->get_id();
+				}
+			}
 			$endpoint                                  = novalnet()->helper()->get_action_endpoint( 'subscription_update' );
 			$parameters['transaction']['payment_type'] = novalnet()->get_payment_types( $this->id );
-			$parameters ['subscription']['tid']        = novalnet()->helper()->get_novalnet_subscription_tid( $wc_order->get_parent_id(), $wc_order->get_id() );
+			$parameters ['subscription']['tid']        = novalnet()->helper()->get_novalnet_subscription_tid( $parent_order_id, $subscription_id );
+			if ( ! empty( $failed_renewal_order_id ) ) {
+				$parameters ['custom']['shop_invoked'] = 1;
+			}
 		} else {
 			if ( $this->supports( 'subscriptions' ) ) {
 
@@ -295,6 +308,9 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 		$parameters['customer'] = novalnet()->helper()->get_customer_data( $wc_order );
 
 		$parameters['custom'] ['lang'] = wc_novalnet_shop_language();
+		// Send order number in input value.
+		$parameters['custom']['input5']    = 'nn_order_id';
+		$parameters['custom']['inputval5'] = $wc_order->get_id();
 
 		if ( ! is_admin() && wc_novalnet_check_session() ) {
 
@@ -305,6 +321,12 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 			WC()->session->set( 'current_novalnet_payment', $this->id );
 
 			$is_change_payment = (bool) WC()->session->__isset( 'novalnet_change_payment_method' );
+
+			if ( ! $is_change_payment ) {
+				if ( class_exists( 'WC_Subscriptions_Order' ) && ! empty( novalnet()->helper()->novalnet_get_wc_order_meta( $wc_order, '_novalnet_renewal_subscription_order' ) ) ) {
+					$is_change_payment = true;
+				}
+			}
 
 			$customer_validation = WC_Novalnet_Validation::has_valid_customer_data( $parameters );
 			if ( isset( $customer_validation['is_invalid'] ) && true === $customer_validation['is_invalid'] ) {
@@ -420,7 +442,7 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 			return $this->novalnet_redirect( $success_url );
 
 			// Update comments with TID for normal payment.
-		} elseif ( empty( novalnet()->request ['change_payment_method'] ) ) {
+		} elseif ( empty( novalnet()->request ['change_payment_method'] ) || novalnet()->helper()->novalnet_get_wc_order_meta( $wc_order, '_novalnet_renewal_subscription_order' ) ) {
 			// Form order comments.
 			$transaction_comments = novalnet()->helper()->prepare_payment_comments( $server_response, $wc_order->get_id() );
 			$customer_given_note  = '';
@@ -487,6 +509,59 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 			$wc_order->save();
 		}
 
+		if ( novalnet()->helper()->novalnet_get_wc_order_meta( $wc_order, '_novalnet_renewal_subscription_order' ) ) {
+			$wcs_order = wcs_get_subscriptions_for_renewal_order( $wc_order );
+			if ( ! empty( $wcs_order ) && is_object( $wcs_order ) ) {
+				// Suscription related order counts.
+				$related_orders = apply_filters( 'novalnet_get_subscription_related_order', $wcs_order );
+				$total_length   = apply_filters( 'novalnet_get_order_subscription_length', $wcs_order );
+				if ( ! empty( $total_length ) && $related_orders >= $total_length ) {
+					$subs_data = novalnet()->db()->get_subscription_details( $wcs_order->get_id() );
+					if ( ! empty( $subs_data ) && ! empty( $subs_data['tid'] ) && ! empty( $subs_data['subs_id'] ) && empty( $subs_data['shop_based_subs'] ) ) {
+						$parameters = array(
+							'subscription' => array(
+								'tid'    => $subs_data['tid'],
+								'reason' => 'Subscription has been deleted from the shop.',
+							),
+							'custom'       => array(
+								'lang'         => wc_novalnet_shop_language(),
+								'shop_invoked' => 1,
+							),
+						);
+
+						$server_response = novalnet()->helper()->submit_request( $parameters, novalnet()->helper()->get_action_endpoint( 'subscription_cancel' ), array( 'post_id' => $subs_data['order_no'] ) );
+
+						if ( WC_Novalnet_Validation::is_success_status( $server_response ) ) {
+							novalnet()->db()->update(
+								array(
+									'termination_at'     => ! empty( $subs_data['termination_at'] ) ? $subs_data['termination_at'] : gmdate( 'Y-m-d H:i:s' ),
+									'termination_reason' => ! empty( $subs_data['termination_reason'] ) ? $subs_data['termination_reason'] : $parameters['subscription']['reason'],
+								),
+								array(
+									'order_no'      => $subs_data['order_no'],
+									'subs_order_no' => $wcs_order->get_id(),
+								),
+								'novalnet_subscription_details'
+							);
+
+							/* translators: %s: reason  */
+							$comments = wc_novalnet_format_text( sprintf( __( 'Subscription has been cancelled since the subscription has exceeded the maximum time period for the TID: %s', 'woocommerce-novalnet-gateway' ), $subs_data['tid'] ) );
+							if ( $wcs_order->can_be_updated_to( 'pending-cancel' ) ) {
+								$wcs_order->update_status( 'pending-cancel', $comments );
+							}
+							if ( function_exists( 'wcs_add_admin_notice' ) ) {
+								wcs_add_admin_notice( $comments );
+							}
+							novalnet()->helper()->debug( 'The subscription has been cancelled successfully. The subscription order ID: ' . $wcs_order->get_id(), '', '', 'notice' );
+						}
+						novalnet()->helper()->novalnet_delete_wc_order_meta( $wc_order, '_novalnet_renewal_subscription_order', true );
+					}
+				} else {
+					novalnet()->helper()->novalnet_delete_wc_order_meta( $wc_order, '_novalnet_renewal_subscription_order', true );
+				}
+			}
+			novalnet()->helper()->novalnet_delete_wc_order_meta( $wc_order, '_novalnet_renewal_subscription_order', true );
+		}
 		// Handle subscription process.
 		do_action( 'novalnet_handle_subscription_post_process', $wc_order->get_id(), $this->id, $server_response, $wc_order );
 
@@ -1014,7 +1089,7 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 		}
 
 		$renewal_order->save();
-		if ( method_exists( $payment_gateway, 'check_transaction_status' ) ) {
+		if ( ! empty( $payment_gateway ) && method_exists( $payment_gateway, 'check_transaction_status' ) ) {
 			$payment_gateway->check_transaction_status( $response, $renewal_order, 'subscription_renewals', true );
 		} else {
 			$data = array( 'message' => 'Payment not found in the order' );
@@ -1081,11 +1156,12 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 			if ( ! empty( $overlay_details ['checkout_js'] ) && ! empty( $overlay_details ['checkout_token'] ) ) {
 				wp_enqueue_script( 'woocommerce-novalnet-gateway-external-script-barzahlen', esc_url( $overlay_details ['checkout_js'] . '?token=' . esc_attr( $overlay_details ['checkout_token'] ) ), array(), NOVALNET_VERSION, false );
 				echo wp_kses(
-					"<button id='barzahlen_button' class='bz-checkout-btn'>" . __( 'Pay now with Barzahlen', 'woocommerce-novalnet-gateway' ) . '</button>',
+					"<button id='barzahlen_button' class='bz-checkout-btn' style='z-index: 10;'>" . __( 'Pay now with Barzahlen', 'woocommerce-novalnet-gateway' ) . '</button>',
 					array(
 						'button' => array(
 							'id'    => true,
 							'class' => true,
+							'style' => true,
 						),
 					)
 				);
@@ -1472,7 +1548,7 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 
 		if ( WC_Novalnet_Validation::check_string( $wc_order->get_payment_method() ) ) {
 
-			if ( $wc_order->has_status( 'pending' ) || ( novalnet()->helper()->novalnet_get_wc_order_meta( $wc_order, 'nn_failed_renewal' ) ) ) {
+			if ( $wc_order->has_status( 'pending' ) || ( novalnet()->helper()->novalnet_get_wc_order_meta( $wc_order, 'nn_failed_renewal' ) ) || ( novalnet()->helper()->novalnet_get_wc_order_meta( $wc_order, '_novalnet_renewal_subscription_order' ) ) ) {
 				unset( $actions['pay'] );
 			}
 
