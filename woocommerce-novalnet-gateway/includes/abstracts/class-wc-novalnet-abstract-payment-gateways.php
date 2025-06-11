@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Novalnet Payment Gateway class.
  *
@@ -19,6 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * WC_Novalnet_Abstract_Payment_Gateways Abstract Class.
  */
 abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway {
+
 
 
 	/**
@@ -42,7 +44,7 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 	 * @param WC_Order $wc_order    The order object.
 	 * @param int      $parameters  The parameters.
 	 */
-	abstract public function generate_payment_parameters( $wc_order, &$parameters );
+	abstract public function generate_payment_parameters( $wc_order, &$parameters);
 
 	/**
 	 * Perform the payment call to Novalnet server.
@@ -53,7 +55,6 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 	 * @return array
 	 */
 	public function perform_payment_call( $wc_order_id ) {
-
 		// The order object.
 		$wc_order = wc_get_order( $wc_order_id );
 
@@ -80,9 +81,11 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 			$this->generate_payment_parameters( $wc_order, $parameters );
 		}
 
-		$is_subscription         = apply_filters( 'novalnet_check_is_subscription', $wc_order );
-		$failed_renewal_order_id = novalnet()->helper()->novalnet_get_wc_order_meta( $wc_order, '_novalnet_renewal_subscription_order' );
-		$is_shop_based_subs      = true;
+		$is_subscription            = apply_filters( 'novalnet_check_is_subscription', $wc_order );
+		$failed_renewal_order_id    = novalnet()->helper()->novalnet_get_wc_order_meta( $wc_order, '_novalnet_renewal_subscription_order' );
+		$is_shop_based_subs         = true;
+		$is_shop_based_subs_enabled = apply_filters( 'novalnet_check_is_shop_scheduled_subscription_enabled', false );
+
 		if ( class_exists( 'WC_Subscriptions' ) && ( ( WC_Novalnet_Validation::is_change_payment_method() && WC()->session->__isset( 'novalnet_change_payment_method' ) ) || ! empty( $failed_renewal_order_id ) ) ) {
 			$order_id           = ( ! empty( $failed_renewal_order_id ) ) ? $failed_renewal_order_id : $wc_order_id;
 			$is_shop_based_subs = apply_filters( 'novalnet_check_is_shop_scheduled_subscription', $order_id );
@@ -101,13 +104,12 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 			}
 			$endpoint                                  = novalnet()->helper()->get_action_endpoint( 'subscription_update' );
 			$parameters['transaction']['payment_type'] = novalnet()->get_payment_types( $this->id );
-			$parameters ['subscription']['tid']        = novalnet()->helper()->get_novalnet_subscription_tid( $parent_order_id, $subscription_id );
+			$parameters['subscription']['tid']         = novalnet()->helper()->get_novalnet_subscription_tid( $parent_order_id, $subscription_id );
 			if ( ! empty( $failed_renewal_order_id ) ) {
-				$parameters ['custom']['shop_invoked'] = 1;
+				$parameters['custom']['shop_invoked'] = 1;
 			}
 		} else {
 			if ( $this->supports( 'subscriptions' ) ) {
-
 				// Set Subscription related parameters if available.
 				do_action( 'novalnet_set_shopbased_subs_flag', $wc_order );
 			}
@@ -116,25 +118,49 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 				$endpoint = $this->get_payment_endpoint_admin_orders( $wc_order->get_total() );
 				$this->add_complete_order_status_filter();
 			} else {
-				// Set payment token for subscription order.
-				$is_shop_based_subs_enabled = apply_filters( 'novalnet_check_is_shop_scheduled_subscription_enabled', false );
-				if ( ( $is_subscription || WC_Novalnet_Validation::is_failed_renewal_order( $wc_order ) ) && ( $is_shop_based_subs_enabled || novalnet()->helper()->is_shop_based_subs_exist( $wc_order ) ) && ! isset( $parameters['subscription'] ) ) {
-					$parameters ['custom']['input1']    = 'shop_subs';
-					$parameters ['custom']['inputval1'] = 1;
-					if ( empty( $parameters['transaction']['create_token'] ) && empty( $parameters['transaction']['payment_data']['token'] ) ) {
-						$parameters ['transaction']['create_token'] = '1';
-					} elseif ( 'novalnet_guaranteed_sepa' === $this->id && ! empty( $parameters ['customer']['birth_date'] ) ) {
-						$parameters ['transaction']['create_token'] = '1';
+
+				if (
+					( $is_subscription || WC_Novalnet_Validation::is_failed_renewal_order( $wc_order ) ) &&
+					( $is_shop_based_subs_enabled || novalnet()->helper()->is_shop_based_subs_exist( $wc_order ) ) &&
+					! isset( $parameters['subscription'] )
+				) {
+					$parameters['custom']['input1']    = 'shop_subs';
+					$parameters['custom']['inputval1'] = 1;
+
+					$wcs_order_id       = apply_filters( 'novalnet_get_subscription_id', $wc_order_id );
+					$subscription_order = wcs_get_subscription( $wcs_order_id );
+					$next_payment_date  = $subscription_order ? $subscription_order->get_date( 'next_payment' ) : '';
+					$payment            = $this->id;
+
+					$tokenization_supported = novalnet()->get_supports( 'tokenization', $payment );
+					$session_token_selected = ! empty( WC()->session->{$payment}[ 'wc-' . $payment . '-new-payment-method' ] );
+					$should_create_token    = ( $next_payment_date || $session_token_selected );
+
+					if (
+						$tokenization_supported &&
+						$should_create_token &&
+						empty( $parameters['transaction']['create_token'] ) &&
+						empty( $parameters['transaction']['payment_data']['token'] )
+					) {
+						$parameters['transaction']['create_token'] = '1';
+					} elseif (
+						$tokenization_supported && empty( $parameters['transaction']['create_token'] ) &&
+						$payment === 'novalnet_guaranteed_sepa' &&
+						! empty( $parameters['customer']['birth_date'] ) &&
+						$should_create_token
+					) {
+						$parameters['transaction']['create_token'] = '1';
 					}
 				}
+
 				$parameters = $this->check_is_zero_amount_booking_txn( $parameters, $wc_order );
 				$endpoint   = $this->get_payment_endpoint();
 			}
 		}
 
 		// Update order number in post meta.
-		if ( ! empty( $parameters ['transaction']['order_no'] ) ) {
-			novalnet()->helper()->novalnet_update_wc_order_meta( $wc_order, '_novalnet_order_number', $parameters ['transaction'] ['order_no'] );
+		if ( ! empty( $parameters['transaction']['order_no'] ) ) {
+			novalnet()->helper()->novalnet_update_wc_order_meta( $wc_order, '_novalnet_order_number', $parameters['transaction']['order_no'] );
 		}
 
 		$update_wc_order = false;
@@ -185,14 +211,14 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 		}
 
 		// Handle redirection (if needed).
-		if ( WC_Novalnet_Validation::is_success_status( $response ) && ! empty( $response ['result'] ['redirect_url'] ) && ! empty( $response['transaction']['txn_secret'] ) ) {
+		if ( WC_Novalnet_Validation::is_success_status( $response ) && ! empty( $response['result']['redirect_url'] ) && ! empty( $response['transaction']['txn_secret'] ) ) {
 			WC()->session->set( 'novalnet_post_id', $wc_order_id );
 			WC()->session->set( 'novalnet_txn_secret', $response['transaction']['txn_secret'] );
-			novalnet()->helper()->debug( 'Going to redirect the end-user to the URL - ' . $response ['result'] ['redirect_url'] . ' to complete the payment', $wc_order_id );
+			novalnet()->helper()->debug( 'Going to redirect the end-user to the URL - ' . $response['result']['redirect_url'] . ' to complete the payment', $wc_order_id );
 			$wc_order->save();
 			return array(
 				'result'   => 'success',
-				'redirect' => $response ['result'] ['redirect_url'],
+				'redirect' => $response['result']['redirect_url'],
 			);
 		}
 
@@ -229,11 +255,10 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 	public function add_email_instructions( $wc_order, $sent_to_admin ) {
 		$language = strtolower( wc_novalnet_shop_language() );
 
-		if ( $wc_order->get_payment_method() === $this->id && ! $sent_to_admin && ! empty( $this->settings [ 'instructions_' . $language ] ) ) {
+		if ( $wc_order->get_payment_method() === $this->id && ! $sent_to_admin && ! empty( $this->settings[ 'instructions_' . $language ] ) ) {
 
 			// Set email notes.
-			echo wp_kses_post( wpautop( wptexturize( $this->settings [ 'instructions_' . $language ] ) ) );
-
+			echo wp_kses_post( wpautop( wptexturize( $this->settings[ 'instructions_' . $language ] ) ) );
 		}
 	}
 
@@ -285,7 +310,7 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 			'payment_type'   => novalnet()->get_payment_types( $this->id ),
 
 			// Add test mode value as 1/ 0 based on configuration value.
-			'test_mode'      => (int) ( 'yes' === $this->settings ['test_mode'] ),
+			'test_mode'      => (int) ( 'yes' === $this->settings['test_mode'] ),
 
 			// Add Amount details.
 			'amount'         => wc_novalnet_formatted_amount( $wc_order->get_total() ),
@@ -307,15 +332,15 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 
 		$parameters['customer'] = novalnet()->helper()->get_customer_data( $wc_order );
 
-		$parameters['custom'] ['lang'] = wc_novalnet_shop_language();
+		$parameters['custom']['lang'] = wc_novalnet_shop_language();
 		// Send order number in input value.
 		$parameters['custom']['input5']    = 'nn_order_id';
 		$parameters['custom']['inputval5'] = $wc_order->get_id();
 
 		if ( ! is_admin() && wc_novalnet_check_session() ) {
 
-			if ( ! empty( $parameters['transaction'] ['order_no'] ) ) {
-				WC()->session->set( 'formatted_order_no', $parameters['transaction'] ['order_no'] );
+			if ( ! empty( $parameters['transaction']['order_no'] ) ) {
+				WC()->session->set( 'formatted_order_no', $parameters['transaction']['order_no'] );
 			}
 			// Set current payment method in session.
 			WC()->session->set( 'current_novalnet_payment', $this->id );
@@ -379,11 +404,11 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 		}
 
 		// Customize the shop return URL's based on payment process type.
-		$parameters ['transaction']['return_url'] = esc_url( add_query_arg( $query_args, apply_filters( 'novalnet_return_url', $this->get_return_url( $wc_order ) ) ) );
+		$parameters['transaction']['return_url'] = esc_url( add_query_arg( $query_args, apply_filters( 'novalnet_return_url', $this->get_return_url( $wc_order ) ) ) );
 
 		// Send order number in input value.
-		$parameters ['custom']['input1']    = 'nn_shopnr';
-		$parameters ['custom']['inputval1'] = $wc_order->get_id();
+		$parameters['custom']['input1']    = 'nn_shopnr';
+		$parameters['custom']['inputval1'] = $wc_order->get_id();
 	}
 
 	/**
@@ -420,7 +445,7 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 	public function transaction_success( $server_response, $wc_order, $is_webhook, $is_scheduled_payment ) {
 
 		// Store payment token (if applicable).
-		$this->store_payment_token( $server_response ['transaction'], $wc_order );
+		$this->store_payment_token( $server_response['transaction'], $wc_order );
 
 		// Check order subscription renew order.
 		$novalnet_renew_subscription = novalnet()->helper()->novalnet_get_wc_order_meta( $wc_order, '_novalnet_renew_subscription' );
@@ -442,7 +467,7 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 			return $this->novalnet_redirect( $success_url );
 
 			// Update comments with TID for normal payment.
-		} elseif ( empty( novalnet()->request ['change_payment_method'] ) || novalnet()->helper()->novalnet_get_wc_order_meta( $wc_order, '_novalnet_renewal_subscription_order' ) ) {
+		} elseif ( empty( novalnet()->request['change_payment_method'] ) || novalnet()->helper()->novalnet_get_wc_order_meta( $wc_order, '_novalnet_renewal_subscription_order' ) ) {
 			// Form order comments.
 			$transaction_comments = novalnet()->helper()->prepare_payment_comments( $server_response, $wc_order->get_id() );
 			$customer_given_note  = '';
@@ -483,9 +508,9 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 		$insert_data = novalnet()->helper()->prepare_transaction_table_data( $wc_order, $this->id, $server_response );
 
 		if ( ! empty( $server_response['transaction']['checkout_js'] ) && ! empty( $server_response['transaction']['checkout_token'] ) ) {
-			$overlay_details                    = array();
-			$overlay_details ['checkout_js']    = $server_response['transaction']['checkout_js'];
-			$overlay_details ['checkout_token'] = $server_response['transaction']['checkout_token'];
+			$overlay_details                   = array();
+			$overlay_details['checkout_js']    = $server_response['transaction']['checkout_js'];
+			$overlay_details['checkout_token'] = $server_response['transaction']['checkout_token'];
 			novalnet()->helper()->novalnet_update_wc_order_meta( $wc_order, '_nn_cp_checkout_token', wc_novalnet_serialize_data( $overlay_details ) );
 		}
 
@@ -499,8 +524,14 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 		// Update Novalnet version while processing the current post id.
 		novalnet()->helper()->novalnet_update_wc_order_meta( $wc_order, '_nn_version', NOVALNET_VERSION );
 
-		// Complete the payment process.
-		$wc_order->payment_complete( $server_response['transaction']['tid'] );
+		if ( $server_response['transaction']['status'] != 'CONFIRMED' ) {
+			$order_status = $this->get_order_status( $server_response['transaction']['status'], $wc_order );
+			$wc_order->update_status( $order_status );
+			$wc_order->set_transaction_id( $server_response['transaction']['tid'] );
+		} else {
+			// Complete the payment process.
+			$wc_order->payment_complete( $server_response['transaction']['tid'] );
+		}
 
 		// Set the customer note again with html entity decoded text.
 		if ( ! empty( $transaction_comments ) ) {
@@ -625,18 +656,18 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 			novalnet()->helper()->update_comments( $wc_order, $transaction_comments, 'note', false );
 			novalnet()->helper()->novalnet_update_wc_order_meta( $wc_order, '_nn_version', NOVALNET_VERSION );
 
-			if ( ! empty( $server_response ['transaction']['status'] ) ) {
-				novalnet()->helper()->novalnet_update_wc_order_meta( $wc_order, '_novalnet_gateway_status', $server_response ['transaction'] ['status'] );
-			} elseif ( ! empty( $server_response ['status'] ) ) {
-				novalnet()->helper()->novalnet_update_wc_order_meta( $wc_order, '_novalnet_gateway_status', $server_response ['status'] );
+			if ( ! empty( $server_response['transaction']['status'] ) ) {
+				novalnet()->helper()->novalnet_update_wc_order_meta( $wc_order, '_novalnet_gateway_status', $server_response['transaction']['status'] );
+			} elseif ( ! empty( $server_response['status'] ) ) {
+				novalnet()->helper()->novalnet_update_wc_order_meta( $wc_order, '_novalnet_gateway_status', $server_response['status'] );
 			}
 
 			if ( empty( $wc_order->get_transaction_id() ) ) {
 				$wc_order->update_status( 'failed' );
 			}
 
-			if ( ( isset( novalnet()->request ['nn_pay_order'] ) && 1 === (int) novalnet()->request ['nn_pay_order'] && is_object( $wc_order ) )
-			|| ( isset( $server_response['response_type'] ) && 'redirect_return' === $server_response['response_type'] )
+			if ( ( isset( novalnet()->request['nn_pay_order'] ) && 1 === (int) novalnet()->request['nn_pay_order'] && is_object( $wc_order ) )
+				|| ( isset( $server_response['response_type'] ) && 'redirect_return' === $server_response['response_type'] )
 			) {
 				$url = $wc_order->get_checkout_payment_url();
 			}
@@ -686,18 +717,22 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 	 * @param array $parameters The formed parameters.
 	 */
 	public function set_payment_token( &$parameters ) {
-
 		$payment = $this->id;
-		if ( ! empty( WC()->session->$payment [ 'wc-' . $payment . '-payment-token' ] ) && ! wc_novalnet_check_isset( WC()->session->$payment, 'wc-' . $payment . '-payment-token', 'new' ) ) {
-			$token = WC_Payment_Tokens::get( WC()->session->$payment [ 'wc-' . $payment . '-payment-token' ] );
-			$parameters ['transaction']['payment_data']['token'] = $token->get_reference_token();
-			$parameters ['custom']['input2']                     = 'reference_tid';
-			$parameters ['custom']['inputval2']                  = $token->get_reference_tid();
-			$parameters ['custom']['input3']                     = 'reference_token';
-			$parameters ['custom']['inputval3']                  = $token->get_reference_token();
-		} elseif ( $this->supports( 'tokenization' ) && ! empty( WC()->session->$payment [ 'wc-' . $payment . '-new-payment-method' ] ) && ( wc_novalnet_check_isset( WC()->session->$payment, 'wc-' . $payment . '-new-payment-method', 'true' ) || wc_novalnet_check_isset( WC()->session->$payment, 'wc-' . $payment . '-new-payment-method', '1' )
-		) ) {
-			$parameters ['transaction']['create_token'] = '1';
+		if ( ! empty( WC()->session->$payment[ 'wc-' . $payment . '-payment-token' ] ) && ! wc_novalnet_check_isset( WC()->session->$payment, 'wc-' . $payment . '-payment-token', 'new' ) ) {
+			$token = WC_Payment_Tokens::get( WC()->session->$payment[ 'wc-' . $payment . '-payment-token' ] );
+			$parameters['transaction']['payment_data']['token'] = $token->get_reference_token();
+			$parameters['custom']['input2']                     = 'reference_tid';
+			$parameters['custom']['inputval2']                  = $token->get_reference_tid();
+			$parameters['custom']['input3']                     = 'reference_token';
+			$parameters['custom']['inputval3']                  = $token->get_reference_token();
+		} elseif (
+			$this->supports( 'tokenization' ) &&
+			! empty( WC()->session->$payment[ 'wc-' . $payment . '-new-payment-method' ] )
+			&& ( wc_novalnet_check_isset( WC()->session->$payment, 'wc-' . $payment . '-new-payment-method', 'true' )
+				|| wc_novalnet_check_isset( WC()->session->$payment, 'wc-' . $payment . '-new-payment-method', '1' )
+			) && novalnet()->get_supports( 'tokenization', $this->id )
+		) {
+			$parameters['transaction']['create_token'] = '1';
 		}
 	}
 
@@ -722,18 +757,24 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 				}
 			}
 
-			if ( ! empty( $transaction ['payment_data'] ['token'] ) && ( ( empty( WC()->session->$payment_type [ 'wc-' . $payment_type . '-payment-token' ] ) || wc_novalnet_check_isset( WC()->session->$payment_type, 'wc-' . $payment_type . '-payment-token', 'new' ) ) && ! empty( WC()->session->$payment_type [ 'wc-' . $payment_type . '-new-payment-method' ] ) &&
-			(
-				wc_novalnet_check_isset( WC()->session->$payment_type, 'wc-' . $payment_type . '-new-payment-method', 'true' ) ||
-				wc_novalnet_check_isset( WC()->session->$payment_type, 'wc-' . $payment_type . '-new-payment-method', '1' )
-			) ) ) {
+			if (
+				! empty( $transaction['payment_data']['token'] ) &&
+				( ( empty( WC()->session->$payment_type[ 'wc-' . $payment_type . '-payment-token' ] )
+					|| wc_novalnet_check_isset( WC()->session->$payment_type, 'wc-' . $payment_type . '-payment-token', 'new' ) )
+					&& ! empty( WC()->session->$payment_type[ 'wc-' . $payment_type . '-new-payment-method' ] ) &&
+					(
+						wc_novalnet_check_isset( WC()->session->$payment_type, 'wc-' . $payment_type . '-new-payment-method', 'true' ) ||
+						wc_novalnet_check_isset( WC()->session->$payment_type, 'wc-' . $payment_type . '-new-payment-method', '1' )
+					) )
+			) {
+
 				$payment_data = $transaction['payment_data'];
 
 				$token = new WC_Payment_Token_Novalnet();
 				$token->delete_duplicate_tokens( $payment_data, $payment_type );
 
-				$token->set_token( $payment_data ['token'] );
-				$token->set_reference_token( $payment_data ['token'] );
+				$token->set_token( $payment_data['token'] );
+				$token->set_reference_token( $payment_data['token'] );
 				$token->set_reference_tid( $transaction['tid'] );
 				$token->set_gateway_id( $payment_type );
 				$token->store_token_data( $payment_type, $payment_data, $token );
@@ -751,7 +792,6 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 	 * @since 12.0.0
 	 */
 	public function saved_payment_methods() {
-
 		$tokens = $this->get_tokens();
 
 		// Merge both guaranteed & non-guaranteed SEPA tokens together.
@@ -794,7 +834,7 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 		}
 		$html .= '</ul>';
 
-        echo apply_filters( 'wc_payment_gateway_form_saved_payment_methods_html', $html, $this ); // @codingStandardsIgnoreLine
+		echo apply_filters('wc_payment_gateway_form_saved_payment_methods_html', $html, $this); // @codingStandardsIgnoreLine
 	}
 
 
@@ -806,7 +846,6 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 	 * @return array|string
 	 */
 	public function process_redirect_payment_response() {
-
 		$txn_secret      = isset( novalnet()->request['txn_secret'] ) ? novalnet()->request['txn_secret'] : null;
 		$order_id        = isset( novalnet()->request['order-id'] ) ? novalnet()->request['order-id'] : null;
 		$server_response = array();
@@ -815,7 +854,7 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 			if ( WC_Novalnet_Validation::is_valid_checksum( novalnet()->request, $txn_secret, WC_Novalnet_Configuration::get_global_settings( 'key_password' ) ) ) {
 				$parameters      = array(
 					'transaction' => array(
-						'tid' => novalnet()->request ['tid'],
+						'tid' => novalnet()->request['tid'],
 					),
 					'custom'      => array(
 						'lang' => wc_novalnet_shop_language(),
@@ -824,8 +863,8 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 				$endpoint        = novalnet()->helper()->get_action_endpoint( 'transaction_details' );
 				$server_response = novalnet()->helper()->submit_request( $parameters, $endpoint, array( 'post_id' => $order_id ) );
 
-				if ( ! empty( $server_response ['custom']['nn_shopnr'] ) ) {
-					$order_id = $server_response ['custom']['nn_shopnr'];
+				if ( ! empty( $server_response['custom']['nn_shopnr'] ) ) {
+					$order_id = $server_response['custom']['nn_shopnr'];
 				}
 			} elseif ( WC_Novalnet_Validation::is_success_status( novalnet()->request ) ) {
 				$server_response                          = novalnet()->helper()->format_querystring_response( novalnet()->request );
@@ -836,7 +875,7 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 
 		$wc_order = wc_get_order( $order_id );
 		if ( ! is_object( $wc_order ) || empty( $wc_order->get_id() ) ) {
-			$tid_text = ( isset( novalnet()->request ['tid'] ) ) ? sprintf( '( TID %1$s )', novalnet()->request ['tid'] ) : '';
+			$tid_text = ( isset( novalnet()->request['tid'] ) ) ? sprintf( '( TID %1$s )', novalnet()->request['tid'] ) : '';
 			novalnet()->helper()->debug( sprintf( 'Response successfully reached to shop %s: Order ID not found', $tid_text ), $order_id, true );
 			return $this->novalnet_redirect( $this->get_return_url( $wc_order ) );
 		}
@@ -844,7 +883,7 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 		if ( WC_Novalnet_Validation::is_success_status( novalnet()->request ) ) {
 			$nn_status = novalnet()->helper()->novalnet_get_wc_order_meta( $wc_order, '_novalnet_gateway_status' );
 			if ( ! empty( $nn_status ) && 'FAILURE' !== $nn_status ) {
-				$tid_text = ( isset( novalnet()->request ['tid'] ) ) ? sprintf( '( TID %1$s )', novalnet()->request ['tid'] ) : '';
+				$tid_text = ( isset( novalnet()->request['tid'] ) ) ? sprintf( '( TID %1$s )', novalnet()->request['tid'] ) : '';
 				novalnet()->helper()->debug( sprintf( 'Receipt of duplicate order response %s', $tid_text ), $order_id, true );
 				return $this->novalnet_redirect( $this->get_return_url( $wc_order ) );
 			}
@@ -875,7 +914,6 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 	 * @since 12.0.0
 	 */
 	public function assign_basic_payment_details() {
-
 		// Get language.
 		$language = strtolower( wc_novalnet_shop_language() );
 
@@ -990,11 +1028,14 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 	 * @return array
 	 */
 	public function check_is_zero_amount_booking_txn( $txn_parameters, $wc_order ) {
-		if ( WC_Novalnet_Validation::can_proceed_zero_amount_booking( $this->id, $wc_order ) && $txn_parameters ['transaction']['amount'] > 0 ) {
-			$txn_parameters ['custom']['input4']            = 'zero_txn_order_amount';
-			$txn_parameters ['custom']['inputval4']         = $txn_parameters ['transaction']['amount'];
-			$txn_parameters ['transaction']['amount']       = '0';
-			$txn_parameters ['transaction']['create_token'] = '1';
+		$payment = $this->id;
+		if ( WC_Novalnet_Validation::can_proceed_zero_amount_booking( $this->id, $wc_order ) && $txn_parameters['transaction']['amount'] > 0 ) {
+			$txn_parameters['custom']['input4']      = 'zero_txn_order_amount';
+			$txn_parameters['custom']['inputval4']   = $txn_parameters['transaction']['amount'];
+			$txn_parameters['transaction']['amount'] = '0';
+			if ( ! empty( WC()->session->$payment[ 'wc-' . $payment . '-new-payment-method' ] ) && novalnet()->get_supports( 'tokenization', $this->id ) ) {
+				$txn_parameters['transaction']['create_token'] = '1';
+			}
 			novalnet()->helper()->novalnet_update_wc_order_meta( $wc_order, '_novalnet_booking_ref_order', 1, true );
 		}
 		return $txn_parameters;
@@ -1044,27 +1085,27 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 		$tid            = novalnet()->db()->get_subs_data_by_order_id( $subscription->get_parent_id(), $subscription_id, 'tid' );
 		$this->settings = WC_Novalnet_Configuration::get_payment_settings( $subscription->get_payment_method() );
 		// Generate basic parameters.
-		$parameters                              = $this->generate_basic_parameters( $renewal_order, false );
-		$parameters ['transaction'] ['amount']   = wc_novalnet_formatted_amount( $amount );
-		$parameters ['transaction'] ['order_no'] = $renewal_order->get_id();
+		$parameters                            = $this->generate_basic_parameters( $renewal_order, false );
+		$parameters['transaction']['amount']   = wc_novalnet_formatted_amount( $amount );
+		$parameters['transaction']['order_no'] = $renewal_order->get_id();
 
 		if ( in_array( $this->id, array( 'novalnet_sepa', 'novalnet_cc', 'novalnet_paypal', 'novalnet_guaranteed_sepa', 'novalnet_guaranteed_invoice', 'novalnet_applepay', 'novalnet_googlepay', 'novalnet_ach' ), true ) ) {
 
-			$parameters ['transaction'] ['payment_data'] ['payment_ref'] = $tid;
+			$parameters['transaction']['payment_data']['payment_ref'] = $tid;
 			$recurring_tid = novalnet()->db()->get_subs_data_by_order_id( $subscription->get_parent_id(), $subscription_id, 'recurring_tid' );
 			if ( $is_shop_based_subs && ! empty( $recurring_tid ) ) {
-				$parameters ['transaction'] ['payment_data'] ['payment_ref'] = $recurring_tid;
+				$parameters['transaction']['payment_data']['payment_ref'] = $recurring_tid;
 			}
 			$shop_subs_token = novalnet()->db()->get_subs_data_by_order_id( $subscription->get_parent_id(), $subscription_id, 'nn_txn_token' );
 			if ( ! empty( $shop_subs_token ) ) {
-				$parameters ['transaction'] ['payment_data'] = array(
+				$parameters['transaction']['payment_data'] = array(
 					'token' => $shop_subs_token,
 				);
 			}
 		}
 
-		$parameters ['custom']['input7']    = 'renewal_order_by';
-		$parameters ['custom']['inputval7'] = 'shop_cron';
+		$parameters['custom']['input7']    = 'renewal_order_by';
+		$parameters['custom']['inputval7'] = 'shop_cron';
 
 		// Submit the given request.
 		$response = novalnet()->helper()->submit_request(
@@ -1076,8 +1117,8 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 			)
 		);
 
-		if ( ! empty( $response ['transaction']['status'] ) ) {
-			novalnet()->helper()->novalnet_update_wc_order_meta( $renewal_order, '_novalnet_gateway_status', $response ['transaction']['status'] );
+		if ( ! empty( $response['transaction']['status'] ) ) {
+			novalnet()->helper()->novalnet_update_wc_order_meta( $renewal_order, '_novalnet_gateway_status', $response['transaction']['status'] );
 		}
 
 		$payment_gateway = wc_get_payment_gateway_by_order( $subscription );
@@ -1125,8 +1166,8 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 
 		if ( ( $page_id && is_page( $page_id ) && isset( $wp->query_vars['add-payment-method'] ) ) ) {
 			foreach ( novalnet()->get_supports( 'tokenization' ) as $payment_type ) {
-				if ( isset( $gateways [ $payment_type ] ) ) {
-					unset( $gateways [ $payment_type ] );
+				if ( isset( $gateways[ $payment_type ] ) ) {
+					unset( $gateways[ $payment_type ] );
 				}
 			}
 		}
@@ -1145,16 +1186,16 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 	public function thankyou_page_instructions( $wc_order_id ) {
 		$language = strtolower( wc_novalnet_shop_language() );
 		// Check Novalnet payment.
-		if ( ! empty( $this->settings [ 'instructions_' . $language ] ) ) {
-			echo wp_kses_post( wpautop( wptexturize( $this->settings [ 'instructions_' . $language ] ) ) );
+		if ( ! empty( $this->settings[ 'instructions_' . $language ] ) ) {
+			echo wp_kses_post( wpautop( wptexturize( $this->settings[ 'instructions_' . $language ] ) ) );
 		}
 
 		$wc_order       = wc_get_order( $wc_order_id );
 		$checkout_token = novalnet()->helper()->novalnet_get_wc_order_meta( $wc_order, '_nn_cp_checkout_token' );
 		if ( ! empty( $checkout_token ) ) {
 			$overlay_details = wc_novalnet_unserialize_data( $checkout_token );
-			if ( ! empty( $overlay_details ['checkout_js'] ) && ! empty( $overlay_details ['checkout_token'] ) ) {
-				wp_enqueue_script( 'woocommerce-novalnet-gateway-external-script-barzahlen', esc_url( $overlay_details ['checkout_js'] . '?token=' . esc_attr( $overlay_details ['checkout_token'] ) ), array(), NOVALNET_VERSION, false );
+			if ( ! empty( $overlay_details['checkout_js'] ) && ! empty( $overlay_details['checkout_token'] ) ) {
+				wp_enqueue_script( 'woocommerce-novalnet-gateway-external-script-barzahlen', esc_url( $overlay_details['checkout_js'] . '?token=' . esc_attr( $overlay_details['checkout_token'] ) ), array(), NOVALNET_VERSION, false );
 				echo wp_kses(
 					"<button id='barzahlen_button' class='bz-checkout-btn' style='z-index: 10;'>" . __( 'Pay now with Barzahlen', 'woocommerce-novalnet-gateway' ) . '</button>',
 					array(
@@ -1429,12 +1470,12 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 					}
 				}
 			}
-			$parameters ['transaction'] ['payment_type'] = novalnet()->get_payment_types( $this->id );
+			$parameters['transaction']['payment_type'] = novalnet()->get_payment_types( $this->id );
 			WC()->session->set( 'current_novalnet_payment', $this->id );
 
 			// Add due date parameter.
-			if ( ! empty( $this->settings ['payment_duration'] ) ) {
-				$parameters ['transaction']['due_date'] = wc_novalnet_format_due_date( $this->settings ['payment_duration'] );
+			if ( ! empty( $this->settings['payment_duration'] ) ) {
+				$parameters['transaction']['due_date'] = wc_novalnet_format_due_date( $this->settings['payment_duration'] );
 			}
 
 			$payment_text         = WC_Novalnet_Configuration::get_payment_text( $this->id );
@@ -1482,8 +1523,8 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 					$wc_order_status = 'wc-on-hold';
 				} else {
 					$settings = WC_Novalnet_Configuration::get_payment_settings( $wc_order->get_payment_method() );
-					if ( ! empty( $settings ['order_success_status'] ) ) {
-						$wc_order_status = $settings ['order_success_status'];
+					if ( ! empty( $settings['order_success_status'] ) ) {
+						$wc_order_status = $settings['order_success_status'];
 					}
 				}
 			}
@@ -1525,7 +1566,6 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 	 * @since 12.0.0
 	 */
 	public function show_error_message_on_redirect() {
-
 		if ( is_checkout() && wc_notice_count( 'error' ) > 0 && wc_novalnet_check_session() && WC()->session->__isset( 'chosen_payment_method' ) && WC_Novalnet_Validation::check_string( WC()->session->chosen_payment_method ) ) {
 
 			// Show non-cart errors.
@@ -1571,7 +1611,7 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 	public function update_payment_method_backend_order( $wc_order, $novalnet_response ) {
 		$payment_types = array_flip( novalnet()->get_payment_types() );
 
-		$payment_id = $payment_types[ $novalnet_response['transaction'] ['payment_type'] ];
+		$payment_id = $payment_types[ $novalnet_response['transaction']['payment_type'] ];
 		WC()->session->set( 'current_novalnet_payment', $payment_id );
 		$payment_text         = WC_Novalnet_Configuration::get_payment_text( $payment_id );
 		$payment_method_title = wc_novalnet_get_payment_text( array(), $payment_text, wc_novalnet_shop_language(), $payment_id, 'title' );

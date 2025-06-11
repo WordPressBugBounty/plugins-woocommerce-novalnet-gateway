@@ -373,6 +373,12 @@
 			} else {
 				$( '#novalnet_webhook_url_message' ).show();
 			}
+			$('select#novalnet_subs_tariff_id').on(
+				'change',
+				function() {
+					$('.woocommerce-save-button').removeAttr('disabled');
+				}
+			);
 
 			$('select#novalnet_tariff_id').on(
 				'change',

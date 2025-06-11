@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Novalnet DB handler
  *
@@ -23,6 +24,7 @@ use Automattic\WooCommerce\Utilities\OrderUtil;
  */
 class WC_Novalnet_DB_Handler {
 
+
 	/**
 	 * Main Novalnet_DB_Handler Instance.
 	 *
@@ -46,7 +48,6 @@ class WC_Novalnet_DB_Handler {
 	 * @return Novalnet_Api_Callback Main instance.
 	 */
 	public static function instance() {
-
 		if ( is_null( self::$instance ) ) {
 			self::$instance = new self();
 		}
@@ -72,7 +73,6 @@ class WC_Novalnet_DB_Handler {
 				throw new Exception( $wpdb->last_error );
 			}
 			$query_return = $query;
-
 		} catch ( Exception $e ) {
 			$novalnet_log = wc_novalnet_logger();
 			$novalnet_log->add( 'novalneterrorlog', 'Database error occured: ' . $e->getMessage() );
@@ -108,7 +108,7 @@ class WC_Novalnet_DB_Handler {
 		global $wpdb;
 
 		if ( $this->is_valid_column( 'order_number_formatted' ) ) {
-			$post_id = $this->handle_query( $wpdb->get_var( $wpdb->prepare( "SELECT order_no FROM `{$wpdb->prefix}novalnet_transaction_detail` WHERE order_number_formatted=%s", $order_number ) ) );// db call ok; no-cache ok.
+			$post_id = $this->handle_query( $wpdb->get_var( $wpdb->prepare( "SELECT order_no FROM `{$wpdb->prefix}novalnet_transaction_detail` WHERE order_number_formatted=%s", $order_number ) ) ); // db call ok; no-cache ok.
 			if ( ! empty( $post_id ) ) {
 				return $post_id;
 			}
@@ -188,22 +188,21 @@ class WC_Novalnet_DB_Handler {
 
 		// Select transaction details based on TID or post_id.
 		if ( '' !== $tid ) {
-			$result = $this->handle_query( $wpdb->get_row( $wpdb->prepare( "SELECT order_no, payment_type, amount, callback_amount, refunded_amount, gateway_status, tid, additional_info FROM `{$wpdb->prefix}novalnet_transaction_detail` WHERE tid=%s", $tid ), ARRAY_A ) );// db call ok; no-cache ok.
+			$result = $this->handle_query( $wpdb->get_row( $wpdb->prepare( "SELECT order_no, payment_type, amount, callback_amount, refunded_amount, gateway_status, tid, additional_info FROM `{$wpdb->prefix}novalnet_transaction_detail` WHERE tid=%s", $tid ), ARRAY_A ) ); // db call ok; no-cache ok.
 		}
 
 		if ( empty( $result ) && ! empty( $post_id ) ) {
-			$result = $this->handle_query( $wpdb->get_row( $wpdb->prepare( "SELECT order_no, payment_type, amount, callback_amount, refunded_amount, gateway_status, tid, additional_info FROM `{$wpdb->prefix}novalnet_transaction_detail` WHERE tid=%s OR order_no=%s", $tid, $post_id ), ARRAY_A ) );// db call ok; no-cache ok.
+			$result = $this->handle_query( $wpdb->get_row( $wpdb->prepare( "SELECT order_no, payment_type, amount, callback_amount, refunded_amount, gateway_status, tid, additional_info FROM `{$wpdb->prefix}novalnet_transaction_detail` WHERE tid=%s OR order_no=%s", $tid, $post_id ), ARRAY_A ) ); // db call ok; no-cache ok.
 		}
 
 		if ( empty( $result ) && ! empty( $subs_id ) ) {
-			$result = $this->handle_query( $wpdb->get_row( $wpdb->prepare( "SELECT order_no, payment_type, amount, callback_amount, refunded_amount, gateway_status, tid, additional_info FROM `{$wpdb->prefix}novalnet_transaction_detail` WHERE tid=%s OR order_no=%s", $tid, $subs_id ), ARRAY_A ) );// db call ok; no-cache ok.
+			$result = $this->handle_query( $wpdb->get_row( $wpdb->prepare( "SELECT order_no, payment_type, amount, callback_amount, refunded_amount, gateway_status, tid, additional_info FROM `{$wpdb->prefix}novalnet_transaction_detail` WHERE tid=%s OR order_no=%s", $tid, $subs_id ), ARRAY_A ) ); // db call ok; no-cache ok.
 		}
 
-		if ( ! empty( $result ['gateway_status'] ) ) {
-			novalnet()->helper()->status_mapper( $result ['gateway_status'] );
+		if ( ! empty( $result['gateway_status'] ) ) {
+			novalnet()->helper()->status_mapper( $result['gateway_status'] );
 		}
 		return $result;
-
 	}
 
 	/**
@@ -220,7 +219,7 @@ class WC_Novalnet_DB_Handler {
 
 		// Select transaction details based on TID.
 		if ( '' !== $value ) {
-			$result = $this->handle_query( $wpdb->get_row( $wpdb->prepare( "SELECT order_no, subs_order_no, recurring_payment_type, tid, recurring_tid, subs_id, shop_based_subs, termination_reason, termination_at FROM `{$wpdb->prefix}novalnet_subscription_details` WHERE recurring_tid=%s OR tid=%s OR subs_order_no=%s", $value, $value, $value ), ARRAY_A ) );// db call ok; no-cache ok.
+			$result = $this->handle_query( $wpdb->get_row( $wpdb->prepare( "SELECT order_no, subs_order_no, recurring_payment_type, tid, recurring_tid, subs_id, shop_based_subs, termination_reason, termination_at FROM `{$wpdb->prefix}novalnet_subscription_details` WHERE recurring_tid=%s OR tid=%s OR subs_order_no=%s", $value, $value, $value ), ARRAY_A ) ); // db call ok; no-cache ok.
 		}
 
 		return $result;
@@ -243,14 +242,14 @@ class WC_Novalnet_DB_Handler {
 		$result = array();
 		// Select transaction details based on post_id.
 		if ( ! empty( $post_id ) && in_array( $column, array( 'tid', 'nn_txn_token', 'shop_based_subs', 'recurring_tid', 'subs_order_no', 'subs_id' ), true ) ) {
-			$result = $this->handle_query( $wpdb->get_var( $wpdb->prepare( "SELECT {$column} FROM `{$wpdb->prefix}novalnet_subscription_details` WHERE order_no=%s AND subs_order_no=%s", $post_id, $subscription_id ) ) );// db call ok; no-cache ok.
+			$result = $this->handle_query( $wpdb->get_var( $wpdb->prepare( "SELECT {$column} FROM `{$wpdb->prefix}novalnet_subscription_details` WHERE order_no=%s AND subs_order_no=%s", $post_id, $subscription_id ) ) ); // db call ok; no-cache ok.
 
 			if ( 'shop_based_subs' === (string) $column && in_array( (int) $result, array( 0, 1 ), true ) ) {
 				return $result;
 			}
 
 			if ( empty( $result ) && $use_parent_id ) {
-				$result = $this->handle_query( $wpdb->get_var( $wpdb->prepare( "SELECT {$column} FROM `{$wpdb->prefix}novalnet_subscription_details` WHERE order_no=%s", $post_id ) ) );// db call ok; no-cache ok.
+				$result = $this->handle_query( $wpdb->get_var( $wpdb->prepare( "SELECT {$column} FROM `{$wpdb->prefix}novalnet_subscription_details` WHERE order_no=%s", $post_id ) ) ); // db call ok; no-cache ok.
 			}
 		}
 		return $result;
@@ -271,21 +270,21 @@ class WC_Novalnet_DB_Handler {
 		$result = array();
 		// Select transaction details based on post_id.
 		if ( 'tid' === $column ) {
-			$result = $this->handle_query( $wpdb->get_var( $wpdb->prepare( "SELECT tid FROM `{$wpdb->prefix}novalnet_transaction_detail` WHERE order_no=%s", $post_id ) ) );// db call ok; no-cache ok.
+			$result = $this->handle_query( $wpdb->get_var( $wpdb->prepare( "SELECT tid FROM `{$wpdb->prefix}novalnet_transaction_detail` WHERE order_no=%s", $post_id ) ) ); // db call ok; no-cache ok.
 		} elseif ( 'gateway_status' === $column ) {
-			$result = $this->handle_query( $wpdb->get_var( $wpdb->prepare( "SELECT gateway_status FROM `{$wpdb->prefix}novalnet_transaction_detail` WHERE order_no=%s", $post_id ) ) );// db call ok; no-cache ok.
+			$result = $this->handle_query( $wpdb->get_var( $wpdb->prepare( "SELECT gateway_status FROM `{$wpdb->prefix}novalnet_transaction_detail` WHERE order_no=%s", $post_id ) ) ); // db call ok; no-cache ok.
 			if ( ! empty( $result ) ) {
 				novalnet()->helper()->status_mapper( $result );
 			}
 		} elseif ( 'additional_info' === $column ) {
-			$result = $this->handle_query( $wpdb->get_var( $wpdb->prepare( "SELECT additional_info FROM `{$wpdb->prefix}novalnet_transaction_detail` WHERE order_no=%s", $post_id ) ) );// db call ok; no-cache ok.
+			$result = $this->handle_query( $wpdb->get_var( $wpdb->prepare( "SELECT additional_info FROM `{$wpdb->prefix}novalnet_transaction_detail` WHERE order_no=%s", $post_id ) ) ); // db call ok; no-cache ok.
 			if ( ! empty( $result ) ) {
 				$result = wc_novalnet_unserialize_data( $result );
 			}
 		} elseif ( 'amount' === $column ) {
-			$result = $this->handle_query( $wpdb->get_var( $wpdb->prepare( "SELECT amount FROM `{$wpdb->prefix}novalnet_transaction_detail` WHERE order_no=%s", $post_id ) ) );// db call ok; no-cache ok.
+			$result = $this->handle_query( $wpdb->get_var( $wpdb->prepare( "SELECT amount FROM `{$wpdb->prefix}novalnet_transaction_detail` WHERE order_no=%s", $post_id ) ) ); // db call ok; no-cache ok.
 		} elseif ( 'refunded_amount' === $column ) {
-			$result = $this->handle_query( $wpdb->get_var( $wpdb->prepare( "SELECT refunded_amount FROM `{$wpdb->prefix}novalnet_transaction_detail` WHERE order_no=%s", $post_id ) ) );// db call ok; no-cache ok.
+			$result = $this->handle_query( $wpdb->get_var( $wpdb->prepare( "SELECT refunded_amount FROM `{$wpdb->prefix}novalnet_transaction_detail` WHERE order_no=%s", $post_id ) ) ); // db call ok; no-cache ok.
 		}
 		return $result;
 	}
@@ -305,16 +304,16 @@ class WC_Novalnet_DB_Handler {
 		$result = array();
 		// Select transaction details based on TID.
 		if ( 'gateway_status' === $column ) {
-			$result = $this->handle_query( $wpdb->get_var( $wpdb->prepare( "SELECT gateway_status FROM `{$wpdb->prefix}novalnet_transaction_detail` WHERE tid=%s", $tid ) ) );// db call ok; no-cache ok.
+			$result = $this->handle_query( $wpdb->get_var( $wpdb->prepare( "SELECT gateway_status FROM `{$wpdb->prefix}novalnet_transaction_detail` WHERE tid=%s", $tid ) ) ); // db call ok; no-cache ok.
 
 			if ( ! empty( $result ) ) {
 				novalnet()->helper()->status_mapper( $result );
 			}
 		} elseif ( 'additional_info' === $column ) {
-			$result = $this->handle_query( $wpdb->get_var( $wpdb->prepare( "SELECT additional_info FROM `{$wpdb->prefix}novalnet_transaction_detail` WHERE tid=%s", $tid ) ) );// db call ok; no-cache ok.
+			$result = $this->handle_query( $wpdb->get_var( $wpdb->prepare( "SELECT additional_info FROM `{$wpdb->prefix}novalnet_transaction_detail` WHERE tid=%s", $tid ) ) ); // db call ok; no-cache ok.
 			$result = wc_novalnet_unserialize_data( $result );
 		} elseif ( 'amount' === $column ) {
-			$result = $this->handle_query( $wpdb->get_var( $wpdb->prepare( "SELECT amount FROM `{$wpdb->prefix}novalnet_transaction_detail` WHERE tid=%s", $tid ) ) );// db call ok; no-cache ok.
+			$result = $this->handle_query( $wpdb->get_var( $wpdb->prepare( "SELECT amount FROM `{$wpdb->prefix}novalnet_transaction_detail` WHERE tid=%s", $tid ) ) ); // db call ok; no-cache ok.
 		}
 		return $result;
 	}
@@ -373,7 +372,7 @@ class WC_Novalnet_DB_Handler {
 		if ( $this->is_valid_table() ) {
 			foreach ( $columns as $column ) {
 				if ( $this->is_valid_column( $column ) ) {
-					$this->handle_query( $wpdb->query( "ALTER TABLE `{$wpdb->prefix}novalnet_transaction_detail` DROP COLUMN $column" ) ); // phpcs:ignore.
+					$this->handle_query($wpdb->query("ALTER TABLE `{$wpdb->prefix}novalnet_transaction_detail` DROP COLUMN $column")); // phpcs:ignore.
 				}
 			}
 		}
@@ -392,7 +391,7 @@ class WC_Novalnet_DB_Handler {
 			foreach ( $columns as $column => $to_change ) {
 
 				if ( $this->is_valid_column( $column ) ) {
-					$this->handle_query( $wpdb->query( "ALTER TABLE `{$wpdb->prefix}novalnet_transaction_detail` CHANGE COLUMN `$column` $to_change" ) ); // phpcs:ignore.
+					$this->handle_query($wpdb->query("ALTER TABLE `{$wpdb->prefix}novalnet_transaction_detail` CHANGE COLUMN `$column` $to_change")); // phpcs:ignore.
 				}
 			}
 		}

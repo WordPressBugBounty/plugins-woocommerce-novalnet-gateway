@@ -482,7 +482,7 @@
 												window.location.replace( order_response.redirect );
 											} else if ( 'error' == order_response.result ) {
 												processedStatus( {status: "FAILURE", statusText: order_response.redirect} );
-												if( 'applepay' == payment_method.toLowerCase() ) {
+												if('applepay' == wallet.toLowerCase()) {
 													alert( order_response.redirect );
 												}
 											}

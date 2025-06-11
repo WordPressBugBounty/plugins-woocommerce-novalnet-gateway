@@ -4,7 +4,7 @@ Donate link: https://www.novalnet.de
 Tags: Credit cards, Payments, Payment gateway, Novalnet payment
 Requires at least: 5.0
 Tested up to: 6.5
-Stable tag: 12.8.1
+Stable tag: 12.8.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -201,12 +201,13 @@ Please check out our ssl certified [Demo Store](https://woocommerce.novalnet.de/
 
 = Compatibility =   
 
-Novalnet payment plugin compatible for WooCommerce 4.0.0-9.5.2 and compatible for subscription 2.0.0-7.1.0.
+Novalnet payment plugin compatible for WooCommerce 4.0.0-9.8.5 and compatible for subscription 2.0.0-7.5.0.
 
 = Automatic Installation: =
 
 * Go to Plugins > “Add New”.
 * Download the WooCommerce payment plugin - Novalnet from WordPress repository and Click "Install Now" to install the plugin. A popup window will ask you to confirm your wish to install the plugin 12.8.1.
+
 = Note: = If this is the first time you've installed a WordPress plugin, you may need to enter the FTP login credential information. If you've installed the plugin before, it will still have the login information. This information is available through your web server host.
 
 * Click “Proceed” to continue the installation. The resulting installation screen will list the installation as successful or note any problems during the install.
@@ -273,6 +274,18 @@ This online payment plugin only works with the WooCommerce webshop. Are you look
 5. Novalnet payments are displayed in the checkout
 
 == Changelog ==
+
+= 12.8.2 =
+
+* [Fix] Automatically creates a renewal order when the renewal transaction fails with the subscription status of ACTIVE_WITH_COLLECTION
+* [Fix] Google Pay and Apple Pay checkout are now blocked if no shipping method is selected
+* [Fix] Payment plugin now supports overpaid transaction refunds through the Novalnet Admin portal
+* [Fix] The subscription end date now updates correctly when the subscription is renewed
+* [Fix] The Paid Date on the backend order page is now updated only after full payment has been received
+* [Fix] Google Pay and Apple Pay now support automatic customer creation during checkout
+* [Enhanced] Full refunds are now triggered automatically when orders are cancelled, based on the "Auto Refund by Cancelled Status" setting
+* [Removed] The create_token parameter, as tokenization for Novalnet subscription orders is now handled server-side
+* [Removed] Deprecated instant email hook from the Germanized plugin used in the Novalnet plugin
 
 = 12.8.1 =
 

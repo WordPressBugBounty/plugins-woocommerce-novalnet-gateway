@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Woocommerce Novalnet Gateway Plugin class.
  *
@@ -13,6 +14,7 @@
  * @class   WC_Novalnet
  */
 final class WC_Novalnet {
+
 
 	/**
 	 * Available payment ID and its type in this module.
@@ -171,7 +173,6 @@ final class WC_Novalnet {
 	 * @return WC_Novalnet - Main instance.
 	 */
 	public static function instance() {
-
 		if ( is_null( self::$instance ) ) {
 			self::$instance = new self();
 		}
@@ -182,7 +183,6 @@ final class WC_Novalnet {
 	 * WC_Novalnet Constructor.
 	 */
 	public function __construct() {
-
 		// Including required files.
 		include_once 'includes/wc-novalnet-functions.php';
 		include_once 'includes/class-wc-novalnet-db-handler.php';
@@ -231,9 +231,6 @@ final class WC_Novalnet {
 
 		// Add plugin scripts (front-end).
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_script' ) );
-
-		// Restrict instant mail from Germanized plugin.
-		add_filter( 'woocommerce_gzd_instant_order_confirmation', array( $this, 'restrict_instant_email' ) );
 
 		// Update Novalnet settings.
 		add_action( 'woocommerce_update_options_novalnet-settings', array( 'WC_Novalnet_Configuration', 'update_novalnet_settings' ) );
@@ -403,7 +400,7 @@ final class WC_Novalnet {
 	 * @since 12.4.0
 	 */
 	public function wallet_product_hook() {
-		// Get wallet settings.
+		 // Get wallet settings.
 		$data['wallet_area']       = 'product_page';
 		$data['available_wallets'] = ( $this->can_display_wallet_button() ) ? get_available_wallets( 'product_page' ) : array();
 		if ( count( $data['available_wallets'] ) > 0 ) {
@@ -473,11 +470,24 @@ final class WC_Novalnet {
 	 * @since 12.5.5
 	 */
 	public function can_display_wallet_button() {
-		// Wallet for guests is also disabled even though account creation during checkout is enabled.
-		if ( ! is_user_logged_in() && 'yes' !== get_option( 'woocommerce_enable_guest_checkout' ) ) {
-			return false;
+		if ( is_user_logged_in() ) {
+			return true;
 		}
-		return true;
+
+		global $woocommerce;
+
+		$items         = $woocommerce->cart->get_cart();
+		$cart_has_subs = 0;
+		foreach ( $items as $item => $values ) {
+			$_product = wc_get_product( $values['data']->get_id() );
+			if ( in_array( $_product->get_type(), array( 'subscription', 'subscription_variation', 'variable-subscription' ), true ) ) {
+				$cart_has_subs = 1;
+			}
+		}
+		$guest_checkout_enabled            = get_option( 'woocommerce_enable_guest_checkout' ) === 'yes';
+		$signup_login_enabled              = get_option( 'woocommerce_enable_signup_and_login_from_checkout' ) === 'yes';
+
+		return $cart_has_subs ? $signup_login_enabled : ($guest_checkout_enabled || $signup_login_enabled);
 	}
 
 	/**
@@ -486,7 +496,6 @@ final class WC_Novalnet {
 	 * @since 12.4.0
 	 */
 	public function novalnet_shipping_address_update() {
-
 		global $woocommerce;
 
 		if ( in_array( $this->request['source_page'], array( 'mini_cart_page_googlepay_button', 'mini_cart_page_applepay_button', 'product_page_googlepay_button', 'product_page_applepay_button' ), true ) ) {
@@ -640,7 +649,7 @@ final class WC_Novalnet {
 			}
 			$methods_id = array();
 			foreach ( $shipping_details as $shipments ) {
-				$methods_id [] = $shipments['identifier'];
+				$methods_id[] = $shipments['identifier'];
 			}
 			$count = 1;
 			foreach ( $shipping_packages as $method ) {
@@ -686,7 +695,6 @@ final class WC_Novalnet {
 	 * @since 12.4.0
 	 */
 	public function novalnet_shipping_method_update() {
-
 		global $woocommerce;
 
 		$received_shipping_method = json_decode( $this->request['shippingInfo'], true );
@@ -782,7 +790,6 @@ final class WC_Novalnet {
 	 * @since 12.4.0
 	 */
 	public function add_virtual_product_in_cart() {
-
 		if ( empty( $this->request['variable_variant_id'] ) ) {
 			$product_id = array();
 			foreach ( WC()->cart->get_cart() as $cart_item ) {
@@ -811,24 +818,24 @@ final class WC_Novalnet {
 	 * @since 12.0.0
 	 */
 	public function novalnet_order_creation() {
-
 		global $woocommerce;
 
 		$token_name = 'novalnet_' . $this->request['payment'] . '_token';
 		if ( WC()->session->__isset( $token_name ) ) {
 			WC()->session->__unset( $token_name );
 		}
-		WC()->session->set( $token_name, $this->request['variable_name']['response']['transaction']['token'] );
-
+		
 		if ( WC()->session->__isset( 'googlepay_do_redirect' ) ) {
 			WC()->session->__unset( 'googlepay_do_redirect' );
 		}
-		if ( ! empty( $this->request['variable_name']['response']['transaction']['doRedirect'] ) ) {
-			WC()->session->set( 'googlepay_do_redirect', $this->request['variable_name']['response']['transaction']['doRedirect'] );
-		}
-
+		
 		$payment_method = 'novalnet_' . $this->request['payment'];
 		if ( isset( $this->request['pay_for_order_id'] ) && ! empty( $this->request['pay_for_order_id'] ) ) {
+			
+			WC()->session->set( $token_name, $this->request['variable_name']['response']['transaction']['token'] );
+			if ( ! empty( $this->request['variable_name']['response']['transaction']['doRedirect'] ) ) {
+				WC()->session->set( 'googlepay_do_redirect', $this->request['variable_name']['response']['transaction']['doRedirect'] );
+			}
 			// Process Payment.
 			$available_gateways   = WC()->payment_gateways->get_available_payment_gateways();
 			$settings             = WC_Novalnet_Configuration::get_payment_settings( $payment_method );
@@ -965,17 +972,10 @@ final class WC_Novalnet {
 					wp_send_json(
 						array(
 							'result'   => 'error',
-							'redirect' => 'WooCommerce Subscription not installed properly.',
+							'redirect' => __( 'WooCommerce Subscription not installed properly.','woocommerce-novalnet-gateway' ),
 						)
 					);
 				}
-			} else {
-				wp_send_json(
-					array(
-						'result'   => 'error',
-						'redirect' => 'Please login and try again.',
-					)
-				);
 			}
 		} elseif ( wc_novalnet_amount( WC()->cart->total ) > 0 ) {
 			$data['payment_method'] = $payment_method;
@@ -987,17 +987,17 @@ final class WC_Novalnet {
 				wp_send_json(
 					array(
 						'result'   => 'error',
-						'redirect' => 'This order requires a shipping option.',
+						'redirect' => __( 'Sorry, this order requires a shipping option.', 'woocommerce-novalnet-gateway' ),
 					)
 				);
 			}
 
 			foreach ( $chosen_shipping_methods as $chosen_shipping_method ) {
-				if ( false === $chosen_shipping_method ) {
+				if ( empty( $chosen_shipping_method ) || false === $chosen_shipping_method ) {
 					wp_send_json(
 						array(
 							'result'   => 'error',
-							'redirect' => 'This order requires a shipping option.',
+							'redirect' => __( 'Sorry, this order requires a shipping option.', 'woocommerce-novalnet-gateway' ),
 						)
 					);
 				}
@@ -1005,7 +1005,47 @@ final class WC_Novalnet {
 		}
 
 		$data['billing_email'] = $customer_billing['email'];
-		$order_id              = $checkout->create_order( $data );
+
+		if ( ! is_user_logged_in() && get_option( 'woocommerce_enable_signup_and_login_from_checkout' ) === 'yes' ) {
+
+			$customer_id = apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() );
+
+			$customer_id = wc_create_new_customer(
+				$data['billing_email'],
+				'',
+				'',
+				array(
+					'first_name' => ! empty( $customer_billing['first_name'] ) ? $customer_billing['first_name'] : '',
+					'last_name'  => ! empty( $customer_billing['last_name'] ) ? $customer_billing['last_name'] : '',
+				)
+			);
+
+			if ( is_wp_error( $customer_id ) ) {
+				wp_send_json(array(
+					'result'   => 'error',
+					'redirect' => ($customer_id->get_error_code() === 'registration-error-email-exists')
+						? sprintf(
+							__( 'An account is already registered with %s. Please log in or use a different email address.', 'woocommerce-novalnet-gateway' ),
+							$data['billing_email']
+						)
+						: '',
+				));
+				
+			}
+
+			wc_set_customer_auth_cookie( $customer_id );
+
+			WC()->session->set( 'reload_checkout', true );
+
+			WC()->cart->calculate_totals();
+		}
+
+		WC()->session->set( $token_name, $this->request['variable_name']['response']['transaction']['token'] );
+		if ( ! empty( $this->request['variable_name']['response']['transaction']['doRedirect'] ) ) {
+			WC()->session->set( 'googlepay_do_redirect', $this->request['variable_name']['response']['transaction']['doRedirect'] );
+		}
+
+		$order_id = $checkout->create_order( $data );
 
 		if ( is_wp_error( $order_id ) ) {
 			wp_send_json(
@@ -1040,7 +1080,7 @@ final class WC_Novalnet {
 				} else {
 					$wc_order->save();
 					// Create manual subcription for the wallet.
-					WC_Subscriptions_Checkout::process_checkout( $wc_order, $_POST ); // phpcs:ignore.
+					WC_Subscriptions_Checkout::process_checkout($wc_order, $_POST); // phpcs:ignore.
 				}
 			} else {
 				$wc_order->update_status( 'failed' );
@@ -1049,7 +1089,7 @@ final class WC_Novalnet {
 				wp_send_json(
 					array(
 						'result'   => 'error',
-						'redirect' => 'Please login and try again.',
+						'redirect' => __('You must be logged in to checkout.', 'woocommerce-novalnet-gateway'),
 					)
 				);
 			}
@@ -1068,7 +1108,6 @@ final class WC_Novalnet {
 	 * @since 12.0.0
 	 */
 	public function enqueue_script() {
-
 		if ( is_checkout() ) {
 			wp_enqueue_script( 'woocommerce-novalnet-gateway-external-script', 'https://cdn.novalnet.de/js/v2/NovalnetUtility.js', array( 'jquery', 'jquery-payment' ), NOVALNET_VERSION, true );
 			wp_enqueue_script( 'woocommerce-novalnet-gateway-external-script-payment', 'https://cdn.novalnet.de/js/v3/payment.js', array( 'jquery', 'jquery-payment' ), NOVALNET_VERSION, true );
@@ -1122,12 +1161,12 @@ final class WC_Novalnet {
 	public function customize_script( $tag, $handle, $src ) {
 		$sri = array(
 			'woocommerce-novalnet-gateway-script'        => 'sha384-8ZYWJ8Q/m/pjhu2t/z2KTywdiMNrCkltZbLWohy3W6jCtxiuKkc5IHhqyxCV9LtF',
-			'woocommerce-novalnet-gateway-admin-script'  => 'sha384-OnegYHNDIFSRLr42KO/nK8TQGeAmPRo6iwVeS1xx+y6YYRiWjO87nOK4R0UPS5P6',
+			'woocommerce-novalnet-gateway-admin-script'  => 'sha384-z+TnRg2sNMhV5X0BD1sw9GQlFQaZi3BpdTTkEwSck/po5cRf05WeuuGoq0SNc2Xu',
 			'woocommerce-novalnet-gateway-cc-script'     => 'sha384-3ZHfvOQB6dn7UBPIsOKcDZktjQz0NSPoInNhZOtXv4f75IggqcBGB1RrV+93utiI',
 			'woocommerce-novalnet-gateway-subscription-script' => 'sha384-5frcLecRDKnrzRRixoMQPeMmZ6KrO736KrXk3k5Va0FjhCJT6yMi/0R3qnp9eLDn',
 			'woocommerce-novalnet-gateway-wallet-script' => 'sha384-Dd8xzwCGanNfU3zwiKBxIHlK6IH4BF7C32tRoqUgjAY4UifShi554P5Tyo0iHOov',
 			// WC Block JS integrity.
-			'wc-novalnet-block-inputs'                   => 'sha384-RWhf7Vww95+PpnFX+P7xU4YkZ0b342KNo7EqZ8Isqb32Ntk3QWacxeU52p/5qSWz',
+			'wc-novalnet-block-inputs'                   => 'sha384-ZWBHHwtoVVSTsRHOoi80H7MN8R7iYBDburtjnfP36zgcBW+7Wf61xlkuIxKkfC/x',
 			'wc-novalnet-ach-blocks-integration'         => 'sha384-Bmy92vsHBrvobxOMCCTPPKEOGEcyA7e0sArshNPVJuvOeFcxOpWE/ydwLgbvPOE9',
 			'wc-novalnet-alipay-blocks-integration'      => 'sha384-QtCElQkKcvHcCYrk8uLP90WzMJ+qZiW4OC6cdGpe7lp7W7XmRMLzWu+rTOSla6uv',
 			'wc-novalnet-applepay-blocks-integration'    => 'sha384-vi4VykNLzIjISVf6DUmG3FuNBCL1kXuILy0u2Locf0lRXO775WNyAz78WhINWmGL',
@@ -1139,10 +1178,10 @@ final class WC_Novalnet {
 			'wc-novalnet-twint-blocks-integration'       => 'sha384-Ex8xPFmmKdPHtXN61aJu10neu12WQK6PkpSSEunQJrFwOjuH5VuP5KWbeUu8HeTr',
 			'wc-novalnet-googlepay-blocks-integration'   => 'sha384-Bz2pPowHvJ8CySS3nJFkIBuzWbMd7PIZWHjrCW5ZvndnYgrM+AJTHf3kQSdCkxmZ',
 			'wc-novalnet-guaranteed-invoice-blocks-integration' => 'sha384-Ztzv1UF02W+v8nwcAG4t3V3oHBKXqM1vO+H2FYnhUS642+xlCHpX6WDC3JnJ6/pB',
-			'wc-novalnet-guaranteed-sepa-blocks-integration' => 'sha384-zraEQJSPxcLac2AeHR3LMJ+z2eTfxSiM/k0BV6AqDL2p3jZXhbg+1Qiay0DMZv0h',
+			'wc-novalnet-guaranteed-sepa-blocks-integration' => 'sha384-M95MhYF1kzHi+LIr1IhKYfW82vu5GDUPCVGNmD/+USNRJFQlv4OAdOdQ66mlJfPi',
 			'wc-novalnet-ideal-blocks-integration'       => 'sha384-vxnvoHpxeQGivWXOfGkKNZenC7BHs79kRfehwvV6mtr2QObmpdyiboY++iD/1vmC',
 			'wc-novalnet-instalment-invoice-blocks-integration' => 'sha384-NDxghaccAxWnVWyfmI5iufH+3/f0/xfchxQQ+J0yScx3P6wDoLGOjlMed/01nkEe',
-			'wc-novalnet-instalment-sepa-blocks-integration' => 'sha384-hfH8XFVDeis2ZRkRwQ1MVheEtrBaXJrEI2JIHEB3r+o+dihlIwhGPznAzuA7nmEH',
+			'wc-novalnet-instalment-sepa-blocks-integration' => 'sha384-hxdg9LQFLNfHtF9/uD/Tb/TqjgDtrDQOZ+p8i8HPAZGU9gthKc8UArEF3rRidZay',
 			'wc-novalnet-instantbank-blocks-integration' => 'sha384-Ss5Yb7zKPLrRpV2PCNQsKLBD64qOQa1Z5ObBJ+phnlTTB6GcYmn60kCr4IdguhZ0',
 			'wc-novalnet-invoice-blocks-integration'     => 'sha384-5v91/uq+TH4FS9RMKZJgBwD49INgIRUr9Wx42fSkVKEcMrzNPW6CbBwQTMqxVHbr',
 			'wc-novalnet-multibanco-blocks-integration'  => 'sha384-Xu+zQJjhaoOHrFvsAJyggsOJ5/o4ll6dXY7iCQLygNG0KYKBjfHXZ2yioziMid9u',
@@ -1195,20 +1234,6 @@ final class WC_Novalnet {
 		return $tag;
 	}
 
-	/**
-	 * Restrict instant order email.
-	 *
-	 * @since 12.0.0
-	 * @param string $value  Return value.
-	 *
-	 * @return string
-	 */
-	public function restrict_instant_email( $value ) {
-		if ( ( isset( $this->request['payment_method'] ) && WC_Novalnet_Validation::check_string( $this->request['payment_method'] ) ) || isset( $this->request['tid'] ) || ( isset( $this->request['action'] ) && 'novalnet_order_creation' === $this->request['action'] ) ) {
-			$value = false;
-		}
-		return $value;
-	}
 
 	/**
 	 * Retrieve the Novalnet payment type.
@@ -1221,7 +1246,7 @@ final class WC_Novalnet {
 	public function get_payment_types( $payment_type = '' ) {
 
 		if ( '' !== $payment_type ) {
-			return $this->payments [ $payment_type ];
+			return $this->payments[ $payment_type ];
 		}
 		return $this->payments;
 	}
@@ -1259,7 +1284,7 @@ final class WC_Novalnet {
 		// Set Available Novalnet gateways.
 		$payment_types = array_keys( $this->get_payment_types() );
 		foreach ( $payment_types as $payment_type ) {
-			$novalnet_methods [] = wc_novalnet_get_class_name( $payment_type );
+			$novalnet_methods[] = wc_novalnet_get_class_name( $payment_type );
 		}
 
 		$methods = array_merge( $novalnet_methods, $methods );
@@ -1272,7 +1297,6 @@ final class WC_Novalnet {
 	 * @since 12.0.0
 	 */
 	public function handle_webhook_process() {
-
 		include_once dirname( __FILE__ ) . '/includes/class-wc-novalnet-webhook.php';
 	}
 
@@ -1299,7 +1323,6 @@ final class WC_Novalnet {
 	 * @return WC_Novalnet_Helper
 	 */
 	public function helper() {
-
 		return WC_Novalnet_Helper::instance();
 	}
 
@@ -1311,7 +1334,6 @@ final class WC_Novalnet {
 	 * @return WC_Novalnet_DB_Handler
 	 */
 	public function db() {
-
 		return WC_Novalnet_DB_Handler::instance();
 	}
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Novalnet Configuration Class
  *
@@ -14,6 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * WC_Novalnet_Configuration
  */
 class WC_Novalnet_Configuration extends WC_Settings_API {
+
 
 	/**
 	 * The single instance of the class.
@@ -33,7 +35,6 @@ class WC_Novalnet_Configuration extends WC_Settings_API {
 	 * @return Novalnet_Api_Callback Main instance.
 	 */
 	public static function instance() {
-
 		if ( is_null( self::$instance ) ) {
 			self::$instance = new self();
 		}
@@ -57,7 +58,6 @@ class WC_Novalnet_Configuration extends WC_Settings_API {
 	 * @since 12.0.0
 	 */
 	public static function update_novalnet_settings() {
-
 		// Update Global configuraion fields.
 		woocommerce_update_options( self::novalnet_settings_fields() );
 	}
@@ -82,11 +82,11 @@ class WC_Novalnet_Configuration extends WC_Settings_API {
 		$countries         = WC()->countries->countries;
 		$allowed_countries = array( 'DE', 'AT', 'CH' );
 		foreach ( $allowed_countries as $country_code ) {
-			$b2c_countries [] = $countries[ $country_code ];
+			$b2c_countries[] = $countries[ $country_code ];
 		}
 		if ( novalnet()->get_supports( 'instalment', $payment_type ) ) {
 			// Payment requirements.
-			$form_fields ['guarantee_payment_title'] = array(
+			$form_fields['guarantee_payment_title'] = array(
 				'title'       => ' ',
 				'type'        => 'title',
 				'description' => sprintf(
@@ -116,7 +116,7 @@ class WC_Novalnet_Configuration extends WC_Settings_API {
 			);
 		} else {
 			// Payment requirements.
-			$form_fields ['guarantee_payment_title'] = array(
+			$form_fields['guarantee_payment_title'] = array(
 				'title'       => ' ',
 				'type'        => 'title',
 				'description' => sprintf(
@@ -175,7 +175,7 @@ class WC_Novalnet_Configuration extends WC_Settings_API {
 		}
 
 		// Allow B2B customers field.
-		$form_fields ['allow_b2b'] = array(
+		$form_fields['allow_b2b'] = array(
 			'title'       => __( 'Allow B2B Customers', 'woocommerce-novalnet-gateway' ),
 			'type'        => 'checkbox',
 			'default'     => 'yes',
@@ -203,28 +203,30 @@ class WC_Novalnet_Configuration extends WC_Settings_API {
 			'desc_tip'    => true,
 		);
 		$instalment_cycles                                     = array();
-		foreach ( array(
-			'2',
-			'3',
-			'4',
-			'5',
-			'6',
-			'7',
-			'8',
-			'9',
-			'10',
-			'11',
-			'12',
-			'15',
-			'18',
-			'21',
-			'24',
-			'36',
-		) as $cycle ) {
+		foreach (
+			array(
+				'2',
+				'3',
+				'4',
+				'5',
+				'6',
+				'7',
+				'8',
+				'9',
+				'10',
+				'11',
+				'12',
+				'15',
+				'18',
+				'21',
+				'24',
+				'36',
+			) as $cycle
+		) {
 			/* translators: %d: cycle */
-			$instalment_cycles [ $cycle ] = sprintf( __( '%d cycles', 'woocommerce-novalnet-gateway' ), $cycle );
+			$instalment_cycles[ $cycle ] = sprintf( __( '%d cycles', 'woocommerce-novalnet-gateway' ), $cycle );
 		}
-		$form_fields ['instalment_total_period'] = array(
+		$form_fields['instalment_total_period'] = array(
 			'title'       => __( 'Instalment cycles', 'woocommerce-novalnet-gateway' ),
 			'type'        => 'multiselect',
 			'class'       => 'chosen_select',
@@ -263,7 +265,7 @@ class WC_Novalnet_Configuration extends WC_Settings_API {
 	public static function on_hold( &$form_fields, $payment_type ) {
 
 		// On-hold configuration fields.
-		$form_fields ['payment_status'] = array(
+		$form_fields['payment_status'] = array(
 			'title'             => __( 'Payment Action', 'woocommerce-novalnet-gateway' ),
 			'class'             => 'chosen_select',
 			'type'              => 'select',
@@ -278,7 +280,7 @@ class WC_Novalnet_Configuration extends WC_Settings_API {
 			),
 		);
 
-		$form_fields ['limit'] = array(
+		$form_fields['limit'] = array(
 			'title'             => __( 'Minimum transaction amount for authorization', 'woocommerce-novalnet-gateway' ),
 			'type'              => 'number',
 			'description'       => __( '(in minimum unit of currency. E.g. enter 100 which is equal to 1.00)', 'woocommerce-novalnet-gateway' ),
@@ -290,7 +292,7 @@ class WC_Novalnet_Configuration extends WC_Settings_API {
 		);
 
 		if ( in_array( $payment_type, novalnet()->get_supports( 'zero_amount_booking' ), true ) && WC_Novalnet_Validation::check_zero_amount_tariff_types() ) {
-			$form_fields ['payment_status']['options']['zero_amount_booking'] = __( 'Authorize with zero amount', 'woocommerce-novalnet-gateway' );
+			$form_fields['payment_status']['options']['zero_amount_booking'] = __( 'Authorize with zero amount', 'woocommerce-novalnet-gateway' );
 		}
 
 		wc_enqueue_js(
@@ -304,10 +306,9 @@ class WC_Novalnet_Configuration extends WC_Settings_API {
 	 * @since 12.0.0
 	 */
 	public static function novalnet_settings_fields() {
-
 		foreach ( novalnet()->get_supports( 'subscription' ) as $subscription_supported_payment ) {
 			$payment_text = self::get_payment_text( $subscription_supported_payment );
-			$subscription_payments [ $subscription_supported_payment ] = wc_novalnet_get_payment_text( self::get_payment_settings( $subscription_supported_payment ), $payment_text, wc_novalnet_shop_language(), $subscription_supported_payment, 'admin_title' );
+			$subscription_payments[ $subscription_supported_payment ] = wc_novalnet_get_payment_text( self::get_payment_settings( $subscription_supported_payment ), $payment_text, wc_novalnet_shop_language(), $subscription_supported_payment, 'admin_title' );
 		}
 
 		$subs_config_log_data = array(
@@ -385,6 +386,14 @@ class WC_Novalnet_Configuration extends WC_Settings_API {
 				array(
 					'id'   => 'novalnet_client_key',
 					'type' => 'novalnet_hidden',
+				),
+				array(
+					'title'    => __( 'Auto Refund by Cancelled Status', 'woocommerce-novalnet-gateway' ),
+					'desc'     => __( 'Activate this option to automatically trigger a complete refund of the associated amount for orders whose status is set to "Cancelled".', 'woocommerce-novalnet-gateway' ),
+					'id'       => 'novalnet_admin_full_refund',
+					'type'     => 'checkbox',
+					'default'  => 'yes',
+					'desc_tip' => true,
 				),
 				array(
 					'title'    => __( 'Display payment logo', 'woocommerce-novalnet-gateway' ),
@@ -515,7 +524,7 @@ class WC_Novalnet_Configuration extends WC_Settings_API {
 
 		$label = __( 'Payment details stored during the checkout process can be used for future payments', 'woocommerce-novalnet-gateway' );
 
-		$form_fields ['tokenization'] = array(
+		$form_fields['tokenization'] = array(
 			'title'       => __( 'One-click shopping', 'woocommerce-novalnet-gateway' ),
 			'type'        => 'checkbox',
 			'default'     => $default,
@@ -541,7 +550,7 @@ class WC_Novalnet_Configuration extends WC_Settings_API {
 			$min_amount = '1998';
 		}
 
-		$form_fields ['min_amount'] = array(
+		$form_fields['min_amount'] = array(
 			'title'             => __( 'Minimum order amount', 'woocommerce-novalnet-gateway' ),
 			'type'              => 'number',
 			'desc_tip'          => __( 'Minimum order amount to display the selected payment method (s) at during checkout', 'woocommerce-novalnet-gateway' ),
@@ -565,7 +574,7 @@ class WC_Novalnet_Configuration extends WC_Settings_API {
 	 * @param array $form_fields The form fields.
 	 */
 	public static function callback_order_status( &$form_fields ) {
-		$form_fields ['callback_status'] = array(
+		$form_fields['callback_status'] = array(
 			'title'       => __( 'Callback / webhook order status', 'woocommerce-novalnet-gateway' ),
 			'class'       => 'chosen_select',
 			'description' => __( 'Status to be used when callback script is executed for payment received by Novalnet', 'woocommerce-novalnet-gateway' ),
@@ -605,7 +614,7 @@ class WC_Novalnet_Configuration extends WC_Settings_API {
 			$max         = '';
 		}
 
-		$form_fields ['payment_duration'] = array(
+		$form_fields['payment_duration'] = array(
 			'title'             => $title,
 			'type'              => 'number',
 			'description'       => $description,
@@ -637,11 +646,11 @@ class WC_Novalnet_Configuration extends WC_Settings_API {
 			'EN' => __( 'English' ),
 		);
 		foreach ( get_available_languages() as $language ) {
-			$languages[ wc_novalnet_shop_language( $language ) ] = $translations [ $language ]['native_name'];
+			$languages[ wc_novalnet_shop_language( $language ) ] = $translations[ $language ]['native_name'];
 		}
 
 		$payment_text           = self::get_payment_text( $payment_type );
-		$payment_title_lang     = $payment_text [ 'title_' . strtolower( wc_novalnet_shop_language() ) ] ?? $payment_text ['title_en'];
+		$payment_title_lang     = $payment_text[ 'title_' . strtolower( wc_novalnet_shop_language() ) ] ?? $payment_text['title_en'];
 		$form_fields['enabled'] = array(
 			'title' => __( 'Enable payment method', 'woocommerce-novalnet-gateway' ),
 			'type'  => 'checkbox',
@@ -672,9 +681,9 @@ class WC_Novalnet_Configuration extends WC_Settings_API {
 		foreach ( array_keys( $languages ) as $language ) {
 
 			$language   = strtolower( wc_novalnet_shop_language( $language ) );
-			$title_lang = $payment_text ['title_en'];
-			if ( isset( $payment_text [ 'title_' . $language ] ) ) {
-				$title_lang = $payment_text [ 'title_' . $language ];
+			$title_lang = $payment_text['title_en'];
+			if ( isset( $payment_text[ 'title_' . $language ] ) ) {
+				$title_lang = $payment_text[ 'title_' . $language ];
 			}
 			$form_fields[ 'title_' . $language ] = array(
 				'title'             => __( 'Title', 'woocommerce-novalnet-gateway' ),
@@ -685,17 +694,17 @@ class WC_Novalnet_Configuration extends WC_Settings_API {
 					'autocomplete' => 'OFF',
 				),
 			);
-			$desc_lang                           = $payment_text ['description_en'];
-			if ( isset( $payment_text [ 'description_' . $language ] ) ) {
-				$desc_lang = $payment_text [ 'description_' . $language ];
+			$desc_lang                           = $payment_text['description_en'];
+			if ( isset( $payment_text[ 'description_' . $language ] ) ) {
+				$desc_lang = $payment_text[ 'description_' . $language ];
 			}
-			$form_fields[ 'description_' . $language ]   = array(
+			$form_fields[ 'description_' . $language ]  = array(
 				'title'       => __( 'Description', 'woocommerce-novalnet-gateway' ),
 				'type'        => 'textarea',
 				'description' => '',
 				'default'     => $desc_lang,
 			);
-			$form_fields [ 'instructions_' . $language ] = array(
+			$form_fields[ 'instructions_' . $language ] = array(
 				'title'       => __( 'Instructions', 'woocommerce' ),
 				'type'        => 'textarea',
 				'description' => __( 'Instructions that will be added to the thank you page and emails.', 'woocommerce' ),
@@ -707,7 +716,7 @@ class WC_Novalnet_Configuration extends WC_Settings_API {
 		if ( in_array( $payment_type, array( 'novalnet_invoice', 'novalnet_prepayment', 'novalnet_barzahlen', 'novalnet_multibanco' ), true ) ) {
 			$default_order_status = 'wc-processing';
 		}
-		$form_fields ['order_success_status'] = array(
+		$form_fields['order_success_status'] = array(
 			'title'       => __( 'Completed order status', 'woocommerce-novalnet-gateway' ),
 			'class'       => 'chosen_select',
 			'type'        => 'select',
@@ -717,7 +726,7 @@ class WC_Novalnet_Configuration extends WC_Settings_API {
 			'desc_tip'    => true,
 		);
 		if ( ! in_array( $payment_type, array( 'novalnet_applepay', 'novalnet_googlepay' ), true ) ) {
-			$form_fields ['enable_for_methods'] = array(
+			$form_fields['enable_for_methods'] = array(
 				'title'             => __( 'Enable for shipping methods', 'woocommerce' ),
 				'type'              => 'multiselect',
 				'class'             => 'wc-enhanced-select',
@@ -733,7 +742,7 @@ class WC_Novalnet_Configuration extends WC_Settings_API {
 			);
 		}
 
-		$form_fields ['enable_for_virtual'] = array(
+		$form_fields['enable_for_virtual'] = array(
 			'title'   => __( 'Accept for virtual orders', 'woocommerce' ),
 			/* translators: %1$s: payment_en_title*/
 			'label'   => sprintf( __( 'Accept %1$s if the order is virtual', 'woocommerce-novalnet-gateway' ), $payment_title_lang ),
@@ -797,7 +806,7 @@ class WC_Novalnet_Configuration extends WC_Settings_API {
 
 		if ( 'novalnet_googlepay' === $payment_type ) {
 			// Enable 3d settings.
-			$form_fields ['enforce_3d'] = array(
+			$form_fields['enforce_3d'] = array(
 				'title'       => __( 'Enforce 3D secure payment outside EU', 'woocommerce-novalnet-gateway' ),
 				'type'        => 'checkbox',
 				'default'     => 'no',
@@ -1075,8 +1084,8 @@ class WC_Novalnet_Configuration extends WC_Settings_API {
 			}
 		}
 
-		if ( isset( $payment_text [ $payment_type ] ) ) {
-			$output = $payment_text [ $payment_type ];
+		if ( isset( $payment_text[ $payment_type ] ) ) {
+			$output = $payment_text[ $payment_type ];
 		}
 		return $output;
 	}

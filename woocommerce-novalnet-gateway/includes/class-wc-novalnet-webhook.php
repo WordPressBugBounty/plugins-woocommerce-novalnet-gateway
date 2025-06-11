@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Novalnet Webhook V2
  *
@@ -20,6 +21,7 @@
  * WC_Novalnet_Webhook
  */
 class WC_Novalnet_Webhook {
+
 
 
 	/**
@@ -179,16 +181,15 @@ class WC_Novalnet_Webhook {
 	 * @since 12.0.0
 	 */
 	public function __construct() {
-
-		// Authenticate request host.
+		 // Authenticate request host.
 		$this->authenticate_event_data();
 
 		// Set Event data.
-		$this->event_type = $this->event_data ['event'] ['type'];
-		$this->event_tid  = $this->event_data ['event'] ['tid'];
+		$this->event_type = $this->event_data['event']['type'];
+		$this->event_tid  = $this->event_data['event']['tid'];
 		$this->parent_tid = $this->event_tid;
-		if ( ! empty( $this->event_data ['event'] ['parent_tid'] ) ) {
-			$this->parent_tid = $this->event_data ['event'] ['parent_tid'];
+		if ( ! empty( $this->event_data['event']['parent_tid'] ) ) {
+			$this->parent_tid = $this->event_data['event']['parent_tid'];
 		}
 
 		// Get order reference.
@@ -196,10 +197,10 @@ class WC_Novalnet_Webhook {
 
 		$order_reference_match = true;
 		// Order number check.
-		if ( ! empty( $this->event_data ['transaction'] ['order_no'] ) ) {
+		if ( ! empty( $this->event_data['transaction']['order_no'] ) ) {
 			// Retrieve the post ID using the transaction order number.
-			$org_post_id           = novalnet()->helper()->get_post_id( $this->event_data ['transaction'] ['order_no'] );
-			$order_reference_match = ( ! empty( $org_post_id ) && (string) $this->order_reference ['order_no'] === (string) $org_post_id );
+			$org_post_id           = novalnet()->helper()->get_post_id( $this->event_data['transaction']['order_no'] );
+			$order_reference_match = ( ! empty( $org_post_id ) && (string) $this->order_reference['order_no'] === (string) $org_post_id );
 		}
 
 		if ( ! empty( $this->event_data['custom']['nn_order_id'] ) ) {
@@ -217,9 +218,9 @@ class WC_Novalnet_Webhook {
 			$this->display_message( array( 'message' => 'Order reference not matching.' ) );
 		}
 		// Create order object.
-		$this->wc_order             = wc_get_order( $this->order_reference ['order_no'] );
-		$this->wc_order_id          = $this->wc_order->get_id();
-		$this->response ['message'] = __( 'Notification received from Novalnet for this order. ', 'woocommerce-novalnet-gateway' );
+		$this->wc_order            = wc_get_order( $this->order_reference['order_no'] );
+		$this->wc_order_id         = $this->wc_order->get_id();
+		$this->response['message'] = __( 'Notification received from Novalnet for this order. ', 'woocommerce-novalnet-gateway' );
 
 		if ( WC_Novalnet_Validation::is_success_status( $this->event_data ) || novalnet()->helper()->is_subs_renewal_active_with_collection( $this->event_data ) || ( 'RENEWAL' === $this->event_type && ! WC_Novalnet_Validation::is_success_status( $this->event_data ) && ! empty( $this->event_data['result']['status_text'] ) ) || in_array( $this->event_type, array( 'PAYMENT_REMINDER_1', 'PAYMENT_REMINDER_2', 'SUBMISSION_TO_COLLECTION_AGENCY' ), true ) ) {
 			$this->is_subscription = false;
@@ -291,13 +292,13 @@ class WC_Novalnet_Webhook {
 				default:
 					$this->display_message( array( 'message' => "The webhook notification has been received for the unhandled EVENT type($this->event_type)" ) );
 			}
-			if ( ! empty( $this->update_data ['update'] ) && $this->update_data ['table'] ) {
+			if ( ! empty( $this->update_data['update'] ) && $this->update_data['table'] ) {
 				novalnet()->db()->update(
-					$this->update_data ['update'],
+					$this->update_data['update'],
 					array(
 						'order_no' => $this->wc_order->get_id(),
 					),
-					$this->update_data ['table']
+					$this->update_data['table']
 				);
 			}
 
@@ -328,13 +329,15 @@ class WC_Novalnet_Webhook {
 	 * @since 12.6.0
 	 */
 	public function handle_payment() {
-		if ( isset( $this->event_data['custom']['book_reference'] ) && isset( $this->event_data['custom']['zero_txn_order_amount'] )
-		&& '1' === (string) novalnet()->helper()->novalnet_get_wc_order_meta( $this->wc_order, '_novalnet_booking_ref_order' ) ) {
+		if (
+			isset( $this->event_data['custom']['book_reference'] ) && isset( $this->event_data['custom']['zero_txn_order_amount'] )
+			&& '1' === (string) novalnet()->helper()->novalnet_get_wc_order_meta( $this->wc_order, '_novalnet_booking_ref_order' )
+		) {
 			$additional_info = wc_novalnet_unserialize_data( $this->order_reference['additional_info'] );
 			if ( novalnet()->helper()->update_payment_booking( $this->wc_order_id, $this->wc_order, $this->event_data, $additional_info ) ) {
 				$this->update_comments = false;
 				/* translators: %1$s: amount, %2$s: TID*/
-				$this->response ['message'] = sprintf( __( 'Your order has been booked with the amount of %1$s. Your new TID for the booked amount: %2$s', 'woocommerce-novalnet-gateway' ), wc_novalnet_shop_amount_format( $this->event_data ['transaction']['amount'] ), $this->event_data ['transaction']['tid'] );
+				$this->response['message'] = sprintf( __( 'Your order has been booked with the amount of %1$s. Your new TID for the booked amount: %2$s', 'woocommerce-novalnet-gateway' ), wc_novalnet_shop_amount_format( $this->event_data['transaction']['amount'] ), $this->event_data['transaction']['tid'] );
 				return true;
 			}
 		}
@@ -347,7 +350,6 @@ class WC_Novalnet_Webhook {
 	 * @since 12.0.0
 	 */
 	public function handle_subscription_suspend() {
-
 		if ( wcs_novalnet_subscription_exists( $this->wcs_order ) ) {
 			/* translators: %1$s: parent_tid, %3$s: date*/
 			$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'This subscription transaction has been suspended on %s', 'woocommerce-novalnet-gateway' ), wc_novalnet_formatted_date() ) );
@@ -357,17 +359,16 @@ class WC_Novalnet_Webhook {
 			$this->wcs_order->update_status( 'on-hold' );
 
 			delete_post_meta( $this->wcs_order->get_id(), '_nn_subscription_updated' );
-			$this->update_data ['table']  = 'novalnet_subscription_details';
-			$this->update_data ['update'] = array(
+			$this->update_data['table']  = 'novalnet_subscription_details';
+			$this->update_data['update'] = array(
 				'suspended_date' => gmdate( 'Y-m-d H:i:s' ),
 			);
-			$this->is_subscription        = true;
+			$this->is_subscription       = true;
 		} else {
 			/* translators: %1$s: event_tid, %2$s: wc_order_id*/
 			$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Subscription suspend for TID %1$s not processed: No subscription found for Order ID %2$s', 'woocommerce-novalnet-gateway' ), $this->event_tid, $this->wc_order_id ) );
 			return true;
 		}
-
 	}
 
 	/**
@@ -380,36 +381,37 @@ class WC_Novalnet_Webhook {
 			// Flag to check renewal for subscription is failed.
 			$subs_cancel_reason = novalnet()->helper()->novalnet_get_wc_order_meta( $this->wc_order, '_subs_cancelled_reason' );
 			if ( ! empty( $subs_cancel_reason ) ) {
-				$this->event_data ['subscription']['reason'] = ( empty( $this->event_data ['subscription']['reason'] ) ) ? $subs_cancel_reason : $this->event_data ['subscription']['reason'];
+				$this->event_data['subscription']['reason'] = ( empty( $this->event_data['subscription']['reason'] ) ) ? $subs_cancel_reason : $this->event_data['subscription']['reason'];
 				novalnet()->helper()->novalnet_delete_wc_order_meta( $this->wc_order, '_subs_cancelled_reason', true );
 			}
 
 			/* translators: %1$s: parent_tid, %2$s: amount, %3$s: next_cycle_date*/
-			$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Subscription has been cancelled due to: %s. ', 'woocommerce-novalnet-gateway' ), $this->event_data ['subscription']['reason'] ) );
+			$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Subscription has been cancelled due to: %s. ', 'woocommerce-novalnet-gateway' ), $this->event_data['subscription']['reason'] ) );
 
 			add_post_meta( $this->wcs_order->get_id(), '_nn_subscription_updated', true );
 
 			try {
-				$this->wcs_order->update_status( 'pending-cancel' );
-				if ( ! empty( $subs_cancel_reason ) && $this->wcs_order->can_be_updated_to( 'cancelled' ) ) { // Set subscription status to cancelled if the renewal is failed.
+				if ( ! $this->wcs_order->needs_payment() ) {
+					$this->wcs_order->update_status( 'pending-cancel' );
+				} elseif ( $this->wcs_order->can_be_updated_to( 'cancelled' ) ) { // Set subscription status to cancelled if the renewal is failed.
 					$this->wcs_order->update_status( 'cancelled' );
 				}
 			} catch ( Exception $e ) {
 				if ( $this->wcs_order->has_status( 'cancelled' ) ) {
-					$this->response ['message'] .= 'Order already cancelled.';
+					$this->response['message'] .= 'Order already cancelled.';
 				} else {
-					$this->response ['message'] .= $e->getMessage();
+					$this->response['message'] .= $e->getMessage();
 				}
 			}
 
 			delete_post_meta( $this->wcs_order->get_id(), '_nn_subscription_updated' );
 
-			$this->update_data ['table']  = 'novalnet_subscription_details';
-			$this->update_data ['update'] = array(
+			$this->update_data['table']  = 'novalnet_subscription_details';
+			$this->update_data['update'] = array(
 				'termination_at'     => gmdate( 'Y-m-d H:i:s' ),
-				'termination_reason' => $this->event_data ['subscription']['reason'],
+				'termination_reason' => $this->event_data['subscription']['reason'],
 			);
-			$this->is_subscription        = true;
+			$this->is_subscription       = true;
 		} else {
 			/* translators: %1$s: event_tid, %2$s: wc_order_id*/
 			$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Subscription cancel for TID %1$s not processed: No subscription found for Order ID %2$s', 'woocommerce-novalnet-gateway' ), $this->event_tid, $this->wc_order_id ) );
@@ -423,10 +425,9 @@ class WC_Novalnet_Webhook {
 	 * @since 12.0.0
 	 */
 	public function handle_subscription_reactivate() {
-
 		if ( wcs_novalnet_subscription_exists( $this->wcs_order ) ) {
 			/* translators: %1$s: date, %2$s: amount, %3$s: next_cycle_date*/
-			$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Subscription has been reactivated for the TID:%1$s on %2$s. Next charging date :%3$s', 'woocommerce-novalnet-gateway' ), $this->parent_tid, wc_novalnet_formatted_date(), wc_novalnet_next_cycle_date( $this->event_data ['subscription'] ) ) );
+			$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Subscription has been reactivated for the TID:%1$s on %2$s. Next charging date :%3$s', 'woocommerce-novalnet-gateway' ), $this->parent_tid, wc_novalnet_formatted_date(), wc_novalnet_next_cycle_date( $this->event_data['subscription'] ) ) );
 
 			add_post_meta( $this->wcs_order->get_id(), '_nn_subscription_updated', true );
 
@@ -440,7 +441,7 @@ class WC_Novalnet_Webhook {
 			if ( 'pending-cancel' !== $current_status ) {
 				novalnet()->helper()->update_subscription_dates(
 					$this->wcs_order,
-					array( 'next_payment' => $this->event_data ['subscription']['next_cycle_date'] ),
+					array( 'next_payment' => $this->event_data['subscription']['next_cycle_date'] ),
 					( ! empty( $this->wcs_order->get_date( 'cancelled' ) ) )
 				);
 			}
@@ -466,7 +467,7 @@ class WC_Novalnet_Webhook {
 			if ( 'pending-cancel' === $current_status ) {
 				novalnet()->helper()->update_subscription_dates(
 					$this->wcs_order,
-					array( 'next_payment' => $this->event_data ['subscription']['next_cycle_date'] ),
+					array( 'next_payment' => $this->event_data['subscription']['next_cycle_date'] ),
 				);
 			}
 
@@ -474,19 +475,18 @@ class WC_Novalnet_Webhook {
 
 			delete_post_meta( $this->wcs_order->get_id(), '_nn_subscription_updated' );
 
-			$this->update_data ['table']  = 'novalnet_subscription_details';
-			$this->update_data ['update'] = array(
+			$this->update_data['table']  = 'novalnet_subscription_details';
+			$this->update_data['update'] = array(
 				'suspended_date'     => null,
 				'termination_at'     => null,
 				'termination_reason' => null,
 			);
-			$this->is_subscription        = true;
+			$this->is_subscription       = true;
 		} else {
 			/* translators: %1$s: event_tid, %2$s: wc_order_id*/
 			$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Subscription reactivation for TID %1$s not processed: No subscription found for Order ID %2$s', 'woocommerce-novalnet-gateway' ), $this->event_tid, $this->wc_order_id ) );
 			return true;
 		}
-
 	}
 
 	/**
@@ -495,29 +495,28 @@ class WC_Novalnet_Webhook {
 	 * @since 12.0.0
 	 */
 	public function handle_subscription_update() {
-
 		if ( wcs_novalnet_subscription_exists( $this->wcs_order ) ) {
 			// Handle change payment method.
-			$payment_types               = novalnet()->get_payment_types();
-			$this->update_data ['table'] = 'novalnet_subscription_details';
-			$next_cycle_date             = wc_novalnet_next_cycle_date( $this->event_data['subscription'] );
+			$payment_types              = novalnet()->get_payment_types();
+			$this->update_data['table'] = 'novalnet_subscription_details';
+			$next_cycle_date            = wc_novalnet_next_cycle_date( $this->event_data['subscription'] );
 
-			if ( ! empty( $this->event_data ['subscription']['update_type'] ) ) {
-				if ( ! empty( $this->event_data ['subscription']['amount'] ) && ( in_array( 'RENEWAL_AMOUNT', $this->event_data ['subscription']['update_type'], true ) || in_array( 'RENEWAL_DATE', $this->event_data ['subscription']['update_type'], true ) ) ) {
+			if ( ! empty( $this->event_data['subscription']['update_type'] ) ) {
+				if ( ! empty( $this->event_data['subscription']['amount'] ) && ( in_array( 'RENEWAL_AMOUNT', $this->event_data['subscription']['update_type'], true ) || in_array( 'RENEWAL_DATE', $this->event_data['subscription']['update_type'], true ) ) ) {
 
 					/* translators: %1$s: amount, %2$s: next_cycle_date */
-					$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Subscription updated successfully. You will be charged %1$s on %2$s.', 'woocommerce-novalnet-gateway' ), ( wc_novalnet_shop_amount_format( $this->event_data ['subscription'] ['amount'] ) ), wc_novalnet_next_cycle_date( $this->event_data ['subscription'] ) ) );
+					$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Subscription updated successfully. You will be charged %1$s on %2$s.', 'woocommerce-novalnet-gateway' ), ( wc_novalnet_shop_amount_format( $this->event_data['subscription']['amount'] ) ), wc_novalnet_next_cycle_date( $this->event_data['subscription'] ) ) );
 				}
 
-				if ( in_array( 'PAYMENT_DATA', $this->event_data ['subscription']['update_type'], true ) && ! empty( $this->event_data ['transaction'] ['payment_type'] ) ) {
+				if ( in_array( 'PAYMENT_DATA', $this->event_data['subscription']['update_type'], true ) && ! empty( $this->event_data['transaction']['payment_type'] ) ) {
 
 					$payment_types = array_flip( $payment_types );
 
 					/* translators: %s: next_cycle_date */
-					$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Successfully changed the payment method for next subscription on %s', 'woocommerce-novalnet-gateway' ), wc_novalnet_next_cycle_date( $this->event_data ['subscription'] ) ) );
+					$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Successfully changed the payment method for next subscription on %s', 'woocommerce-novalnet-gateway' ), wc_novalnet_next_cycle_date( $this->event_data['subscription'] ) ) );
 
 					// Set new payment method.
-					WC_Subscriptions_Change_Payment_Gateway::update_payment_method( $this->wcs_order, $payment_types[ $this->event_data ['transaction'] ['payment_type'] ] );
+					WC_Subscriptions_Change_Payment_Gateway::update_payment_method( $this->wcs_order, $payment_types[ $this->event_data['transaction']['payment_type'] ] );
 
 					// Update recurring payment process.
 					do_action( 'novalnet_update_recurring_payment', $this->event_data, $this->wcs_order->get_parent_id(), $this->wcs_order->get_payment_method(), $this->wcs_order );
@@ -526,7 +525,7 @@ class WC_Novalnet_Webhook {
 					$this->update_comments = false;
 				}
 
-				if ( in_array( 'STATUS', $this->event_data ['subscription']['update_type'], true ) ) {
+				if ( in_array( 'STATUS', $this->event_data['subscription']['update_type'], true ) ) {
 					/* translators: %1$s: date */
 					$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Subscription has been successfully activated on %1$s', 'woocommerce-novalnet-gateway' ), wc_novalnet_formatted_date() ) );
 				}
@@ -556,7 +555,7 @@ class WC_Novalnet_Webhook {
 	 */
 	public function handle_payment_reminder( $reminder_count ) {
 		/* translators: %s: reminder count */
-		$this->response ['message'] = sprintf( __( 'Payment Reminder %1$s has been sent to the customer.', 'woocommerce-novalnet-gateway' ), $reminder_count );
+		$this->response['message'] = sprintf( __( 'Payment Reminder %1$s has been sent to the customer.', 'woocommerce-novalnet-gateway' ), $reminder_count );
 	}
 
 	/**
@@ -565,8 +564,8 @@ class WC_Novalnet_Webhook {
 	 * @since 12.4.0
 	 */
 	public function submission_to_collection_agency() {
-		/* translators: %1$s: parent_tid, %2$s: amount, %3$s: date, %4$s: tid  */
-		$this->response ['message'] = sprintf( __( 'The transaction has been submitted to the collection agency. Collection Reference: %1$s', 'woocommerce-novalnet-gateway' ), $this->event_data ['collection'] ['reference'] );
+		 /* translators: %1$s: parent_tid, %2$s: amount, %3$s: date, %4$s: tid  */
+		$this->response['message'] = sprintf( __( 'The transaction has been submitted to the collection agency. Collection Reference: %1$s', 'woocommerce-novalnet-gateway' ), $this->event_data['collection']['reference'] );
 	}
 
 	/**
@@ -601,24 +600,24 @@ class WC_Novalnet_Webhook {
 			$recurring_order->set_payment_method_title( $this->wcs_order->get_payment_method_title() );
 
 			/* translators: %1$s: tid, %2$s: amount, %3$s: date, %4$s: tid */
-			$this->response ['message'] = wc_novalnet_format_text( sprintf( __( 'Subscription has been successfully renewed for the TID: %1$s with the amount %2$s on %3$s. The renewal TID is:%4$s.', 'woocommerce-novalnet-gateway' ), $this->parent_tid, wc_novalnet_shop_amount_format( $this->event_data ['transaction']['amount'] ), wc_novalnet_formatted_date(), $this->event_tid ) );
+			$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Subscription has been successfully renewed for the TID: %1$s with the amount %2$s on %3$s. The renewal TID is:%4$s.', 'woocommerce-novalnet-gateway' ), $this->parent_tid, wc_novalnet_shop_amount_format( $this->event_data['transaction']['amount'] ), wc_novalnet_formatted_date(), $this->event_tid ) );
 
 			// Do Novalnet process after verify the successful recurring order creation.
 			if ( ! empty( $recurring_order->get_id() ) ) {
 				/* Update renewal order number */
-				$this->response ['order_no'] = $recurring_order->get_id();
-				$wcsr_order = wc_get_order( $recurring_order->get_id() );
+				$this->response['order_no'] = $recurring_order->get_id();
+				$wcsr_order                 = wc_get_order( $recurring_order->get_id() );
 
 				if ( ! is_null( $wcsr_order ) && ! empty( $wcsr_order->get_order_number() ) ) {
 					novalnet()->helper()->novalnet_update_wc_order_meta( $wcsr_order, '_novalnet_order_number', $wcsr_order->get_order_number(), true );
 					$this->response['order_no'] = $wcsr_order->get_order_number();
 				}
 				novalnet()->helper()->novalnet_update_wc_order_meta( $recurring_order, '_novalnet_renewal_tid', $this->event_data['transaction']['tid'], true );
-				if ( ! WC_Novalnet_Validation::is_success_status( $this->event_data ) && ! empty( $this->event_data['result']['status_text'] ) && ! novalnet()->helper()->is_subs_renewal_active_with_collection( $this->event_data ) ) {
+				if ( ! WC_Novalnet_Validation::is_success_status( $this->event_data ) && ! empty( $this->event_data['result']['status_text'] ) ) {
 
 					/* translators: %1$s: tid, %2$s: date, %3$s: status_text */
-					$this->response ['message'] = wc_novalnet_format_text( sprintf( __( 'The subscription renewal for TID %1$s was failed on %2$s due to following reason: %3$s', 'woocommerce-novalnet-gateway' ), $this->parent_tid, wc_novalnet_formatted_date(), $this->event_data['result']['status_text'] ) );
-					
+					$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'The subscription renewal for TID %1$s was failed on %2$s due to following reason: %3$s', 'woocommerce-novalnet-gateway' ), $this->parent_tid, wc_novalnet_formatted_date(), $this->event_data['result']['status_text'] ) );
+
 					novalnet()->helper()->novalnet_update_wc_order_meta( $recurring_order, '_novalnet_renewal_subscription_order', $this->wcs_order_id, true );
 					novalnet()->helper()->novalnet_update_wc_order_meta( $this->wc_order, '_subs_cancelled_reason', $this->event_data['result']['status_text'], true );
 					$insert_data = novalnet()->helper()->prepare_transaction_table_data( $recurring_order, $recurring_order->get_payment_method(), $this->event_data );
@@ -658,13 +657,13 @@ class WC_Novalnet_Webhook {
 				( ! empty( $this->wcs_order->get_date( 'cancelled' ) ) )
 			);
 
-			// Suscription related order counts.
-			$related_orders = apply_filters( 'novalnet_get_subscription_related_order', $this->wcs_order );
+			  // Suscription related order counts.
+			  $related_orders = apply_filters( 'novalnet_get_subscription_related_order', $this->wcs_order );
 			if ( ! empty( $total_length ) && $related_orders >= $total_length ) {
 				$this->subscription_cancel_to_server();
 			} elseif ( ! empty( $next_cycle_date ) && WC_Novalnet_Validation::is_success_status( $this->event_data ) ) {
 				/* translators: %s: next cycle date */
-				$this->response ['message'] .= wc_novalnet_format_text( sprintf( __( ' Next charging date will be on %1$s', 'woocommerce-novalnet-gateway' ), $next_cycle_date ) );
+				$this->response['message'] .= wc_novalnet_format_text( sprintf( __( ' Next charging date will be on %1$s', 'woocommerce-novalnet-gateway' ), $next_cycle_date ) );
 			}
 
 			if ( version_compare( WC_Subscriptions::$version, '4.0.0', '<' ) ) {
@@ -677,13 +676,12 @@ class WC_Novalnet_Webhook {
 				$this->update_recurring_order_amount();
 			}
 
-			$this->is_subscription = true;
+			  $this->is_subscription = true;
 		} else {
 			/* translators: %1$s: event_tid, %2$s: wc_order_id*/
 			$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Renewal creation for TID %1$s not processed: No subscription found for Order ID %2$s', 'woocommerce-novalnet-gateway' ), $this->event_tid, $this->wc_order_id ) );
 			return true;
 		}
-
 	}
 
 	/**
@@ -694,7 +692,7 @@ class WC_Novalnet_Webhook {
 	public function subscription_cancel_to_server() {
 		add_post_meta( $this->wcs_order->get_id(), '_nn_subscription_updated', true );
 
-		$tid = ( ! empty( $this->event_data ['event'] ['parent_tid'] ) ) ? $this->event_data ['event'] ['parent_tid'] : novalnet()->db()->get_subs_data_by_order_id( $this->wcs_order->get_parent_id(), $this->wcs_order->get_id(), 'tid', false );
+		$tid = ( ! empty( $this->event_data['event']['parent_tid'] ) ) ? $this->event_data['event']['parent_tid'] : novalnet()->db()->get_subs_data_by_order_id( $this->wcs_order->get_parent_id(), $this->wcs_order->get_id(), 'tid', false );
 		if ( empty( $tid ) ) {
 			$tid = novalnet()->db()->get_transaction_details( $this->wc_order_id, $this->parent_tid, $this->wcs_order->get_id() );
 		}
@@ -723,21 +721,20 @@ class WC_Novalnet_Webhook {
 	 * @since 12.0.0
 	 */
 	public function handle_instalment() {
-
 		if ( 'CONFIRMED' === $this->event_data['transaction']['status'] && ! empty( $this->event_data['instalment']['cycles_executed'] ) ) {
 
 			/* translators: %1$s: parent_tid, %2$s: tid, %3$s: amount, %4$s: date */
-			$this->response ['message'] = sprintf( __( 'A new instalment transaction has been received for the Transaction ID: %1$s . The new instalment Transaction ID is %2$s with the amount %3$s on %4$s. ', 'woocommerce-novalnet-gateway' ), $this->parent_tid, $this->event_tid, wc_novalnet_shop_amount_format( $this->event_data['instalment']['cycle_amount'] ), wc_novalnet_formatted_date() );
+			$this->response['message'] = sprintf( __( 'A new instalment transaction has been received for the Transaction ID: %1$s . The new instalment Transaction ID is %2$s with the amount %3$s on %4$s. ', 'woocommerce-novalnet-gateway' ), $this->parent_tid, $this->event_tid, wc_novalnet_shop_amount_format( $this->event_data['instalment']['cycle_amount'] ), wc_novalnet_formatted_date() );
 
 			// Store Bank details.
-			$this->order_reference ['additional_info'] = apply_filters( 'novalnet_store_instalment_data_webhook', $this->event_data );
-			$this->update_data ['table']               = 'novalnet_transaction_detail';
-			$this->update_data ['update']              = array(
-				'additional_info' => $this->order_reference ['additional_info'],
+			$this->order_reference['additional_info'] = apply_filters( 'novalnet_store_instalment_data_webhook', $this->event_data );
+			$this->update_data['table']               = 'novalnet_transaction_detail';
+			$this->update_data['update']              = array(
+				'additional_info' => $this->order_reference['additional_info'],
 			);
 
-			if ( 'INSTALMENT_INVOICE' === $this->event_data['transaction']['payment_type'] && empty( $this->event_data ['transaction']['bank_details'] ) ) {
-				$this->event_data ['transaction']['bank_details'] = wc_novalnet_unserialize_data( $this->order_reference ['additional_info'] );
+			if ( 'INSTALMENT_INVOICE' === $this->event_data['transaction']['payment_type'] && empty( $this->event_data['transaction']['bank_details'] ) ) {
+				$this->event_data['transaction']['bank_details'] = wc_novalnet_unserialize_data( $this->order_reference['additional_info'] );
 			}
 
 			// Build & update renewal comments.
@@ -746,16 +743,15 @@ class WC_Novalnet_Webhook {
 
 			novalnet()->db()->update(
 				array(
-					'additional_info' => $this->order_reference ['additional_info'],
+					'additional_info' => $this->order_reference['additional_info'],
 				),
 				array(
 					'order_no' => $this->wc_order->get_id(),
 				)
 			);
 
-			WC()->mailer();
-			do_action( 'novalnet_send_instalment_notification_to_customer', $this->wc_order->get_id(), $this->wc_order );
-
+			 WC()->mailer();
+			 do_action( 'novalnet_send_instalment_notification_to_customer', $this->wc_order->get_id(), $this->wc_order );
 		}
 	}
 
@@ -765,13 +761,12 @@ class WC_Novalnet_Webhook {
 	 * @since 12.0.0
 	 */
 	public function handle_instalment_cancel() {
-
 		if ( 'CONFIRMED' === $this->event_data['transaction']['status'] && 'DEACTIVATED' !== (string) $this->order_reference['gateway_status'] ) {
-			$this->update_data ['table']  = 'novalnet_transaction_detail';
-			$this->update_data ['update'] = array(
+			$this->update_data['table']  = 'novalnet_transaction_detail';
+			$this->update_data['update'] = array(
 				'gateway_status' => 'DEACTIVATED',
 			);
-			$instalments                  = novalnet()->db()->get_entry_by_order_id( $this->wc_order_id, 'additional_info' );
+			$instalments                 = novalnet()->db()->get_entry_by_order_id( $this->wc_order_id, 'additional_info' );
 			if ( ! empty( $instalments ) ) {
 				$instalments['is_instalment_cancelled'] = 1;
 				$instalments['is_full_cancelled']       = 1;
@@ -783,7 +778,7 @@ class WC_Novalnet_Webhook {
 
 			if ( 'REMAINING_CYCLES' === (string) $this->event_data['instalment']['cancel_type'] ) {
 				/* translators: %1$s: parent_tid, %2$s: date */
-				$this->response ['message'] = sprintf( __( 'Instalment has been stopped for the TID: %1$s on %2$s', 'woocommerce-novalnet-gateway' ), $this->parent_tid, wc_novalnet_formatted_date() );
+				$this->response['message'] = sprintf( __( 'Instalment has been stopped for the TID: %1$s on %2$s', 'woocommerce-novalnet-gateway' ), $this->parent_tid, wc_novalnet_formatted_date() );
 			} else {
 				$refund_note = '';
 				if ( isset( $this->event_data['transaction']['refund']['amount'] ) ) {
@@ -798,7 +793,7 @@ class WC_Novalnet_Webhook {
 					);
 				}
 				/* translators: %1$s: parent_tid, %2$s: date */
-				$this->response ['message'] = sprintf( __( 'Instalment has been cancelled for the TID: %1$s on %2$s %3$s', 'woocommerce-novalnet-gateway' ), $this->parent_tid, wc_novalnet_formatted_date(), $refund_note );
+				$this->response['message'] = sprintf( __( 'Instalment has been cancelled for the TID: %1$s on %2$s %3$s', 'woocommerce-novalnet-gateway' ), $this->parent_tid, wc_novalnet_formatted_date(), $refund_note );
 				$this->wc_order->update_status( 'wc-cancelled' );
 			}
 		}
@@ -812,13 +807,13 @@ class WC_Novalnet_Webhook {
 	public function handle_credit() {
 		if ( 'ONLINE_TRANSFER_CREDIT' === $this->event_data['transaction']['payment_type'] ) {
 			/* translators: %1$s: tid, %2$s: amount, %3$s: date, %4$s: parent_tid */
-			$this->response ['message'] = wc_novalnet_format_text( sprintf( __( 'Credit has been successfully received for the TID: %1$s with amount %2$s on %3$s. Please refer PAID order details in our Novalnet Admin Portal for the TID: %4$s', 'woocommerce-novalnet-gateway' ), $this->parent_tid, wc_novalnet_shop_amount_format( $this->event_data['transaction']['amount'] ), wc_novalnet_formatted_date(), $this->event_data['transaction']['tid'] ) );
+			$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Credit has been successfully received for the TID: %1$s with amount %2$s on %3$s. Please refer PAID order details in our Novalnet Admin Portal for the TID: %4$s', 'woocommerce-novalnet-gateway' ), $this->parent_tid, wc_novalnet_shop_amount_format( $this->event_data['transaction']['amount'] ), wc_novalnet_formatted_date(), $this->event_data['transaction']['tid'] ) );
 		} else {
 			/* translators: %s: post type */
-			$this->response ['message'] = sprintf( __( 'Credit has been successfully received for the TID: %1$s with amount %2$s on %3$s. Please refer PAID order details in our Novalnet Admin Portal for the TID: %4$s. ', 'woocommerce-novalnet-gateway' ), $this->parent_tid, wc_novalnet_shop_amount_format( $this->event_data['transaction']['amount'] ), wc_novalnet_formatted_date(), $this->event_data['transaction']['tid'] );
-			$payment_settings           = WC_Novalnet_Configuration::get_payment_settings( $this->wc_order->get_payment_method() );
+			$this->response['message'] = sprintf( __( 'Credit has been successfully received for the TID: %1$s with amount %2$s on %3$s. Please refer PAID order details in our Novalnet Admin Portal for the TID: %4$s. ', 'woocommerce-novalnet-gateway' ), $this->parent_tid, wc_novalnet_shop_amount_format( $this->event_data['transaction']['amount'] ), wc_novalnet_formatted_date(), $this->event_data['transaction']['tid'] );
+			$payment_settings          = WC_Novalnet_Configuration::get_payment_settings( $this->wc_order->get_payment_method() );
 			if ( in_array( $this->event_data['transaction']['payment_type'], array( 'INVOICE_CREDIT', 'CASHPAYMENT_CREDIT', 'MULTIBANCO_CREDIT' ), true ) ) {
-				$this->update_payment_credit_status_amount( $payment_settings ['callback_status'] );
+				$this->update_payment_credit_status_amount( $payment_settings['callback_status'] );
 			} elseif ( ! empty( $this->wcs_order_id ) ) {
 				$subscriptions = wcs_get_subscriptions_for_order( $this->wc_order_id, array( 'order_type' => 'any' ) );
 				if ( ! empty( $subscriptions ) ) {
@@ -831,8 +826,7 @@ class WC_Novalnet_Webhook {
 							}
 						} elseif ( WC_Novalnet_Validation::check_string( $subscription->get_payment_method() ) ) {
 							novalnet()->helper()->novalnet_update_wc_order_meta( $this->wc_order, 'nn_credit_tid', $this->event_data['transaction']['tid'], true );
-							$this->update_payment_credit_status_amount( $payment_settings['order_success_status'], true );
-
+							$this->update_payment_credit_status_amount();
 							if ( novalnet()->helper()->novalnet_get_wc_order_meta( $this->wc_order, '_novalnet_renewal_subscription_order' ) ) {
 								novalnet()->helper()->novalnet_delete_wc_order_meta( $this->wc_order, '_novalnet_renewal_subscription_order', true );
 							}
@@ -857,32 +851,35 @@ class WC_Novalnet_Webhook {
 	 *
 	 * @since 12.6.1
 	 */
-	public function update_payment_credit_status_amount( $order_update_status, $complete_payment = false ) {
-
+	public function update_payment_credit_status_amount( $callback_status = '' ) {
 		// Calculate total amount.
-		$paid_amount = $this->order_reference ['callback_amount'] + $this->event_data['transaction']['amount'];
+		$paid_amount = $this->order_reference['callback_amount'] + $this->event_data['transaction']['amount'];
 
 		// Calculate including refunded amount.
-		$amount_to_be_paid = $this->order_reference['amount'] - $this->order_reference ['refunded_amount'];
+		$amount_to_be_paid = $this->order_reference['amount'] - $this->order_reference['refunded_amount'];
 
-		$this->update_data ['table']  = 'novalnet_transaction_detail';
-		$this->update_data ['update'] = array(
-			'gateway_status'  => $this->event_data ['transaction']['status'],
+		$this->update_data['table']  = 'novalnet_transaction_detail';
+		$this->update_data['update'] = array(
+			'gateway_status'  => $this->event_data['transaction']['status'],
 			'callback_amount' => $paid_amount,
 		);
 
 		if ( ( (int) $paid_amount >= (int) $amount_to_be_paid ) ) {
-			if ( $complete_payment ) {
+			if ( $this->wc_order->get_date_paid() == null ) {
 				$this->wc_order->payment_complete( $this->parent_tid );
-			} elseif ( ! $this->wc_order->has_status( $order_update_status ) ) {
-				$this->wc_order->update_status( $order_update_status ); // Update callback status.
-			}
+				$this->wc_order->set_date_paid( time() );
 
+			}
+			if ( ! empty( $callback_status ) ) {
+				$this->wc_order->update_status( $callback_status ); // Update callback status.
+			}
+			$this->wc_order->save();
 			if ( (int) $paid_amount > (int) $amount_to_be_paid ) {
-				$this->response ['message'] .= sprintf( __( 'The amount has been overpaid', 'woocommerce-novalnet-gateway' ) );
+				$this->response['message'] .= sprintf( __( 'The amount has been overpaid', 'woocommerce-novalnet-gateway' ) );
 			}
 		}
 	}
+
 
 	/**
 	 * Handle transaction capture/cancel
@@ -890,27 +887,31 @@ class WC_Novalnet_Webhook {
 	 * @since 12.0.0
 	 */
 	public function handle_transaction_capture_cancel() {
-		$this->update_data ['table']  = 'novalnet_transaction_detail';
-		$this->update_data ['update'] = array(
-			'gateway_status' => $this->event_data ['transaction']['status'],
+		$this->update_data['table']  = 'novalnet_transaction_detail';
+		$this->update_data['update'] = array(
+			'gateway_status' => $this->event_data['transaction']['status'],
 		);
 		if ( 'TRANSACTION_CAPTURE' === $this->event_type ) {
 			/* translators: %s: Date */
-			$this->response ['message'] = sprintf( __( 'The transaction has been confirmed on %1$s', 'woocommerce-novalnet-gateway' ), wc_novalnet_formatted_date() );
-			$payment_settings           = WC_Novalnet_Configuration::get_payment_settings( $this->wc_order->get_payment_method() );
-			$order_status               = $payment_settings['order_success_status'];
-			$this->wc_order->payment_complete( $this->event_data['transaction']['tid'] );
+			$this->response['message'] = sprintf( __( 'The transaction has been confirmed on %1$s', 'woocommerce-novalnet-gateway' ), wc_novalnet_formatted_date() );
+			$payment_settings          = WC_Novalnet_Configuration::get_payment_settings( $this->wc_order->get_payment_method() );
+			$order_status              = $payment_settings['order_success_status'];
+			if ( $this->wc_order->get_date_paid() == null ) {
+				$this->wc_order->payment_complete( $this->event_data['transaction']['tid'] );
+				$this->wc_order->set_date_paid( time() );
+			}
+
 			if ( in_array( $this->wc_order->get_payment_method(), array( 'novalnet_instalment_sepa', 'novalnet_instalment_invoice' ), true ) ) {
 
-				if ( ! empty( $this->order_reference ['additional_info'] ) ) {
-					$this->order_reference ['additional_info'] = wc_novalnet_serialize_data( array_merge( wc_novalnet_unserialize_data( $this->order_reference ['additional_info'] ), wc_novalnet_unserialize_data( apply_filters( 'novalnet_store_instalment_data', $this->event_data ) ) ) );
+				if ( ! empty( $this->order_reference['additional_info'] ) ) {
+					$this->order_reference['additional_info'] = wc_novalnet_serialize_data( array_merge( wc_novalnet_unserialize_data( $this->order_reference['additional_info'] ), wc_novalnet_unserialize_data( apply_filters( 'novalnet_store_instalment_data', $this->event_data ) ) ) );
 				} else {
-					$this->order_reference ['additional_info'] = apply_filters( 'novalnet_store_instalment_data', $this->event_data );
+					$this->order_reference['additional_info'] = apply_filters( 'novalnet_store_instalment_data', $this->event_data );
 				}
 
 				novalnet()->db()->update(
 					array(
-						'additional_info' => $this->order_reference ['additional_info'],
+						'additional_info' => $this->order_reference['additional_info'],
 					),
 					array(
 						'order_no' => $this->wc_order->get_id(),
@@ -919,8 +920,8 @@ class WC_Novalnet_Webhook {
 			}
 			if ( in_array( $this->wc_order->get_payment_method(), array( 'novalnet_invoice', 'novalnet_guaranteed_invoice', 'novalnet_instalment_invoice' ), true ) ) {
 
-				if ( empty( $this->event_data ['transaction']['bank_details'] ) ) {
-					$this->event_data ['transaction']['bank_details'] = wc_novalnet_unserialize_data( $this->order_reference ['additional_info'] );
+				if ( empty( $this->event_data['transaction']['bank_details'] ) ) {
+					$this->event_data['transaction']['bank_details'] = wc_novalnet_unserialize_data( $this->order_reference['additional_info'] );
 				}
 				$transaction_comments = novalnet()->helper()->prepare_payment_comments( $this->event_data );
 
@@ -928,15 +929,15 @@ class WC_Novalnet_Webhook {
 				novalnet()->helper()->update_comments( $this->wc_order, $transaction_comments, 'transaction_info', false, true );
 			}
 			if ( 'novalnet_invoice' !== $this->wc_order->get_payment_method() ) {
-				$this->update_data ['update'] ['callback_amount'] = $this->event_data ['transaction']['amount'];
+				$this->update_data['update']['callback_amount'] = $this->event_data['transaction']['amount'];
 			}
 		} elseif ( 'TRANSACTION_CANCEL' === $this->event_type ) {
 			/* translators: %s: Date */
-			$this->response ['message'] = sprintf( __( 'The transaction has been cancelled on %1$s', 'woocommerce-novalnet-gateway' ), wc_novalnet_formatted_date() );
-			$order_status               = 'wc-cancelled';
+			$this->response['message'] = sprintf( __( 'The transaction has been cancelled on %1$s', 'woocommerce-novalnet-gateway' ), wc_novalnet_formatted_date() );
+			$order_status              = 'wc-cancelled';
 		}
 		// Update status will save the order.
-		novalnet()->helper()->novalnet_update_wc_order_meta( $this->wc_order, '_novalnet_gateway_status', $this->event_data ['transaction']['status'] );
+		novalnet()->helper()->novalnet_update_wc_order_meta( $this->wc_order, '_novalnet_gateway_status', $this->event_data['transaction']['status'] );
 		$this->wc_order->update_status( $order_status );
 	}
 
@@ -946,34 +947,54 @@ class WC_Novalnet_Webhook {
 	 * @since 12.0.0
 	 */
 	public function handle_transaction_refund() {
-		if ( ! empty( $this->event_data ['transaction'] ['refund'] ['amount'] ) ) {
+		if ( ! empty( $this->event_data['transaction']['refund']['amount'] ) ) {
 
 			/* translators: %1$s: tid, %2$s: amount */
-			$this->response ['message'] = sprintf( __( 'Refund has been initiated for the TID:%1$s with the amount %2$s.', 'woocommerce-novalnet-gateway' ), $this->parent_tid, wc_novalnet_shop_amount_format( $this->event_data ['transaction'] ['refund'] ['amount'] ) );
+			$this->response['message'] = sprintf( __( 'Refund has been initiated for the TID:%1$s with the amount %2$s.', 'woocommerce-novalnet-gateway' ), $this->parent_tid, wc_novalnet_shop_amount_format( $this->event_data['transaction']['refund']['amount'] ) );
 			if ( ! empty( $this->event_data['transaction']['refund']['tid'] ) ) {
 				/* translators: %s: response tid */
-				$this->response ['message'] .= sprintf( __( ' New TID:%s for the refunded amount.', 'woocommerce-novalnet-gateway' ), $this->event_data ['transaction']['refund']['tid'] );
+				$this->response['message'] .= sprintf( __( ' New TID:%s for the refunded amount.', 'woocommerce-novalnet-gateway' ), $this->event_data['transaction']['refund']['tid'] );
 			}
 
 			// Update transaction details.
-			$this->update_data ['table']  = 'novalnet_transaction_detail';
-			$this->update_data ['update'] = array(
+			$this->update_data['table']  = 'novalnet_transaction_detail';
+			$this->update_data['update'] = array(
 				// Calculating refunded amount.
-				'refunded_amount' => $this->order_reference ['refunded_amount'] + $this->event_data ['transaction'] ['refund'] ['amount'],
-				'gateway_status'  => $this->event_data ['transaction']['status'],
+				'refunded_amount' => $this->order_reference['refunded_amount'] + $this->event_data['transaction']['refund']['amount'],
+				'gateway_status'  => $this->event_data['transaction']['status'],
 			);
 
 			if ( novalnet()->get_supports( 'instalment', $this->wc_order->get_payment_method() ) ) {
 
 				$instalments = wc_novalnet_unserialize_data( $this->order_reference['additional_info'] );
 				foreach ( $instalments as $key => $data ) {
-					if ( ! empty( $data ['tid'] ) && (int) $data ['tid'] === (int) $this->event_data ['transaction']['tid'] ) {
-						if ( strpos( $instalments [ $key ] ['amount'], '.' ) ) {
-							$instalments [ $key ] ['amount'] *= 100;
+					if ( ! empty( $data['tid'] ) && (int) $data['tid'] === (int) $this->event_data['transaction']['tid'] ) {
+						if ( strpos( $instalments[ $key ]['amount'], '.' ) ) {
+							$instalments[ $key ]['amount'] *= 100;
 						}
-						$instalments [ $key ] ['amount']                -= $this->event_data ['transaction'] ['refund'] ['amount'];
-						$this->update_data ['update']['additional_info'] = wc_novalnet_serialize_data( $instalments );
+						$instalments[ $key ]['amount']                 -= $this->event_data['transaction']['refund']['amount'];
+						$this->update_data['update']['additional_info'] = wc_novalnet_serialize_data( $instalments );
 					}
+				}
+			}
+
+			$refunded_amount = $this->order_reference['refunded_amount'] + $this->event_data['transaction']['refund']['amount'];
+
+			$excess_amount         = $this->order_reference['callback_amount'] - $this->order_reference['amount'];
+			$amount_to_be_refunded = 0;
+			$order_total_refunded  = $this->wc_order->get_total_refunded();
+
+			if ( $excess_amount > 0 && $excess_amount >= $refunded_amount ) {
+				return;
+			} elseif ( $excess_amount > 0 ) {
+				$previous_refunded_amount = $this->order_reference['refunded_amount'] > 0 ? $this->order_reference['refunded_amount'] : 0;
+				$amount_to_be_refunded    = ( abs( $previous_refunded_amount - $excess_amount ) - $this->event_data['transaction']['refund']['amount'] );
+				$amount_to_be_refunded    = abs( $amount_to_be_refunded );
+
+				$order_total_refunded = abs( $order_total_refunded );
+
+				if ( $order_total_refunded > 0 ) {
+					$amount_to_be_refunded = $this->event_data['transaction']['refund']['amount'];
 				}
 			}
 
@@ -981,16 +1002,16 @@ class WC_Novalnet_Webhook {
 			$refund = wc_create_refund(
 				array(
 					'order_id' => $this->wc_order->get_id(),
-					'amount'   => sprintf( '%0.2f', ( $this->event_data ['transaction'] ['refund'] ['amount'] / 100 ) ),
-					'reason'   => ! empty( $this->event_data ['transaction'] ['reason'] ) ? $this->event_data ['transaction'] ['reason'] : '',
+					'amount'   => sprintf( '%0.2f', ( $amount_to_be_refunded > 0 ? $amount_to_be_refunded : $this->event_data['transaction']['refund']['amount'] ) / 100 ),
+					'reason'   => ! empty( $this->event_data['transaction']['reason'] ) ? $this->event_data['transaction']['reason'] : '',
 				)
 			);
 
 			if ( is_wp_error( $refund ) ) {
 				$this->notify_customer = false;
 				/* translators: %1$s: date, %2$s: message*/
-				$this->response ['message'] .= PHP_EOL . sprintf( __( 'Payment refund failed for the order: %1$s due to: %2$s' ), $this->wc_order_id, $refund->get_error_message() );
-				novalnet()->helper()->debug( $this->response ['message'], $this->wc_order_id );
+				$this->response['message'] .= PHP_EOL . sprintf( __( 'Payment refund failed for the order: %1$s due to: %2$s' ), $this->wc_order_id, $refund->get_error_message() );
+				novalnet()->helper()->debug( $this->response['message'], $this->wc_order_id );
 			}
 		}
 	}
@@ -1001,7 +1022,7 @@ class WC_Novalnet_Webhook {
 	 * @since 12.0.0
 	 */
 	public function handle_chargeback() {
-		if ( wc_novalnet_check_isset( $this->order_reference, 'gateway_status', 'CONFIRMED' ) && ! empty( $this->event_data ['transaction'] ['amount'] ) ) {
+		if ( wc_novalnet_check_isset( $this->order_reference, 'gateway_status', 'CONFIRMED' ) && ! empty( $this->event_data['transaction']['amount'] ) ) {
 			if ( ! empty( $this->wcs_order_id ) ) {
 				$subscriptions = wcs_get_subscriptions_for_order( $this->wc_order_id, array( 'order_type' => 'any' ) );
 				if ( ! empty( $subscriptions ) ) {
@@ -1017,7 +1038,7 @@ class WC_Novalnet_Webhook {
 				}
 			}
 			/* translators: %1$s: parent_tid, %2$s: amount, %3$s: date, %4$s: tid  */
-			$this->response ['message'] = sprintf( __( 'Chargeback executed successfully for the TID: %1$s amount: %2$s on %3$s. The subsequent TID: %4$s.', 'woocommerce-novalnet-gateway' ), $this->parent_tid, wc_novalnet_shop_amount_format( $this->event_data ['transaction'] ['amount'] ), wc_novalnet_formatted_date(), $this->event_tid );
+			$this->response['message'] = sprintf( __( 'Chargeback executed successfully for the TID: %1$s amount: %2$s on %3$s. The subsequent TID: %4$s.', 'woocommerce-novalnet-gateway' ), $this->parent_tid, wc_novalnet_shop_amount_format( $this->event_data['transaction']['amount'] ), wc_novalnet_formatted_date(), $this->event_tid );
 		}
 	}
 
@@ -1027,17 +1048,16 @@ class WC_Novalnet_Webhook {
 	 * @since 12.0.0
 	 */
 	public function handle_transaction_update() {
-
-		$this->update_data ['table']  = 'novalnet_transaction_detail';
-		$this->update_data ['update'] = array(
-			'gateway_status' => $this->event_data ['transaction']['status'],
+		$this->update_data['table']  = 'novalnet_transaction_detail';
+		$this->update_data['update'] = array(
+			'gateway_status' => $this->event_data['transaction']['status'],
 		);
 		if ( in_array( $this->event_data['transaction']['status'], array( 'PENDING', 'ON_HOLD', 'CONFIRMED', 'DEACTIVATED' ), true ) ) {
 			if ( 'DEACTIVATED' === $this->event_data['transaction']['status'] ) {
 				$this->notify_customer = true;
 
 				/* translators: %s: Date */
-				$this->response ['message'] = sprintf( __( 'The transaction has been cancelled on %1$s', 'woocommerce-novalnet-gateway' ), wc_novalnet_formatted_date() );
+				$this->response['message'] = sprintf( __( 'The transaction has been cancelled on %1$s', 'woocommerce-novalnet-gateway' ), wc_novalnet_formatted_date() );
 
 				$transaction_comments = novalnet()->helper()->prepare_payment_comments( $this->event_data );
 
@@ -1046,26 +1066,26 @@ class WC_Novalnet_Webhook {
 				if ( in_array( $this->order_reference['gateway_status'], array( 'PENDING', 'ON_HOLD' ), true ) ) {
 					if ( 'ON_HOLD' === $this->event_data['transaction']['status'] ) {
 						$this->notify_customer = true;
-						if ( empty( $this->event_data ['transaction']['bank_details'] ) && ! empty( $this->order_reference ['additional_info'] ) ) {
-							$this->event_data ['transaction']['bank_details'] = wc_novalnet_unserialize_data( $this->order_reference ['additional_info'] );
+						if ( empty( $this->event_data['transaction']['bank_details'] ) && ! empty( $this->order_reference['additional_info'] ) ) {
+							$this->event_data['transaction']['bank_details'] = wc_novalnet_unserialize_data( $this->order_reference['additional_info'] );
 						}
 						$order_status = 'wc-on-hold';
 					} elseif ( 'CONFIRMED' === $this->event_data['transaction']['status'] ) {
 						$this->notify_customer = true;
 
-						if ( empty( $this->event_data ['transaction']['bank_details'] ) && ! empty( $this->order_reference ['additional_info'] ) ) {
-							$this->event_data ['transaction']['bank_details'] = wc_novalnet_unserialize_data( $this->order_reference ['additional_info'] );
+						if ( empty( $this->event_data['transaction']['bank_details'] ) && ! empty( $this->order_reference['additional_info'] ) ) {
+							$this->event_data['transaction']['bank_details'] = wc_novalnet_unserialize_data( $this->order_reference['additional_info'] );
 						}
 						if ( novalnet()->get_supports( 'instalment', $this->wc_order->get_payment_method() ) ) {
 
-							if ( ! empty( $this->order_reference ['additional_info'] ) ) {
-								$this->order_reference ['additional_info'] = wc_novalnet_serialize_data( array_merge( wc_novalnet_unserialize_data( $this->order_reference ['additional_info'] ), wc_novalnet_unserialize_data( apply_filters( 'novalnet_store_instalment_data', $this->event_data ) ) ) );
+							if ( ! empty( $this->order_reference['additional_info'] ) ) {
+								$this->order_reference['additional_info'] = wc_novalnet_serialize_data( array_merge( wc_novalnet_unserialize_data( $this->order_reference['additional_info'] ), wc_novalnet_unserialize_data( apply_filters( 'novalnet_store_instalment_data', $this->event_data ) ) ) );
 							} else {
-								$this->order_reference ['additional_info'] = apply_filters( 'novalnet_store_instalment_data', $this->event_data );
+								$this->order_reference['additional_info'] = apply_filters( 'novalnet_store_instalment_data', $this->event_data );
 							}
 							novalnet()->db()->update(
 								array(
-									'additional_info' => $this->order_reference ['additional_info'],
+									'additional_info' => $this->order_reference['additional_info'],
 								),
 								array(
 									'order_no' => $this->wc_order->get_id(),
@@ -1076,27 +1096,30 @@ class WC_Novalnet_Webhook {
 							do_action( 'novalnet_send_instalment_notification_to_customer', $this->wc_order->get_id(), $this->wc_order );
 						}
 						$payment_settings = WC_Novalnet_Configuration::get_payment_settings( $this->wc_order->get_payment_method() );
-						$order_status     = $payment_settings ['order_success_status'];
-						$this->wc_order->payment_complete( $this->event_data['transaction']['tid'] );
-						$this->update_data ['update']['callback_amount'] = (int) $this->order_reference ['amount'];
+						$order_status     = $payment_settings['order_success_status'];
+						if ( $this->wc_order->get_date_paid() == null ) {
+							$this->wc_order->payment_complete( $this->event_data['transaction']['tid'] );
+							$this->wc_order->set_date_paid( time() );
+						}
+						$this->update_data['update']['callback_amount'] = (int) $this->order_reference['amount'];
 					}
 
 					// Reform the transaction comments.
-					if ( in_array( $this->event_data ['transaction']['payment_type'], array( 'INVOICE', 'PREPAYMENT', 'GUARANTEED_INVOICE', 'INSTALMENT_INVOICE' ), true ) ) {
+					if ( in_array( $this->event_data['transaction']['payment_type'], array( 'INVOICE', 'PREPAYMENT', 'GUARANTEED_INVOICE', 'INSTALMENT_INVOICE' ), true ) ) {
 
-						if ( empty( $this->event_data ['transaction']['bank_details'] ) ) {
-							$this->event_data ['transaction']['bank_details'] = wc_novalnet_unserialize_data( $this->order_reference ['additional_info'] );
+						if ( empty( $this->event_data['transaction']['bank_details'] ) ) {
+							$this->event_data['transaction']['bank_details'] = wc_novalnet_unserialize_data( $this->order_reference['additional_info'] );
 						}
 					}
-					if ( 'CASHPAYMENT' === $this->event_data ['transaction']['payment_type'] ) {
-						$this->event_data ['transaction']['nearest_stores'] = wc_novalnet_unserialize_data( $this->order_reference ['additional_info'] );
+					if ( 'CASHPAYMENT' === $this->event_data['transaction']['payment_type'] ) {
+						$this->event_data['transaction']['nearest_stores'] = wc_novalnet_unserialize_data( $this->order_reference['additional_info'] );
 					}
 
 					$transaction_comments = novalnet()->helper()->prepare_payment_comments( $this->event_data );
-					if ( (int) $this->event_data['transaction']['amount'] !== (int) $this->order_reference ['amount'] && ! novalnet()->get_supports( 'instalment', $this->wc_order->get_payment_method() ) ) {
-						$this->update_data ['update']['amount'] = $this->event_data['transaction']['amount'];
-						if ( (int) $this->event_data['transaction']['amount'] < (int) $this->order_reference ['amount'] ) {
-							$refund_amount   = (int) ( ( $this->order_reference ['amount'] - $this->order_reference ['refunded_amount'] ) - $this->event_data['transaction']['amount'] );
+					if ( (int) $this->event_data['transaction']['amount'] !== (int) $this->order_reference['amount'] && ! novalnet()->get_supports( 'instalment', $this->wc_order->get_payment_method() ) ) {
+						$this->update_data['update']['amount'] = $this->event_data['transaction']['amount'];
+						if ( (int) $this->event_data['transaction']['amount'] < (int) $this->order_reference['amount'] ) {
+							$refund_amount   = (int) ( ( $this->order_reference['amount'] - $this->order_reference['refunded_amount'] ) - $this->event_data['transaction']['amount'] );
 							$discount_amount = sprintf( '%0.2f', $refund_amount / 100 );
 
 							// Create the refund.
@@ -1109,13 +1132,13 @@ class WC_Novalnet_Webhook {
 							);
 							if ( is_wp_error( $refund ) ) {
 								/* translators: %1$s: date, %2$s: message*/
-								$this->response ['message'] = sprintf( __( 'Payment refund failed for the order: %1$s due to: %2$s' ), $this->wc_order->get_id(), $refund->get_error_message() );
-								novalnet()->helper()->debug( $this->response ['message'], $this->wc_order_id );
+								$this->response['message'] = sprintf( __( 'Payment refund failed for the order: %1$s due to: %2$s' ), $this->wc_order->get_id(), $refund->get_error_message() );
+								novalnet()->helper()->debug( $this->response['message'], $this->wc_order_id );
 							} else {
-								$this->update_data ['refunded_amount'] = (int) $this->order_reference ['refunded_amount'] + $refund_amount;
+								$this->update_data['refunded_amount'] = (int) $this->order_reference['refunded_amount'] + $refund_amount;
 							}
 						} else {
-							$fee_in_smaller_unit = $this->event_data['transaction']['amount'] - $this->order_reference ['amount'];
+							$fee_in_smaller_unit = $this->event_data['transaction']['amount'] - $this->order_reference['amount'];
 							$formatted_fee       = wc_novalnet_shop_amount_format( $fee_in_smaller_unit );
 							$fee_in_bigger_unit  = sprintf( '%0.2f', $fee_in_smaller_unit / 100 );
 
@@ -1141,29 +1164,29 @@ class WC_Novalnet_Webhook {
 					}
 
 					/* translators: %1$s: tid, %2$s: amount*/
-					$this->response ['message'] = wc_novalnet_format_text( sprintf( __( 'Transaction updated successfully for the TID: %1$s with amount %2$s.', 'woocommerce-novalnet-gateway' ), $this->event_tid, wc_novalnet_shop_amount_format( $amount ) ) );
-					if ( isset( $this->event_data ['transaction']['update_type'] ) ) {
-						if ( in_array( $this->event_data ['transaction']['update_type'], array( 'AMOUNT', 'AMOUNT_DUE_DATE', 'DUE_DATE' ), true ) ) {
+					$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Transaction updated successfully for the TID: %1$s with amount %2$s.', 'woocommerce-novalnet-gateway' ), $this->event_tid, wc_novalnet_shop_amount_format( $amount ) ) );
+					if ( isset( $this->event_data['transaction']['update_type'] ) ) {
+						if ( in_array( $this->event_data['transaction']['update_type'], array( 'AMOUNT', 'AMOUNT_DUE_DATE', 'DUE_DATE' ), true ) ) {
 							$this->notify_customer = true;
-							if ( 'DUE_DATE' === $this->event_data ['transaction']['update_type'] ) {
+							if ( 'DUE_DATE' === $this->event_data['transaction']['update_type'] ) {
 								/* translators: %1$s: tid, %2$s: due date*/
-								$this->response ['message'] = wc_novalnet_format_text( sprintf( __( 'Transaction updated successfully for the TID: %1$s with due date %2$s.', 'woocommerce-novalnet-gateway' ), $this->event_tid, wc_novalnet_formatted_date( $this->event_data['transaction']['due_date'] ) ) );
-							} elseif ( 'AMOUNT_DUE_DATE' === $this->event_data ['transaction']['update_type'] ) {
+								$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Transaction updated successfully for the TID: %1$s with due date %2$s.', 'woocommerce-novalnet-gateway' ), $this->event_tid, wc_novalnet_formatted_date( $this->event_data['transaction']['due_date'] ) ) );
+							} elseif ( 'AMOUNT_DUE_DATE' === $this->event_data['transaction']['update_type'] ) {
 								/* translators: %1$s: tid, %2$s: amount, %3$s: due date */
-								$this->response ['message'] = wc_novalnet_format_text( sprintf( __( 'Transaction updated successfully for the TID: %1$s with amount %2$s and due date %3$s.', 'woocommerce-novalnet-gateway' ), $this->event_tid, wc_novalnet_shop_amount_format( $amount ), wc_novalnet_formatted_date( $this->event_data['transaction']['due_date'] ) ) );
+								$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Transaction updated successfully for the TID: %1$s with amount %2$s and due date %3$s.', 'woocommerce-novalnet-gateway' ), $this->event_tid, wc_novalnet_shop_amount_format( $amount ), wc_novalnet_formatted_date( $this->event_data['transaction']['due_date'] ) ) );
 							}
-						} elseif ( 'STATUS' === $this->event_data ['transaction']['update_type'] ) {
-							if ( 'ON_HOLD' === $this->event_data ['transaction']['status'] ) {
+						} elseif ( 'STATUS' === $this->event_data['transaction']['update_type'] ) {
+							if ( 'ON_HOLD' === $this->event_data['transaction']['status'] ) {
 								/* translators: %1$s: tid, %2$s: date*/
-								$this->response ['message'] = wc_novalnet_format_text( sprintf( __( 'The transaction status has been changed from pending to on-hold for the TID: %1$s on %2$s.', 'woocommerce-novalnet-gateway' ), $this->parent_tid, wc_novalnet_formatted_date() ) );
-							} elseif ( 'CONFIRMED' === $this->event_data ['transaction']['status'] ) {
+								$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'The transaction status has been changed from pending to on-hold for the TID: %1$s on %2$s.', 'woocommerce-novalnet-gateway' ), $this->parent_tid, wc_novalnet_formatted_date() ) );
+							} elseif ( 'CONFIRMED' === $this->event_data['transaction']['status'] ) {
 								$this->notify_customer = true;
 								/* translators: %1$s: tid, %2$s: amount, %3$s: due date */
-								$this->response ['message'] = sprintf( __( 'Transaction updated successfully for the TID: %1$s with the amount %2$s on %3$s', 'woocommerce-novalnet-gateway' ), $this->event_tid, wc_novalnet_shop_amount_format( $amount ), wc_novalnet_formatted_date() );
-							} elseif ( 'DEACTIVATED' === $this->event_data ['transaction']['status'] ) {
+								$this->response['message'] = sprintf( __( 'Transaction updated successfully for the TID: %1$s with the amount %2$s on %3$s', 'woocommerce-novalnet-gateway' ), $this->event_tid, wc_novalnet_shop_amount_format( $amount ), wc_novalnet_formatted_date() );
+							} elseif ( 'DEACTIVATED' === $this->event_data['transaction']['status'] ) {
 								$this->notify_customer = true;
 								/* translators: %1$s: date*/
-								$this->response ['message'] = sprintf( __( 'The transaction has been cancelled on %1$s', 'woocommerce-novalnet-gateway' ), wc_novalnet_formatted_date() );
+								$this->response['message'] = sprintf( __( 'The transaction has been cancelled on %1$s', 'woocommerce-novalnet-gateway' ), wc_novalnet_formatted_date() );
 							}
 						}
 					}
@@ -1176,7 +1199,7 @@ class WC_Novalnet_Webhook {
 				novalnet()->helper()->update_comments( $this->wc_order, $transaction_comments, 'transaction_info', false, true, $customer_given_note );
 			}
 			// Update status or set customer note will save the order.
-			novalnet()->helper()->novalnet_update_wc_order_meta( $this->wc_order, '_novalnet_gateway_status', $this->event_data ['transaction']['status'], ! ( ! empty( $order_status ) || ! empty( $transaction_comments ) ) );
+			novalnet()->helper()->novalnet_update_wc_order_meta( $this->wc_order, '_novalnet_gateway_status', $this->event_data['transaction']['status'], ! ( ! empty( $order_status ) || ! empty( $transaction_comments ) ) );
 
 			if ( ! empty( $order_status ) ) {
 				$this->wc_order->update_status( $order_status );
@@ -1206,23 +1229,21 @@ class WC_Novalnet_Webhook {
 		} catch ( Exception $e ) {
 			$this->display_message( array( 'message' => "Received data is not in the JSON format $e" ) );
 		}
-
 		// Your payment access key value.
 		$this->payment_access_key = WC_Novalnet_Configuration::get_global_settings( 'key_password' );
 
 		// Validate request parameters.
 		foreach ( $this->mandatory as $category => $parameters ) {
-			if ( empty( $this->event_data [ $category ] ) ) {
+			if ( empty( $this->event_data[ $category ] ) ) {
 
 				// Could be a possible manipulation in the notification data.
 				$this->display_message( array( 'message' => "Required parameter category($category) not received" ) );
 			} elseif ( ! empty( $parameters ) ) {
 				foreach ( $parameters as $parameter ) {
-					if ( empty( $this->event_data [ $category ] [ $parameter ] ) ) {
-
+					if ( empty( $this->event_data[ $category ][ $parameter ] ) ) {
 						// Could be a possible manipulation in the notification data.
 						$this->display_message( array( 'message' => "Required parameter($parameter) in the category($category) not received" ) );
-					} elseif ( in_array( $parameter, array( 'tid', 'parent_tid' ), true ) && ! preg_match( '/^\d{17}$/', $this->event_data [ $category ] [ $parameter ] ) ) {
+					} elseif ( in_array( $parameter, array( 'tid', 'parent_tid' ), true ) && ! preg_match( '/^\d{17}$/', $this->event_data[ $category ][ $parameter ] ) ) {
 						$this->display_message( array( 'message' => "Invalid TID received in the category($category) not received $parameter" ) );
 					}
 				}
@@ -1236,19 +1257,19 @@ class WC_Novalnet_Webhook {
 	 */
 	public function validate_checksum() {
 		$logentry     = array(
-			'tid'           => $this->event_data ['event'] ['tid'],
-			'event_type'    => $this->event_data ['event'] ['type'],
-			'result_status' => $this->event_data ['result'] ['status'],
+			'tid'           => $this->event_data['event']['tid'],
+			'event_type'    => $this->event_data['event']['type'],
+			'result_status' => $this->event_data['result']['status'],
 		);
-		$token_string = $this->event_data ['event'] ['tid'] . $this->event_data ['event'] ['type'] . $this->event_data ['result'] ['status'];
+		$token_string = $this->event_data['event']['tid'] . $this->event_data['event']['type'] . $this->event_data['result']['status'];
 
-		if ( isset( $this->event_data ['transaction'] ['amount'] ) ) {
-			$token_string      .= $this->event_data ['transaction'] ['amount'];
-			$logentry['amount'] = $this->event_data ['transaction'] ['amount'];
+		if ( isset( $this->event_data['transaction']['amount'] ) ) {
+			$token_string      .= $this->event_data['transaction']['amount'];
+			$logentry['amount'] = $this->event_data['transaction']['amount'];
 		}
-		if ( isset( $this->event_data ['transaction'] ['currency'] ) ) {
-			$token_string        .= $this->event_data ['transaction'] ['currency'];
-			$logentry['currency'] = $this->event_data ['transaction'] ['currency'];
+		if ( isset( $this->event_data['transaction']['currency'] ) ) {
+			$token_string        .= $this->event_data['transaction']['currency'];
+			$logentry['currency'] = $this->event_data['transaction']['currency'];
 		}
 		if ( ! empty( $this->payment_access_key ) ) {
 			$token_string .= strrev( $this->payment_access_key );
@@ -1262,14 +1283,13 @@ class WC_Novalnet_Webhook {
 		$novalnet_log                   = wc_novalnet_logger();
 		$novalnet_log->add( 'woocommerce-novalnet-gateway', 'Callback Generated Checksum: ' . $json_data );
 
-		if ( $generated_checksum !== $this->event_data ['event'] ['checksum'] ) {
+		if ( $generated_checksum !== $this->event_data['event']['checksum'] ) {
 			$this->display_message( array( 'message' => 'While notifying some data has been changed. The hash check failed' ) );
 		}
 
-		if ( ! empty( $this->event_data ['custom'] ['shop_invoked'] ) ) {
+		if ( ! empty( $this->event_data['custom']['shop_invoked'] ) ) {
 			$this->display_message( array( 'message' => 'Process already handled in the shop.' ) );
 		}
-
 	}
 
 	/**
@@ -1278,8 +1298,7 @@ class WC_Novalnet_Webhook {
 	 * @since 12.0.0
 	 */
 	public function authenticate_event_data() {
-
-		// Backend callback option.
+		 // Backend callback option.
 		$this->test_mode = (int) ( 'yes' === WC_Novalnet_Configuration::get_global_settings( 'callback_test_mode' ) );
 
 		// Host based validation.
@@ -1341,28 +1360,32 @@ class WC_Novalnet_Webhook {
 	 * @return void
 	 */
 	public function get_order_reference() {
-
-		if ( ! empty( $this->event_data ['transaction'] ['order_no'] ) || ! empty( $this->parent_tid ) ) {
-			if ( ! empty( $this->event_data ['transaction'] ['order_no'] ) ) {
-				$this->wc_order_id = novalnet()->helper()->get_post_id( $this->event_data ['transaction'] ['order_no'] );
-			} elseif ( ! empty( $this->event_data ['subscription'] ['order_no'] ) ) {
-				$this->wc_order_id = novalnet()->helper()->get_post_id( $this->event_data ['subscription'] ['order_no'] );
+		if ( ! empty( $this->event_data['transaction']['order_no'] ) || ! empty( $this->parent_tid ) ) {
+			if ( ! empty( $this->event_data['transaction']['order_no'] ) ) {
+				$this->wc_order_id = novalnet()->helper()->get_post_id( $this->event_data['transaction']['order_no'] );
+			} elseif ( ! empty( $this->event_data['subscription']['order_no'] ) ) {
+				$this->wc_order_id = novalnet()->helper()->get_post_id( $this->event_data['subscription']['order_no'] );
 			}
 			$this->order_reference = novalnet()->db()->get_transaction_details( $this->wc_order_id, $this->parent_tid );
 		}
 
 		// Assign payment type based on the order for subscription.
 		if ( class_exists( 'WC_Subscription' ) ) {
+
 			if ( ! empty( $this->parent_tid ) ) {
 				$this->subs_order_reference = novalnet()->db()->get_subscription_details( $this->parent_tid );
 			}
 
-			if ( empty( $this->order_reference ['order_no'] ) && ! empty( $this->subs_order_reference ) ) {
+			if ( empty( $this->order_reference['order_no'] ) && ! empty( $this->subs_order_reference ) ) {
 				$this->order_reference = novalnet()->db()->get_transaction_details( '', $this->subs_order_reference['tid'] );
 			}
 
-			if ( ! empty( $this->order_reference ['order_no'] ) ) {
-				$this->wcs_order_id = apply_filters( 'novalnet_get_subscription_id', $this->order_reference ['order_no'] );
+			if ( empty( $this->subs_order_reference ) && ! empty( $this->event_data['subscription']['tid'] ) ) {
+				$this->subs_order_reference = novalnet()->db()->get_subscription_details( $this->event_data['subscription']['tid'] );
+			}
+
+			if ( ! empty( $this->order_reference['order_no'] ) ) {
+				$this->wcs_order_id = apply_filters( 'novalnet_get_subscription_id', $this->order_reference['order_no'] );
 				if ( 'shop_subscription' === novalnet()->helper()->novalnet_get_wc_order_type( $this->wcs_order_id ) ) {
 					$this->wcs_order = wcs_get_subscription( $this->wcs_order_id );
 					if ( empty( $this->wcs_order ) || ! is_object( $this->wcs_order ) ) {
@@ -1370,28 +1393,45 @@ class WC_Novalnet_Webhook {
 						$message = sprintf( __( 'Subscription order reference not found in the shop for the subscription order: %d', 'novalnet' ), $this->wcs_order_id );
 						$this->display_message( array( 'message' => $message ) );
 					}
-					$this->order_reference ['payment_type'] = $this->wcs_order->get_payment_method();
+					$this->order_reference['payment_type'] = $this->wcs_order->get_payment_method();
 				}
 			}
 		}
-
 		if ( empty( $this->order_reference ) ) {
-			if ( 'ONLINE_TRANSFER_CREDIT' === $this->event_data ['transaction'] ['payment_type'] ) {
+			if ( 'ONLINE_TRANSFER_CREDIT' === $this->event_data['transaction']['payment_type'] ) {
 				if ( ! empty( $this->parent_tid ) ) {
-					$this->wc_order_id = novalnet()->helper()->get_post_id( $this->event_data ['transaction'] ['order_no'] );
+					$this->wc_order_id = novalnet()->helper()->get_post_id( $this->event_data['transaction']['order_no'] );
 				}
-				$this->order_reference ['order_no'] = $this->wc_order_id;
-				$transaction_tid                    = $this->event_data ['transaction'] ['tid'];
+				$this->order_reference['order_no'] = $this->wc_order_id;
+				$transaction_tid                   = $this->event_data['transaction']['tid'];
 				// Update the transaction TID for updating the initial payment.
-				$this->event_data ['transaction'] ['tid'] = $this->parent_tid;
+				$this->event_data['transaction']['tid'] = $this->parent_tid;
 				$this->update_initial_payment( false );
 				// Reassign the transaction TID after the initial payment is updated.
-				$this->event_data ['transaction'] ['tid'] = $transaction_tid;
-				$this->order_reference                    = novalnet()->db()->get_transaction_details( $this->wc_order_id, $this->parent_tid );
-
-			} elseif ( 'PAYMENT' === $this->event_data ['event'] ['type'] ) {
-				$this->order_reference ['order_no'] = $this->wc_order_id;
+				$this->event_data['transaction']['tid'] = $transaction_tid;
+				$this->order_reference                  = novalnet()->db()->get_transaction_details( $this->wc_order_id, $this->parent_tid );
+			} elseif ( 'PAYMENT' === $this->event_data['event']['type'] ) {
+				$this->order_reference['order_no'] = $this->wc_order_id;
 				$this->update_initial_payment( true );
+			} elseif ( 'CREDIT' == $this->event_data['event']['type'] && ! empty( $this->subs_order_reference ) ) {
+				$this->order_reference = novalnet()->db()->get_transaction_details( $this->event_data['transaction']['order_no'], $this->parent_tid );
+				if ( empty( $this->order_reference ) ) {
+					$wsorder     = wc_get_order( $this->event_data['transaction']['order_no'] );
+					$insert_data = array(
+						'order_no'        => $this->event_data['transaction']['order_no'],
+						'tid'             => $this->parent_tid,
+						'currency'        => get_woocommerce_currency(),
+						'gateway_status'  => $this->event_data['transaction']['status'],
+						'payment_type'    => ( is_object( $wsorder ) && $wsorder->get_payment_method() ) ? $wsorder->get_payment_method() : null,
+						'amount'          => $this->event_data['transaction']['amount'],
+						'subs_id'         => $this->event_data['subscription']['subs_id'],
+						'callback_amount' => $this->event_data['transaction']['amount'],
+					);
+					novalnet()->db()->insert( $insert_data, 'novalnet_transaction_detail' );
+					novalnet()->helper()->novalnet_update_wc_order_meta( $wsorder, '_novalnet_order_number', $wsorder->get_order_number(), true );
+					novalnet()->helper()->novalnet_update_wc_order_meta( $wsorder, 'nn_credit_tid', $this->event_data['transaction']['tid'], true );
+					$this->order_reference = novalnet()->db()->get_transaction_details( $this->event_data['transaction']['order_no'], $this->parent_tid );
+				}
 			} else {
 				$this->display_message( array( 'message' => 'Order reference not found in the shop' ) );
 			}
@@ -1411,14 +1451,15 @@ class WC_Novalnet_Webhook {
 			// Get the order no by using the cancelled order tid.
 			$order_id_by_meta = novalnet()->db()->get_post_id_by_meta_data( $this->parent_tid );
 			if ( ! empty( $order_id_by_meta ) ) {
-				$this->order_reference ['order_no'] = $order_id_by_meta;
+				$this->order_reference['order_no'] = $order_id_by_meta;
 			}
 		}
 
-		if ( ! empty( $this->order_reference ['order_no'] ) ) {
-			$wc_order = wc_get_order( $this->order_reference ['order_no'] );
-			if ( is_object( $wc_order ) ) {
-				$payment_gateway = wc_get_payment_gateway_by_order( $wc_order );
+		if ( ! empty( $this->order_reference['order_no'] ) ) {
+			$wc_order        = wc_get_order( $this->order_reference['order_no'] );
+			$payment_gateway = wc_get_payment_gateway_by_order( $wc_order );
+
+			if ( is_object( $wc_order ) && $payment_gateway !== false ) {
 				if ( method_exists( $payment_gateway, 'check_transaction_status' ) ) {
 					$comments = $payment_gateway->check_transaction_status( $this->event_data, $wc_order, $communication_failure );
 				} else {
@@ -1476,7 +1517,7 @@ class WC_Novalnet_Webhook {
 			$mail_subject .= wc_novalnet_format_text( sprintf( __( ' - [Order #%1$s]', 'woocommerce-novalnet-gateway' ), $this->wc_order->get_order_number() ) );
 		}
 
-		wc_novalnet_send_mail( WC_Novalnet_Configuration::get_global_settings( 'callback_emailtoaddr' ), $mail_subject, $comments ['message'] );
+		wc_novalnet_send_mail( WC_Novalnet_Configuration::get_global_settings( 'callback_emailtoaddr' ), $mail_subject, $comments['message'] );
 	}
 
 
@@ -1491,24 +1532,23 @@ class WC_Novalnet_Webhook {
 
 		$data = array(
 			'event_type'     => $this->event_type,
-			'gateway_status' => $this->event_data ['transaction']['status'],
+			'gateway_status' => $this->event_data['transaction']['status'],
 			'event_tid'      => $this->event_tid,
 			'parent_tid'     => $this->parent_tid,
 			'order_no'       => $post_id,
 		);
 
-		if ( isset( $this->event_data ['transaction']['payment_type'] ) ) {
-			$data['payment_type'] = $this->event_data ['transaction']['payment_type'];
+		if ( isset( $this->event_data['transaction']['payment_type'] ) ) {
+			$data['payment_type'] = $this->event_data['transaction']['payment_type'];
 		}
-		if ( isset( $this->event_data ['transaction']['amount'] ) ) {
-			$data['amount'] = $this->event_data ['transaction']['amount'];
+		if ( isset( $this->event_data['transaction']['amount'] ) ) {
+			$data['amount'] = $this->event_data['transaction']['amount'];
 		}
 		novalnet()->db()->insert(
 			$data,
 			'novalnet_webhook_history'
 		);
 	}
-
 }
 
 new WC_Novalnet_Webhook();

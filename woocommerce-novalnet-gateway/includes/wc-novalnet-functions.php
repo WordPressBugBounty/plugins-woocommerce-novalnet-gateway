@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Novalnet Functions.
  *
@@ -50,7 +51,7 @@ function wc_novalnet_format_text( $text ) {
 function wc_novalnet_next_cycle_date( $data ) {
 
 	// Check for next subscription cycle parameter.
-	return ( ! empty( $data ['next_cycle_date'] ) ) ? $data ['next_cycle_date'] : '';
+	return ( ! empty( $data['next_cycle_date'] ) ) ? $data['next_cycle_date'] : '';
 }
 
 /**
@@ -127,12 +128,12 @@ function wc_novalnet_subscription_cancel_form() {
 	return $form;
 }
 
-	/**
-	 * Retrieves the Novalnet subscription cancel reasons.
-	 *
-	 * @since  12.0.0
-	 * @return array
-	 */
+/**
+ * Retrieves the Novalnet subscription cancel reasons.
+ *
+ * @since  12.0.0
+ * @return array
+ */
 function wc_novalnet_subscription_cancel_list() {
 	return array(
 		__( '--Select--', 'woocommerce-novalnet-gateway' ),
@@ -204,7 +205,6 @@ function wc_novalnet_unserialize_data( $data, $need_as_array = true ) {
  * @since 12.0.0
  */
 function wc_novalnet_thankyou_page_session_unset() {
-
 	// $post_id used in action.
 	WC()->session->__unset( 'novalnet_thankyou_page' );
 }
@@ -258,11 +258,11 @@ function wc_novalnet_format_due_date( $days ) {
  * @return string
  */
 function wc_novalnet_response_text( $data ) {
-	if ( ! empty( $data ['result']['status_text'] ) ) {
-		return $data ['result']['status_text'];
+	if ( ! empty( $data['result']['status_text'] ) ) {
+		return $data['result']['status_text'];
 	}
-	if ( ! empty( $data ['status_text'] ) ) {
-		return $data ['status_text'];
+	if ( ! empty( $data['status_text'] ) ) {
+		return $data['status_text'];
 	}
 	return __( 'Payment was not successful. An error occurred', 'woocommerce-novalnet-gateway' );
 }
@@ -300,11 +300,11 @@ function wc_novalnet_get_ip_address( $type = 'REMOTE_ADDR' ) {
 
 	// Check for valid IP.
 	if ( 'SERVER_ADDR' === $type ) {
-		if ( empty( $server [ $type ] ) ) {
+		if ( empty( $server[ $type ] ) ) {
 			$ip_address = gethostbyname( $server['HTTP_HOST'] );
 			return $ip_address;
 		}
-		return $server [ $type ];
+		return $server[ $type ];
 	}
 	$ip_address = WC_Geolocation::get_ip_address();
 	return $ip_address;
@@ -364,7 +364,7 @@ function wc_novalnet_formatted_amount( $amount ) {
  * @return object
  */
 function wc_novalnet_logger() {
-	return new WC_Logger();
+	 return new WC_Logger();
 }
 
 /**
@@ -434,8 +434,8 @@ function wc_novalnet_process_multiple_payment_hide() {
  */
 function wc_novalnet_get_payment_text( $settings, $payment_text, $language, $payment_id, $title = 'title' ) {
 
-	if ( isset( $settings [ $title . '_' . $language ] ) ) {
-		return $settings [ $title . '_' . $language ];
+	if ( isset( $settings[ $title . '_' . $language ] ) ) {
+		return $settings[ $title . '_' . $language ];
 	}
 
 	return isset( $payment_text[ $title . '_' . $language ] ) ? $payment_text[ $title . '_' . $language ] : $payment_text[ $title . '_en' ];
@@ -452,7 +452,7 @@ function wc_novalnet_get_payment_text( $settings, $payment_text, $language, $pay
  * @return array
  */
 function wc_novalnet_check_isset( $data, $key, $value = '' ) {
-	return ( ! empty( $data [ $key ] ) && $value === $data [ $key ] );
+	return ( ! empty( $data[ $key ] ) && $value === $data[ $key ] );
 }
 
 /**
@@ -536,7 +536,7 @@ function get_wallet_sheet_details( $wallet ) {
 	$pay_for_order    = false;
 	$pay_for_order_id = '';
 	// If paying from order, we need to get total from order not cart.
-	if ( isset( $_GET['pay_for_order'] ) && ! empty( $_GET['key'] ) ) { // @codingStandardsIgnoreLine.
+	if (isset($_GET['pay_for_order']) && ! empty($_GET['key'])) { // @codingStandardsIgnoreLine.
 		global $wp;
 		$pay_for_order    = true;
 		$pay_for_order_id = wc_clean( $wp->query_vars['order-pay'] );
@@ -616,7 +616,6 @@ function get_wallet_sheet_details( $wallet ) {
 		}
 
 		$cart_subtotal = $wc_order->get_total();
-
 	} else {
 		$cart_subtotal = WC()->cart->total;
 		$items         = $woocommerce->cart->get_cart();
@@ -828,7 +827,7 @@ function get_available_wallets( $page ) {
 
 			$items               = $woocommerce->cart->get_cart();
 			$pay_for_order_total = 0;
-			if ( isset( $_GET['pay_for_order'] ) && ! empty( $_GET['key'] ) ) { // @codingStandardsIgnoreLine.
+			if (isset($_GET['pay_for_order']) && ! empty($_GET['key'])) { // @codingStandardsIgnoreLine.
 				global $wp;
 				$pay_for_order       = true;
 				$pay_for_order_id    = wc_clean( $wp->query_vars['order-pay'] );
@@ -892,7 +891,6 @@ function get_available_wallets( $page ) {
 						$cart_has_virtual = 0;
 					} else {
 						$cart_has_virtual = 1;
-
 					}
 				}
 			}
@@ -901,10 +899,11 @@ function get_available_wallets( $page ) {
 				$is_wallet_available_for_virtual = false;
 			}
 
-			if ( $cart_has_subs && $cart_has_subs_valid
-			&& ( ( 'product_page' === $page && $product_has_free_trial && WC()->cart->total <= 0 )
-				|| ( 'product_page' !== $page && WC()->cart->total <= 0 )
-			)
+			if (
+				$cart_has_subs && $cart_has_subs_valid
+				&& ( ( 'product_page' === $page && $product_has_free_trial && WC()->cart->total <= 0 )
+					|| ( 'product_page' !== $page && WC()->cart->total <= 0 )
+				)
 			) {
 				if ( version_compare( WC_Subscriptions::$version, '4.0.0', '<' ) ) {
 					$zero_initial_requires_payment = WC_Subscriptions_Cart::zero_initial_payment_requires_payment();
@@ -1030,13 +1029,13 @@ function set_paypal_sheet_details( &$parameters, $wc_order ) {
 						'category'    => $product_type,
 					);
 				} elseif ( $signup_fee > 0 ) {
-						$parameters['cart_info']['line_items'][] = array(
-							'name'        => 'Signup Fee',
-							'price'       => wc_novalnet_amount_as_string( $signup_fee ),
-							'quantity'    => $item_values['quantity'],
-							'description' => $product_title,
-							'category'    => $product_type,
-						);
+					$parameters['cart_info']['line_items'][] = array(
+						'name'        => 'Signup Fee',
+						'price'       => wc_novalnet_amount_as_string( $signup_fee ),
+						'quantity'    => $item_values['quantity'],
+						'description' => $product_title,
+						'category'    => $product_type,
+					);
 				}
 			} else {
 				$parameters['cart_info']['line_items'][] = array(
@@ -1132,7 +1131,7 @@ function load_shipping_method_options() {
 		$options[ $method->get_method_title() ] = array();
 
 		// Translators: %1$s shipping method name.
-		$options[ $method->get_method_title() ][ $method->id ] = sprintf( __( 'Any &quot;%1$s&quot; method', 'woocommerce' ), $method->get_method_title() );
+		$options[ $method->get_method_title() ][ $method->id ] = sprintf( __( 'Any &quot;%1$s&quot; method', 'woocommerce-novalnet-gateway' ), $method->get_method_title() );
 
 		foreach ( $zones as $zone ) {
 
@@ -1147,10 +1146,10 @@ function load_shipping_method_options() {
 				$option_id = $shipping_method_instance->get_rate_id();
 
 				// Translators: %1$s shipping method title, %2$s shipping method id.
-				$option_instance_title = sprintf( __( '%1$s (#%2$s)', 'woocommerce' ), $shipping_method_instance->get_title(), $shipping_method_instance_id );
+				$option_instance_title = sprintf( __( '%1$s (#%2$s)', 'woocommerce-novalnet-gateway' ), $shipping_method_instance->get_title(), $shipping_method_instance_id );
 
 				// Translators: %1$s zone name, %2$s shipping method instance name.
-				$option_title = sprintf( __( '%1$s &ndash; %2$s', 'woocommerce' ), $zone->get_id() ? $zone->get_zone_name() : __( 'Other locations', 'woocommerce' ), $option_instance_title );
+				$option_title = sprintf( __( '%1$s &ndash; %2$s', 'woocommerce-novalnet-gateway' ), $zone->get_id() ? $zone->get_zone_name() : __( 'Other locations', 'woocommerce-novalnet-gateway' ), $option_instance_title );
 
 				$options[ $method->get_method_title() ][ $option_id ] = $option_title;
 			}

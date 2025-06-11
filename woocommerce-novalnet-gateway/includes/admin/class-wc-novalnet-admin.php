@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Novalnet Configuration Class
  *
@@ -16,11 +17,12 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Novalnet_Admin extends WC_Settings_API {
 
+
 	/**
 	 * Constructor
 	 */
 	public function __construct() {
-		// Save Novalnet settings.
+		 // Save Novalnet settings.
 		add_action( 'woocommerce_settings_save_novalnet-settings', array( $this, 'save' ) );
 
 		add_action( 'woocommerce_admin_field_novalnet_hidden', array( $this, 'form_novalnet_hidden' ) );
@@ -81,8 +83,10 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 	 * @param string           $screen_id The current page screen id.
 	 * @param WP_Post|WC_Order $post_or_wc_order The WordPress post or Woocommerce order object.
 	 */
-	public function novalnet_order_meta_boxes( $screen_id, $post_or_wc_order ) : void {
+	public function novalnet_order_meta_boxes( $screen_id, $post_or_wc_order ): void {
+
 		$wc_order = ( $post_or_wc_order instanceof WP_Post ) ? wc_get_order( $post_or_wc_order->ID ) : $post_or_wc_order;
+
 		if ( ! empty( $wc_order ) && $wc_order instanceof WC_Order ) {
 			// Dont use $post_type as variable name these may override the existing core value.
 			$nn_post_type   = novalnet()->helper()->novalnet_get_wc_order_type( $wc_order );
@@ -131,14 +135,20 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 				$response   = novalnet()->helper()->submit_request( $parameters, novalnet()->helper()->get_action_endpoint( 'transaction_capture' ), array( 'post_id' => $post_id ) );
 
 				if ( WC_Novalnet_Validation::is_success_status( $response ) ) {
-					$update_info['gateway_status'] = $response ['transaction']['status'];
-					novalnet()->helper()->novalnet_update_wc_order_meta( $wc_order, '_novalnet_gateway_status', $response ['transaction']['status'], true );
+					$update_info['gateway_status'] = $response['transaction']['status'];
+					novalnet()->helper()->novalnet_update_wc_order_meta( $wc_order, '_novalnet_gateway_status', $response['transaction']['status'], true );
+
 					/* translators: %s: Date */
 					$message = sprintf( __( 'The transaction has been confirmed on %s.', 'woocommerce-novalnet-gateway' ), wc_novalnet_formatted_date() );
 
 					// Update callback amount.
 					if ( 'CONFIRMED' === $update_info['gateway_status'] ) {
-						$update_info ['callback_amount'] = wc_novalnet_formatted_amount( $wc_order->get_total() );
+						if ( $wc_order->get_date_paid() == null ) {
+							$wc_order->set_date_paid( time() );
+							$wc_order->payment_complete( $tid );
+							$wc_order->save();
+						}
+						$update_info['callback_amount'] = wc_novalnet_formatted_amount( $wc_order->get_total() );
 					}
 
 					// Store instalment details.
@@ -147,9 +157,9 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 						$additional_info = novalnet()->db()->get_entry_by_order_id( $wc_order, 'additional_info' );
 
 						if ( ! empty( $additional_info ) ) {
-							$update_info ['additional_info'] = wc_novalnet_serialize_data( $additional_info + wc_novalnet_unserialize_data( apply_filters( 'novalnet_store_instalment_data', $response ) ) );
+							$update_info['additional_info'] = wc_novalnet_serialize_data( $additional_info + wc_novalnet_unserialize_data( apply_filters( 'novalnet_store_instalment_data', $response ) ) );
 						} else {
-							$update_info ['additional_info'] = apply_filters( 'novalnet_store_instalment_data', $response );
+							$update_info['additional_info'] = apply_filters( 'novalnet_store_instalment_data', $response );
 						}
 					}
 
@@ -203,7 +213,7 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 						continue;
 					}
 					$html .= '<option value="' . esc_attr( $payment_type ) . '"';
-					if ( ! empty( novalnet()->request ['shop_order_novalnet_paymenttype'] ) && novalnet()->request ['shop_order_novalnet_paymenttype'] === $payment_type ) {
+					if ( ! empty( novalnet()->request['shop_order_novalnet_paymenttype'] ) && novalnet()->request['shop_order_novalnet_paymenttype'] === $payment_type ) {
 						$html .= 'selected="selected"';
 					}
 					$html .= '>' . esc_attr( $details->method_title ) . '</option>';
@@ -237,14 +247,14 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 	public static function orders_by_paymenttype_query( $vars ) {
 		global $typenow;
 
-		if ( ! empty( $typenow ) && in_array( $typenow, array( 'shop_order', 'shop_subscription' ), true ) && ! empty( novalnet()->request ['shop_order_novalnet_paymenttype'] ) ) {
-			$meta_key = apply_filters( 'woocommerce_novalnet_admin_order_type_filter_meta_key', '_payment_method', novalnet()->request ['shop_order_novalnet_paymenttype'] );
+		if ( ! empty( $typenow ) && in_array( $typenow, array( 'shop_order', 'shop_subscription' ), true ) && ! empty( novalnet()->request['shop_order_novalnet_paymenttype'] ) ) {
+			$meta_key = apply_filters( 'woocommerce_novalnet_admin_order_type_filter_meta_key', '_payment_method', novalnet()->request['shop_order_novalnet_paymenttype'] );
 
 			if ( ! empty( $meta_key ) ) {
 				$vars['meta_query'][] = array(
 					'key'     => '_payment_method',
 					'compare' => '=',
-					'value'   => novalnet()->request ['shop_order_novalnet_paymenttype'],
+					'value'   => novalnet()->request['shop_order_novalnet_paymenttype'],
 				);
 			}
 		}
@@ -260,8 +270,8 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 	 * @return array
 	 */
 	public static function order_list_by_paymenttype_query( $vars ) {
-		if ( ! empty( novalnet()->request ['shop_order_novalnet_paymenttype'] ) ) {
-			$vars['payment_method'] = wp_unslash( novalnet()->request ['shop_order_novalnet_paymenttype'] );
+		if ( ! empty( novalnet()->request['shop_order_novalnet_paymenttype'] ) ) {
+			$vars['payment_method'] = wp_unslash( novalnet()->request['shop_order_novalnet_paymenttype'] );
 		}
 		return $vars;
 	}
@@ -272,7 +282,6 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 	 * @since 12.0.0
 	 */
 	public function admin_enqueue_scripts() {
-
 		// Enqueue style & script.
 		wp_enqueue_media();
 		wp_enqueue_script( 'woocommerce-novalnet-gateway-script', novalnet()->plugin_url . '/assets/js/novalnet.min.js', '', NOVALNET_VERSION, true );
@@ -313,7 +322,7 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 	 */
 	public function add_novalnet_settings_tab( $woocommerce_tab ) {
 
-		$woocommerce_tab ['novalnet-settings'] = __( 'Novalnet Global Configuration', 'woocommerce-novalnet-gateway' );
+		$woocommerce_tab['novalnet-settings'] = __( 'Novalnet Global Configuration', 'woocommerce-novalnet-gateway' );
 		return $woocommerce_tab;
 	}
 
@@ -323,20 +332,19 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 	 * @since 12.0.0
 	 */
 	public function get_novalnet_vendor_details() {
-
 		check_ajax_referer( 'novalnet_merchant_data_action', 'nn_nonce' );
-		if ( ! empty( novalnet()->request ['novalnet_api_key'] ) && ! empty( novalnet()->request ['novalnet_key_password'] ) ) {
+		if ( ! empty( novalnet()->request['novalnet_api_key'] ) && ! empty( novalnet()->request['novalnet_key_password'] ) ) {
 
 			$request = array(
 				'merchant' => array(
-					'signature' => novalnet()->request ['novalnet_api_key'],
+					'signature' => novalnet()->request['novalnet_api_key'],
 				),
 				'custom'   => array(
 					'lang' => wc_novalnet_shop_language(),
 				),
 			);
 
-			$response = novalnet()->helper()->submit_request( $request, novalnet()->helper()->get_action_endpoint( 'merchant_details' ), array( 'access_key' => novalnet()->request ['novalnet_key_password'] ) );
+			$response = novalnet()->helper()->submit_request( $request, novalnet()->helper()->get_action_endpoint( 'merchant_details' ), array( 'access_key' => novalnet()->request['novalnet_key_password'] ) );
 
 			if ( ! empty( $response['result']['status'] ) && 'SUCCESS' === $response['result']['status'] ) {
 
@@ -372,8 +380,8 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 		}
 		$request = array(
 			'instalment' => array(
-				'tid'         => novalnet()->request ['novalnet_instalment_cancel_tid'],
-				'cancel_type' => novalnet()->request ['cancel_type'],
+				'tid'         => novalnet()->request['novalnet_instalment_cancel_tid'],
+				'cancel_type' => novalnet()->request['cancel_type'],
 			),
 			'custom'     => array(
 				'lang'         => wc_novalnet_shop_language(),
@@ -381,11 +389,11 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 			),
 		);
 
-		$response = novalnet()->helper()->submit_request( $request, novalnet()->helper()->get_action_endpoint( 'instalment_cancel' ), array( 'access_key' => novalnet()->request ['novalnet_key_password'] ) );
-		$wc_order = wc_get_order( novalnet()->request ['instalment_cancel_order_id'] );
+		$response = novalnet()->helper()->submit_request( $request, novalnet()->helper()->get_action_endpoint( 'instalment_cancel' ), array( 'access_key' => novalnet()->request['novalnet_key_password'] ) );
+		$wc_order = wc_get_order( novalnet()->request['instalment_cancel_order_id'] );
 		if ( WC_Novalnet_Validation::is_success_status( $response ) ) {
 
-			if ( 'CANCEL_ALL_CYCLES' === (string) novalnet()->request ['cancel_type'] ) {
+			if ( 'CANCEL_ALL_CYCLES' === (string) novalnet()->request['cancel_type'] ) {
 				$refund_note = '';
 				if ( isset( $response['transaction']['refund']['amount'] ) ) {
 					$refund_note = sprintf(
@@ -415,9 +423,9 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 				);
 			}
 
-			$instalments                            = novalnet()->db()->get_entry_by_order_id( novalnet()->request ['instalment_cancel_order_id'], 'additional_info' );
+			$instalments                            = novalnet()->db()->get_entry_by_order_id( novalnet()->request['instalment_cancel_order_id'], 'additional_info' );
 			$instalments['is_instalment_cancelled'] = 1;
-			$instalments['is_full_cancelled']       = ( 'CANCEL_ALL_CYCLES' === (string) novalnet()->request ['cancel_type'] ) ? 1 : 0;
+			$instalments['is_full_cancelled']       = ( 'CANCEL_ALL_CYCLES' === (string) novalnet()->request['cancel_type'] ) ? 1 : 0;
 
 			$update_info = array(
 				'gateway_status'  => 'DEACTIVATED',
@@ -427,7 +435,7 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 			novalnet()->db()->update(
 				$update_info,
 				array(
-					'order_no' => novalnet()->request ['instalment_cancel_order_id'],
+					'order_no' => novalnet()->request['instalment_cancel_order_id'],
 				)
 			);
 			novalnet()->helper()->update_comments( $wc_order, wc_novalnet_format_text( $message ) );
@@ -450,9 +458,9 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 	 */
 	public function handle_webhook_configure() {
 		check_ajax_referer( 'novalnet_merchant_data_action', 'nn_nonce' );
-		if ( ! empty( novalnet()->request ['novalnet_api_key'] ) && ! empty( novalnet()->request ['novalnet_key_password'] ) ) {
+		if ( ! empty( novalnet()->request['novalnet_api_key'] ) && ! empty( novalnet()->request['novalnet_key_password'] ) ) {
 
-			if ( empty( novalnet()->request ['novalnet_webhook_url'] ) ) {
+			if ( empty( novalnet()->request['novalnet_webhook_url'] ) ) {
 				wp_send_json_error(
 					array(
 						'error' => __( 'Please enter the valid webhook URL', 'woocommerce-novalnet-gateway' ),
@@ -462,17 +470,17 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 
 			$request = array(
 				'merchant' => array(
-					'signature' => novalnet()->request ['novalnet_api_key'],
+					'signature' => novalnet()->request['novalnet_api_key'],
 				),
 				'webhook'  => array(
-					'url' => novalnet()->request ['novalnet_webhook_url'],
+					'url' => novalnet()->request['novalnet_webhook_url'],
 				),
 				'custom'   => array(
 					'lang' => wc_novalnet_shop_language(),
 				),
 			);
 
-			$response = novalnet()->helper()->submit_request( $request, novalnet()->helper()->get_action_endpoint( 'webhook_configure' ), array( 'access_key' => novalnet()->request ['novalnet_key_password'] ) );
+			$response = novalnet()->helper()->submit_request( $request, novalnet()->helper()->get_action_endpoint( 'webhook_configure' ), array( 'access_key' => novalnet()->request['novalnet_key_password'] ) );
 
 			if ( ! empty( $response['result']['status'] ) && 'SUCCESS' === $response['result']['status'] ) {
 				$response['result']['status_text'] = __( 'Notification / Webhook URL is configured successfully in Novalnet Admin Portal', 'woocommerce-novalnet-gateway' );
@@ -498,7 +506,7 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 	 * @since 12.0.0
 	 */
 	public function check_amount_admin_order() {
-		if ( ! empty( novalnet()->request ['novalnet_check_post_id'] ) ) {
+		if ( ! empty( novalnet()->request['novalnet_check_post_id'] ) ) {
 			$order          = wc_get_order( novalnet()->request['novalnet_check_post_id'] );
 			$payment_method = novalnet()->request['novalnet_admin_payment'];
 			if ( $order->get_total() > 0 ) {
@@ -539,7 +547,7 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 	public function form_novalnet_hidden( $value ) {
 		$option_value = self::get_option( $value['id'] );
 		?>
-		<input name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" type="hidden" value="<?php echo esc_attr( $option_value ); ?>"/>
+		<input name="<?php echo esc_attr( $value['id'] ); ?>" id="<?php echo esc_attr( $value['id'] ); ?>" type="hidden" value="<?php echo esc_attr( $option_value ); ?>" />
 		<?php
 	}
 
@@ -574,9 +582,8 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 	 * @since 12.0.0
 	 */
 	public function save() {
-
 		// Process backend global configuration validation.
-		if ( ! empty( novalnet()->request ['tab'] ) && 'novalnet-settings' === novalnet()->request ['tab'] && ! empty( novalnet()->request ['save'] ) ) {
+		if ( ! empty( novalnet()->request['tab'] ) && 'novalnet-settings' === novalnet()->request['tab'] && ! empty( novalnet()->request['save'] ) ) {
 			if ( WC_Novalnet_Validation::validate_configuration( novalnet()->request ) ) {
 				$error = esc_attr( __( 'Please fill in the required fields', 'woocommerce-novalnet-gateway' ) );
 			} else {
@@ -604,8 +611,8 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 	 * @since 12.5.0
 	 */
 	public function novalnet_wc_order_recalculate_success() {
-		if ( wc_novalnet_check_isset( novalnet()->request, 'action', 'novalnet_wc_order_recalculate_success' ) && ! empty( novalnet()->request ['novalnet_check_order_id'] ) ) {
-			$wc_order_id = novalnet()->request ['novalnet_check_order_id'];
+		if ( wc_novalnet_check_isset( novalnet()->request, 'action', 'novalnet_wc_order_recalculate_success' ) && ! empty( novalnet()->request['novalnet_check_order_id'] ) ) {
+			$wc_order_id = novalnet()->request['novalnet_check_order_id'];
 			$this->handle_amount_update( $wc_order_id );
 		}
 	}
@@ -700,14 +707,13 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 	 * @throws Exception For response.
 	 */
 	public function handle_status_change( $wc_order_id, $old_status, $new_status, $wc_order ) {
-
 		// Check for the Novalnet payment_type.
 		if ( current_user_can( 'edit_shop_orders' ) && WC_Novalnet_Validation::check_string( $wc_order->get_payment_method() ) && 'shop_order' === (string) novalnet()->helper()->novalnet_get_wc_order_type( $wc_order ) && ! doing_action( 'wp_ajax_handle_instalment_cancel' ) ) {
 			// Get the current payment status of the transaction.
 			$gateway_status = novalnet()->db()->get_entry_by_order_id( $wc_order_id, 'gateway_status' );
 			$add_refund_log = false;
 
-			if ( 'cancelled' === $new_status && in_array( $gateway_status, array( 'CONFIRMED', 'PENDING' ), true ) ) {
+			if ( 'cancelled' === $new_status && in_array( $gateway_status, array( 'CONFIRMED', 'PENDING' ), true ) && WC_Novalnet_Configuration::get_global_settings( 'admin_full_refund' ) === 'yes' ) {
 
 				$transaction_details = novalnet()->db()->get_transaction_details( $wc_order_id );
 				$refunded_amount     = novalnet()->db()->get_entry_by_order_id( $wc_order_id, 'refunded_amount' );
@@ -733,7 +739,6 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 
 			$wc_order->set_customer_note( wp_strip_all_tags( $wc_order->get_customer_note() ) );
 			$wc_order->save();
-
 			if ( ! empty( $action ) ) {
 
 				// Get the Transaction ID of the transaction.
@@ -770,8 +775,8 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 					// Handle success process.
 					if ( WC_Novalnet_Validation::is_success_status( $response ) ) {
 
-						$update_info['gateway_status'] = $response ['transaction']['status'];
-						novalnet()->helper()->novalnet_update_wc_order_meta( $wc_order, '_novalnet_gateway_status', $response ['transaction']['status'], true );
+						$update_info['gateway_status'] = $response['transaction']['status'];
+						novalnet()->helper()->novalnet_update_wc_order_meta( $wc_order, '_novalnet_gateway_status', $response['transaction']['status'], true );
 						if ( 'instalment_cancel' === $action ) {
 							$instalments                            = novalnet()->db()->get_entry_by_order_id( $wc_order_id, 'additional_info' );
 							$instalments['is_instalment_cancelled'] = 1;
@@ -788,7 +793,12 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 
 							// Update callback amount.
 							if ( 'CONFIRMED' === $update_info['gateway_status'] ) {
-								$update_info ['callback_amount'] = wc_novalnet_formatted_amount( $wc_order->get_total() );
+								if ( $wc_order->get_date_paid() == null ) {
+									$wc_order->set_date_paid( time() );
+									$wc_order->payment_complete( $tid );
+									$wc_order->save();
+								}
+								$update_info['callback_amount'] = wc_novalnet_formatted_amount( $wc_order->get_total() );
 							}
 
 							// Store instalment details.
@@ -797,9 +807,9 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 								$additional_info = novalnet()->db()->get_entry_by_order_id( $wc_order_id, 'additional_info' );
 
 								if ( ! empty( $additional_info ) ) {
-									$update_info ['additional_info'] = wc_novalnet_serialize_data( $additional_info + wc_novalnet_unserialize_data( apply_filters( 'novalnet_store_instalment_data', $response ) ) );
+									$update_info['additional_info'] = wc_novalnet_serialize_data( $additional_info + wc_novalnet_unserialize_data( apply_filters( 'novalnet_store_instalment_data', $response ) ) );
 								} else {
-									$update_info ['additional_info'] = apply_filters( 'novalnet_store_instalment_data', $response );
+									$update_info['additional_info'] = apply_filters( 'novalnet_store_instalment_data', $response );
 								}
 
 								// Store Paypal token details.
@@ -842,8 +852,7 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 									wc_novalnet_formatted_date(),
 									wc_novalnet_shop_amount_format(
 										wc_novalnet_formatted_amount(
-											$response
-											['transaction']['refund']['amount'] / 100
+											$response['transaction']['refund']['amount'] / 100
 										)
 									)
 								);
@@ -855,8 +864,7 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 									$response['transaction']['tid'],
 									wc_novalnet_shop_amount_format(
 										wc_novalnet_formatted_amount(
-											$response
-											['transaction']['refund']['amount'] / 100
+											$response['transaction']['refund']['amount'] / 100
 										)
 									)
 								);
@@ -864,7 +872,7 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 								// Get the new TID.
 								if ( ! empty( $response['transaction']['refund']['tid'] ) ) {
 									/* translators: %s: response tid */
-									$message .= sprintf( __( ' New TID:%s for the refunded amount', 'woocommerce-novalnet-gateway' ), $response ['transaction']['refund']['tid'] );
+									$message .= sprintf( __( ' New TID:%s for the refunded amount', 'woocommerce-novalnet-gateway' ), $response['transaction']['refund']['tid'] );
 								}
 							}
 						}
@@ -962,48 +970,48 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 			<div id="novalnet_admin_order_error" style="display: none;" class="error"></div>
 			<div id="wc_shop_order_novalnet_payment_method">
 				<input type="hidden" name="novalnet_valid_amount" id="novalnet_valid_amount" value=0 />
-			<?php
-			$supported_payment = array(
-				'novalnet_prepayment',
-				'novalnet_invoice',
-				'novalnet_sepa',
-				'novalnet_barzahlen',
-				'novalnet_multibanco',
-			);
+				<?php
+				$supported_payment = array(
+					'novalnet_prepayment',
+					'novalnet_invoice',
+					'novalnet_sepa',
+					'novalnet_barzahlen',
+					'novalnet_multibanco',
+				);
 
-			if ( 'EUR' === get_woocommerce_currency() ) {
-				$supported_payment[] = 'novalnet_guaranteed_invoice';
-				$supported_payment[] = 'novalnet_guaranteed_sepa';
-			}
-
-			$allowed_countries = ( new WC_Novalnet_Guaranteed_Process() )->allowed_countries();
-
-			foreach ( $supported_payment as $payment_type ) {
-				$settings = WC_Novalnet_Configuration::get_payment_settings( $payment_type );
-				if ( wc_novalnet_check_isset( $settings, 'enabled', 'yes' ) ) {
-					$allow_b2b = ( isset( $settings['allow_b2b'] ) && ! empty( $settings['allow_b2b'] ) ) ? "allow_b2b='{$settings['allow_b2b']}'" : '';
-					?>
-					<div class="form-field form-field-wide wc_shop_admin_order_novalnet_method" id="wc_shop_order_admin_<?php echo esc_attr( $payment_type ); ?>" style="display:none" <?php echo esc_attr( $allow_b2b ); ?>>
-					<?php $available_gateways[ $payment_type ]->payment_fields(); ?>
-					</div>
-					<?php
+				if ( 'EUR' === get_woocommerce_currency() ) {
+					$supported_payment[] = 'novalnet_guaranteed_invoice';
+					$supported_payment[] = 'novalnet_guaranteed_sepa';
 				}
-			}
-			wp_localize_script( 'woocommerce-novalnet-gateway-admin-script', 'wc_novalnet_admin_supported_payment', $supported_payment );
-			wp_localize_script( 'woocommerce-novalnet-gateway-admin-script', 'wc_novalnet_allowed_countries', $allowed_countries );
-			echo '</div>';
+
+				$allowed_countries = ( new WC_Novalnet_Guaranteed_Process() )->allowed_countries();
+
+				foreach ( $supported_payment as $payment_type ) {
+					$settings = WC_Novalnet_Configuration::get_payment_settings( $payment_type );
+					if ( wc_novalnet_check_isset( $settings, 'enabled', 'yes' ) ) {
+						$allow_b2b = ( isset( $settings['allow_b2b'] ) && ! empty( $settings['allow_b2b'] ) ) ? "allow_b2b='{$settings['allow_b2b']}'" : '';
+						?>
+						<div class="form-field form-field-wide wc_shop_admin_order_novalnet_method" id="wc_shop_order_admin_<?php echo esc_attr( $payment_type ); ?>" style="display:none" <?php echo esc_attr( $allow_b2b ); ?>>
+							<?php $available_gateways[ $payment_type ]->payment_fields(); ?>
+						</div>
+						<?php
+					}
+				}
+				wp_localize_script( 'woocommerce-novalnet-gateway-admin-script', 'wc_novalnet_admin_supported_payment', $supported_payment );
+				wp_localize_script( 'woocommerce-novalnet-gateway-admin-script', 'wc_novalnet_allowed_countries', $allowed_countries );
+				echo '</div>';
 		}
 	}
 
-	/**
-	 * Remove html strings form customer note
-	 *
-	 * @since 12.0.0
-	 * @since 12.6.2 Changed the function hook to 'woocommerce_after_resend_order_email'.
-	 *
-	 * @param WC_Order $wc_order The order object.
-	 * @param string   $mail_type The current mail type.
-	 */
+		/**
+		 * Remove html strings form customer note
+		 *
+		 * @since 12.0.0
+		 * @since 12.6.2 Changed the function hook to 'woocommerce_after_resend_order_email'.
+		 *
+		 * @param WC_Order $wc_order The order object.
+		 * @param string   $mail_type The current mail type.
+		 */
 	public function novalnet_wc_shop_order_customer_note_check( $wc_order, $mail_type ) {
 		if ( is_admin() && 'shop_order' === novalnet()->helper()->novalnet_get_wc_order_type( $wc_order ) && 'new_order' === $mail_type && WC_Novalnet_Validation::check_string( $wc_order->get_payment_method() ) ) {
 			$string = preg_replace( '/(<([^>]+)>)/i', '', $wc_order->get_customer_note() );
@@ -1013,5 +1021,5 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 	}
 }
 
-// Initiate Admin.
-new WC_Novalnet_Admin();
+	// Initiate Admin.
+	new WC_Novalnet_Admin();
