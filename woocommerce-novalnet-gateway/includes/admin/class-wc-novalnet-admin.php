@@ -713,6 +713,10 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 			$gateway_status = novalnet()->db()->get_entry_by_order_id( $wc_order_id, 'gateway_status' );
 			$add_refund_log = false;
 
+			if ( get_option( 'novalnet_admin_full_refund' ) === false ) {
+				add_option( 'novalnet_admin_full_refund', 'yes' );
+			}
+
 			if ( 'cancelled' === $new_status && in_array( $gateway_status, array( 'CONFIRMED', 'PENDING' ), true ) && WC_Novalnet_Configuration::get_global_settings( 'admin_full_refund' ) === 'yes' ) {
 
 				$transaction_details = novalnet()->db()->get_transaction_details( $wc_order_id );

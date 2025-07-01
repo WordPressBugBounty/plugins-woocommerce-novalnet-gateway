@@ -330,7 +330,9 @@ final class WC_Novalnet {
 			$draft_order_id = ( null !== wc()->session ) ? wc()->session->get( 'store_api_draft_order', 0 ) : null;
 			$order_id       = $wc_order->get_id();
 			if ( $draft_order_id === $order_id && WC_Novalnet_Validation::check_string( $wc_order->get_payment_method() ) && 'pending' === $wc_order->get_status() ) {
-				return false;
+				$cart_hash = md5( json_encode( wc_clean( WC()->cart->get_cart_for_session() ) ) . WC()->cart->total );
+				$wc_order->set_cart_hash( $cart_hash );
+				$wc_order->save();
 			}
 		}
 		return $status;
@@ -400,9 +402,21 @@ final class WC_Novalnet {
 	 * @since 12.4.0
 	 */
 	public function wallet_product_hook() {
+
+		global $product;
+
+		$is_subscription_product = false;
+
+		if ( is_product() && $product instanceof WC_Product ) {
+			if ( class_exists( 'WC_Subscriptions' ) &&  WC_Subscriptions_Product::is_subscription( $product ) ) {
+				$is_subscription_product = true;
+			}
+		}
+
 		 // Get wallet settings.
 		$data['wallet_area']       = 'product_page';
-		$data['available_wallets'] = ( $this->can_display_wallet_button() ) ? get_available_wallets( 'product_page' ) : array();
+		$data['available_wallets'] = ( $this->can_display_wallet_button( array( 'is_subscription_product' => $is_subscription_product ) ) ) ? get_available_wallets( 'product_page' ) : array();
+
 		if ( count( $data['available_wallets'] ) > 0 ) {
 			novalnet()->helper()->load_template( 'render-wallet-button.php', $data );
 		}
@@ -469,7 +483,7 @@ final class WC_Novalnet {
 	 *
 	 * @since 12.5.5
 	 */
-	public function can_display_wallet_button() {
+	public function can_display_wallet_button($data = []) {
 		if ( is_user_logged_in() ) {
 			return true;
 		}
@@ -484,10 +498,15 @@ final class WC_Novalnet {
 				$cart_has_subs = 1;
 			}
 		}
-		$guest_checkout_enabled            = get_option( 'woocommerce_enable_guest_checkout' ) === 'yes';
-		$signup_login_enabled              = get_option( 'woocommerce_enable_signup_and_login_from_checkout' ) === 'yes';
+		$signup_subscription_enabled = get_option( 'woocommerce_enable_signup_from_checkout_for_subscriptions' ) === 'yes';
+		$guest_checkout_enabled      = get_option( 'woocommerce_enable_guest_checkout' ) === 'yes';
+		$signup_login_enabled        = get_option( 'woocommerce_enable_signup_and_login_from_checkout' ) === 'yes';
 
-		return $cart_has_subs ? $signup_login_enabled : ($guest_checkout_enabled || $signup_login_enabled);
+		if ( ! empty( $data ) && class_exists( 'WC_Subscriptions' ) && ! $guest_checkout_enabled && ! $signup_login_enabled ) {
+			return $data['is_subscription_product'] && $signup_subscription_enabled ? true : false;
+		}
+
+		return $cart_has_subs ? $signup_login_enabled || $signup_subscription_enabled : ( $guest_checkout_enabled || $signup_login_enabled );
 	}
 
 	/**
@@ -1006,7 +1025,7 @@ final class WC_Novalnet {
 
 		$data['billing_email'] = $customer_billing['email'];
 
-		if ( ! is_user_logged_in() && get_option( 'woocommerce_enable_signup_and_login_from_checkout' ) === 'yes' ) {
+		if ( ! is_user_logged_in() && ( get_option( 'woocommerce_enable_signup_and_login_from_checkout' ) === 'yes' || ($cart_has_subs && class_exists( 'WC_Subscriptions' ) && get_option( 'woocommerce_enable_signup_from_checkout_for_subscriptions' ) === 'yes' ) ) ) {
 
 			$customer_id = apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() );
 
@@ -1023,14 +1042,14 @@ final class WC_Novalnet {
 			if ( is_wp_error( $customer_id ) ) {
 				wp_send_json(array(
 					'result'   => 'error',
-					'redirect' => ($customer_id->get_error_code() === 'registration-error-email-exists')
+					'redirect' => ($customer_id->get_error_code() === 'registration-error-email-exists' )
 						? sprintf(
 							__( 'An account is already registered with %s. Please log in or use a different email address.', 'woocommerce-novalnet-gateway' ),
 							$data['billing_email']
 						)
 						: '',
 				));
-				
+
 			}
 
 			wc_set_customer_auth_cookie( $customer_id );
@@ -1178,10 +1197,10 @@ final class WC_Novalnet {
 			'wc-novalnet-twint-blocks-integration'       => 'sha384-Ex8xPFmmKdPHtXN61aJu10neu12WQK6PkpSSEunQJrFwOjuH5VuP5KWbeUu8HeTr',
 			'wc-novalnet-googlepay-blocks-integration'   => 'sha384-Bz2pPowHvJ8CySS3nJFkIBuzWbMd7PIZWHjrCW5ZvndnYgrM+AJTHf3kQSdCkxmZ',
 			'wc-novalnet-guaranteed-invoice-blocks-integration' => 'sha384-Ztzv1UF02W+v8nwcAG4t3V3oHBKXqM1vO+H2FYnhUS642+xlCHpX6WDC3JnJ6/pB',
-			'wc-novalnet-guaranteed-sepa-blocks-integration' => 'sha384-M95MhYF1kzHi+LIr1IhKYfW82vu5GDUPCVGNmD/+USNRJFQlv4OAdOdQ66mlJfPi',
+			'wc-novalnet-guaranteed-sepa-blocks-integration' => 'sha384-zraEQJSPxcLac2AeHR3LMJ+z2eTfxSiM/k0BV6AqDL2p3jZXhbg+1Qiay0DMZv0h',
 			'wc-novalnet-ideal-blocks-integration'       => 'sha384-vxnvoHpxeQGivWXOfGkKNZenC7BHs79kRfehwvV6mtr2QObmpdyiboY++iD/1vmC',
 			'wc-novalnet-instalment-invoice-blocks-integration' => 'sha384-NDxghaccAxWnVWyfmI5iufH+3/f0/xfchxQQ+J0yScx3P6wDoLGOjlMed/01nkEe',
-			'wc-novalnet-instalment-sepa-blocks-integration' => 'sha384-hxdg9LQFLNfHtF9/uD/Tb/TqjgDtrDQOZ+p8i8HPAZGU9gthKc8UArEF3rRidZay',
+			'wc-novalnet-instalment-sepa-blocks-integration' => 'sha384-hfH8XFVDeis2ZRkRwQ1MVheEtrBaXJrEI2JIHEB3r+o+dihlIwhGPznAzuA7nmEH',
 			'wc-novalnet-instantbank-blocks-integration' => 'sha384-Ss5Yb7zKPLrRpV2PCNQsKLBD64qOQa1Z5ObBJ+phnlTTB6GcYmn60kCr4IdguhZ0',
 			'wc-novalnet-invoice-blocks-integration'     => 'sha384-5v91/uq+TH4FS9RMKZJgBwD49INgIRUr9Wx42fSkVKEcMrzNPW6CbBwQTMqxVHbr',
 			'wc-novalnet-multibanco-blocks-integration'  => 'sha384-Xu+zQJjhaoOHrFvsAJyggsOJ5/o4ll6dXY7iCQLygNG0KYKBjfHXZ2yioziMid9u',

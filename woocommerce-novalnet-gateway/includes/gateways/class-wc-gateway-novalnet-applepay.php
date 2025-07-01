@@ -218,17 +218,15 @@ class WC_Gateway_Novalnet_ApplePay extends WC_Novalnet_Abstract_Payment_Gateways
 			'description' => __( 'The selected pages will display the Apple pay button to pay instantly as an express checkout option', 'woocommerce-novalnet-gateway' ),
 			'desc_tip'    => true,
 			'options'     => array(
-				'shopping_cart_page'  => __( 'Shopping cart page', 'woocommerce-novalnet-gateway' ),
-				'mini_cart_page'      => __( 'Mini cart page', 'woocommerce-novalnet-gateway' ),
-				'product_page'        => __( 'Product page', 'woocommerce-novalnet-gateway' ),
-				'guest_checkout_page' => __( 'Guest checkout page', 'woocommerce-novalnet-gateway' ),
-				'checkout_page'       => __( 'Checkout page', 'woocommerce-novalnet-gateway' ),
+				'shopping_cart_page' => __( 'Shopping cart page', 'woocommerce-novalnet-gateway' ),
+				'mini_cart_page'     => __( 'Mini cart page', 'woocommerce-novalnet-gateway' ),
+				'product_page'       => __( 'Product page', 'woocommerce-novalnet-gateway' ),
+				'checkout_page'      => __( 'Checkout page', 'woocommerce-novalnet-gateway' ),
 			),
 			'default'     => array(
 				'shopping_cart_page',
 				'mini_cart_page',
 				'product_page',
-				'guest_checkout_page',
 				'checkout_page',
 			),
 		);

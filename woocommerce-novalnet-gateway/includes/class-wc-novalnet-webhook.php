@@ -1343,15 +1343,25 @@ class WC_Novalnet_Webhook {
 			'REMOTE_ADDR',
 		);
 
-		foreach ( $ip_keys as $key ) {
+	$invalidIp = '';
+	foreach ( $ip_keys as $key ) {
 			if ( array_key_exists( $key, $_SERVER ) === true ) {
 				if ( in_array( $key, array( 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED_HOST' ), true ) ) {
 					$forwarded_ip = ! empty( sanitize_text_field( wp_unslash( $_SERVER[ $key ] ) ) ) ? explode( ',', sanitize_text_field( wp_unslash( $_SERVER[ $key ] ) ) ) : array();
-					return in_array( $novalnet_host_ip, $forwarded_ip, true ) ? sanitize_text_field( wp_unslash( $novalnet_host_ip ) ) : sanitize_text_field( wp_unslash( $_SERVER[ $key ] ) );
+					if (in_array($novalnet_host_ip, $forwarded_ip, true)) {
+						return $novalnet_host_ip;
+					}
 				}
-				return sanitize_text_field( wp_unslash( $_SERVER[ $key ] ) );
+				$forwarded_ip = sanitize_text_field( wp_unslash( $_SERVER[ $key ] ) );
+
+				if ( $forwarded_ip === $novalnet_host_ip) {
+					return $forwarded_ip;
+				} elseif(!empty($forwarded_ip)){
+					$invalidIp = $forwarded_ip;
+				}
 			}
 		}
+		return $invalidIp;
 	}
 
 	/**

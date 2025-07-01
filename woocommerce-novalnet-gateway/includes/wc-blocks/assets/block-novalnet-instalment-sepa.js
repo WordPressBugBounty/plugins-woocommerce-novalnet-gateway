@@ -75,8 +75,6 @@
             },
             paymentMethodId : paymentMethodId,
             supports:{
-                showSavedCards: paymentMethodData.enableTokenization,
-                showSaveOption: paymentMethodData.enableTokenization,
                 features: paymentMethodData.supports,
             }
         };

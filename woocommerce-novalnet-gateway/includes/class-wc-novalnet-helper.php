@@ -1098,7 +1098,7 @@ class WC_Novalnet_Helper {
 		}
 
 		$available_wallets = get_available_wallets( $source_page );
-		if ( ! in_array( $payment_wallet, $available_wallets, true ) ) {
+		if ( ! in_array( $payment_wallet, $available_wallets, true ) || ! novalnet()->can_display_wallet_button() ) {
 			return array();
 		}
 

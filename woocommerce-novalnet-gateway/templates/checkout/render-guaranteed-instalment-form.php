@@ -68,6 +68,7 @@ if ( WC_Novalnet_Validation::check_string( $payment_type, 'instalment' ) ) :
 				),
 				'custom_attributes' => array(
 					'onchange' => 'wc_novalnet.show_instalment_table("' . $payment_type . '")',
+					'style' => 'width: 300px;', 
 				),
 				/* translators: %s: Amount */
 				'label'             => sprintf( __( 'Choose your instalment plan <b>(Net loan amount: %s )</b>', 'woocommerce-novalnet-gateway' ), wc_novalnet_shop_amount_format( $order_total * 100 ) ),

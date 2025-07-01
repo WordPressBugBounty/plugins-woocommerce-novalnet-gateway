@@ -129,6 +129,8 @@ class WC_Gateway_Novalnet_GooglePay extends WC_Novalnet_Abstract_Payment_Gateway
 		$do_redirect     = WC()->session->get( 'googlepay_do_redirect' );
 
 		if ( 'true' === (string) $do_redirect ) {
+			// Assign enforce 3d value.
+			$parameters['transaction']['enforce_3d'] = '1';
 			// Assign redirect payment params.
 			$this->redirect_payment_params( $wc_order, $parameters );
 		}
@@ -216,17 +218,15 @@ class WC_Gateway_Novalnet_GooglePay extends WC_Novalnet_Abstract_Payment_Gateway
 			'description' => __( 'The selected pages will display the Google Pay button to pay instantly as an express checkout option', 'woocommerce-novalnet-gateway' ),
 			'desc_tip'    => true,
 			'options'     => array(
-				'shopping_cart_page'  => __( 'Shopping cart page', 'woocommerce-novalnet-gateway' ),
-				'mini_cart_page'      => __( 'Mini cart page', 'woocommerce-novalnet-gateway' ),
-				'product_page'        => __( 'Product page', 'woocommerce-novalnet-gateway' ),
-				'guest_checkout_page' => __( 'Guest checkout page', 'woocommerce-novalnet-gateway' ),
-				'checkout_page'       => __( 'Checkout page', 'woocommerce-novalnet-gateway' ),
+				'shopping_cart_page' => __( 'Shopping cart page', 'woocommerce-novalnet-gateway' ),
+				'mini_cart_page'     => __( 'Mini cart page', 'woocommerce-novalnet-gateway' ),
+				'product_page'       => __( 'Product page', 'woocommerce-novalnet-gateway' ),
+				'checkout_page'      => __( 'Checkout page', 'woocommerce-novalnet-gateway' ),
 			),
 			'default'     => array(
 				'shopping_cart_page',
 				'mini_cart_page',
 				'product_page',
-				'guest_checkout_page',
 				'checkout_page',
 			),
 		);

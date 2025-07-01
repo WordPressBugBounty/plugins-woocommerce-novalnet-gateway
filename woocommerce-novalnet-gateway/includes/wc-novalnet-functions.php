@@ -825,6 +825,13 @@ function get_available_wallets( $page ) {
 		if ( ! empty( $wallet_setting ) && 'yes' === $wallet_setting['enabled'] ) {
 			$dispay_button_on = 'display_' . $wallet . '_button_on';
 
+			if ( ! isset( $wallet_setting[ $dispay_button_on ] ) || ! is_array( $wallet_setting[ $dispay_button_on ] ) ) {
+				$wallet_setting[ $dispay_button_on ] = array();
+			}
+			if ( ! in_array( 'guest_checkout_page', $wallet_setting[ $dispay_button_on ] ) ) {
+				$wallet_setting[ $dispay_button_on ][] = 'guest_checkout_page';
+			}
+
 			$items               = $woocommerce->cart->get_cart();
 			$pay_for_order_total = 0;
 			if (isset($_GET['pay_for_order']) && ! empty($_GET['key'])) { // @codingStandardsIgnoreLine.

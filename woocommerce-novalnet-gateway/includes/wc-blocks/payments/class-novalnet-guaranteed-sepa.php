@@ -85,8 +85,7 @@ final class Novalnet_Guaranteed_Sepa extends AbstractPaymentMethodType {
 	public function get_payment_method_data() {
 		$payment_method_data = novalnet()->helper()->get_payment_method_block_data( $this->name );
 		if ( ! empty( $payment_method_data ) ) {
-			$payment_method_data['settings']           = $this->settings;
-			$payment_method_data['enableTokenization'] = wc_novalnet_check_isset( $this->settings, 'tokenization', 'yes' );
+			$payment_method_data['settings'] = $this->settings;
 		}
 		return $payment_method_data;
 	}
