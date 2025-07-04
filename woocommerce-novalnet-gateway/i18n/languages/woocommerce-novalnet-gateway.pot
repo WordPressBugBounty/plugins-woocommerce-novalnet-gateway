@@ -1,8 +1,8 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: Novalnet payment plugin - WooCommerce - 12.8.3\n"
-"POT-Creation-Date: 2025-06-19 12:51+0530\n"
+"Project-Id-Version: Novalnet payment plugin - WooCommerce - 12.8.4\n"
+"POT-Creation-Date: 2025-07-03 12:40+0530\n"
 "PO-Revision-Date: 2017-05-26 18:35+0530\n"
 "Last-Translator: Novalnet AG <sales@novalnet.de>\n"
 "Language-Team: Novalnet <sales@novalnet.de>\n"
@@ -1065,32 +1065,41 @@ msgstr ""
 
 #: includes/class-wc-novalnet-helper.php:185
 msgid ""
-"\\n\\nYour order is being verified. Once confirmed, we will send you "
-"our bank details to which the order amount should be transferred. "
-"Please note that this may take up to 24 hours"
+"\n"
+"\n"
+"Your order is being verified. Once confirmed, we will send you our "
+"bank details to which the order amount should be transferred. Please "
+"note that this may take up to 24 hours"
 msgstr ""
 
 #: includes/class-wc-novalnet-helper.php:187
 msgid ""
-"\\n\\nYour order is under verification and we will soon update you "
-"with the order status. Please note that this may take upto 24 hours."
+"\n"
+"\n"
+"Your order is under verification and we will soon update you with the "
+"order status. Please note that this may take upto 24 hours."
 msgstr ""
 
 #: includes/class-wc-novalnet-helper.php:196
 #, php-format
 msgid ""
-"\\nPlease use the following payment reference details to pay the "
-"amount of %s at a Multibanco ATM or through your internet banking."
+"\n"
+"Please use the following payment reference details to pay the amount "
+"of %s at a Multibanco ATM or through your internet banking."
 msgstr ""
 
 #: includes/class-wc-novalnet-helper.php:199
 #, php-format
-msgid "\\nPayment Reference : %s"
+msgid ""
+"\n"
+"Payment Reference : %s"
 msgstr ""
 
 #: includes/class-wc-novalnet-helper.php:203
 #, php-format
-msgid "\\nEntity : %s \\n"
+msgid ""
+"\n"
+"Entity : %s \n"
 msgstr ""
 
 #: includes/class-wc-novalnet-helper.php:236
@@ -1109,82 +1118,101 @@ msgstr ""
 
 #: includes/class-wc-novalnet-helper.php:292
 #, php-format
-msgid "\\nSlip expiry date : %s"
+msgid ""
+"\n"
+"Slip expiry date : %s"
 msgstr ""
 
 #: includes/class-wc-novalnet-helper.php:294
-msgid "\\n\\nStore(s) near to you: \\n\\n"
+msgid ""
+"\n"
+"\n"
+"Store(s) near to you: \n"
+"\n"
 msgstr ""
 
 #: includes/class-wc-novalnet-helper.php:334
 #, php-format
 msgid ""
-"\\n \\n Please transfer the amount of %1$s to the following account on "
-"or before %2$s \\n\\n"
+"\n"
+" Please transfer the amount of %1$s to the following account on or "
+"before %2$s \n"
 msgstr ""
 
 #: includes/class-wc-novalnet-helper.php:338
 #, php-format
 msgid ""
-"\\n \\n Please transfer the instalment cycle amount of %1$s to the "
-"following account on or before %2$s \\n \\n"
+"\n"
+" \n"
+" Please transfer the instalment cycle amount of %1$s to the following "
+"account on or before %2$s \n"
+" \n"
 msgstr ""
 
 #: includes/class-wc-novalnet-helper.php:342
 #, php-format
 msgid ""
-" \\n \\n Please transfer the amount of %1$s to the following account. "
-"\\n\\n"
+"\n"
+" \n"
+" Please transfer the amount of %1$s to the following account. \n"
+"\n"
 msgstr ""
 
 #: includes/class-wc-novalnet-helper.php:346
 #, php-format
 msgid ""
-" \\n \\n Please transfer the instalment cycle amount of %1$s to the "
-"following account. \\n \\n"
+" \n"
+" \n"
+" Please transfer the instalment cycle amount of %1$s to the following "
+"account. \n"
+" \n"
 msgstr ""
 
 #: includes/class-wc-novalnet-helper.php:353
 #, php-format
-msgid "Account holder: %s \\n"
+msgid "Account holder: %s \n"
 msgstr ""
 
 #: includes/class-wc-novalnet-helper.php:356
 #, php-format
-msgid "Bank: %s \\n"
+msgid "Bank: %s \n"
 msgstr ""
 
 #: includes/class-wc-novalnet-helper.php:359
 #, php-format
-msgid "Place: %s \\n"
+msgid "Place: %s \n"
 msgstr ""
 
 #: includes/class-wc-novalnet-helper.php:362
 #, php-format
-msgid "IBAN: %s \\n"
+msgid "IBAN: %s \n"
 msgstr ""
 
 #: includes/class-wc-novalnet-helper.php:365
 #, php-format
-msgid "BIC: %s \\n"
+msgid "BIC: %s \n"
 msgstr ""
 
 #: includes/class-wc-novalnet-helper.php:373
 msgid ""
-"\\n Please use any of the following payment references when "
-"transferring the amount. This is necessary to match it with your "
-"corresponding order"
+"\n"
+" Please use any of the following payment references when transferring "
+"the amount. This is necessary to match it with your corresponding order"
 msgstr ""
 
 #: includes/class-wc-novalnet-helper.php:376
 #, php-format
-msgid "\\n Payment Reference 1: TID %s"
+msgid ""
+"\n"
+" Payment Reference 1: TID %s"
 msgstr ""
 
 #: includes/class-wc-novalnet-helper.php:381
 #: includes/class-wc-novalnet-helper.php:384
 #, php-format
-msgid "\\n Payment Reference 2: %s"
+msgid ""
+"\n"
+" Payment Reference 2: %s"
 msgstr ""
 
 #: includes/class-wc-novalnet-helper.php:738
@@ -1576,14 +1604,14 @@ msgid ""
 "%2$s on %3$s"
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:1393
+#: includes/class-wc-novalnet-webhook.php:1403
 #, php-format
 msgid ""
 "Subscription order reference not found in the shop for the "
 "subscription order: %d"
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:1517
+#: includes/class-wc-novalnet-webhook.php:1527
 #, php-format
 msgid " - [Order #%1$s]"
 msgstr ""
@@ -1875,10 +1903,14 @@ msgstr ""
 msgid "Other locations"
 msgstr ""
 
-#: novalnet-payment-gateway.php:97
+#: novalnet-payment-gateway.php:92
 msgid ""
 "PCI compliant payment solution, covering a full scope of payment "
 "services and seamless integration for easy adaptability"
+msgstr ""
+
+#: novalnet-payment-gateway.php:94
+msgid "Novalnet payment plugin - WooCommerce"
 msgstr ""
 
 #: templates/checkout/render-ach-form.php:25

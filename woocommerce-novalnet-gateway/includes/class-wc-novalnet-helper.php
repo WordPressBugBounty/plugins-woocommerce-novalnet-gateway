@@ -182,9 +182,9 @@ class WC_Novalnet_Helper {
 		// Forming basic comments.
 		$comments = $this->form_comments( $data );
 		if ( 'PENDING' === $data['transaction']['status'] && in_array( $data['transaction']['payment_type'], array( 'GUARANTEED_INVOICE', 'INSTALMENT_INVOICE' ), true ) ) {
-			$comments .= __( '\n\nYour order is being verified. Once confirmed, we will send you our bank details to which the order amount should be transferred. Please note that this may take up to 24 hours', 'woocommerce-novalnet-gateway' );
+			$comments .= __( "\n\nYour order is being verified. Once confirmed, we will send you our bank details to which the order amount should be transferred. Please note that this may take up to 24 hours", 'woocommerce-novalnet-gateway' );
 		} elseif ( 'PENDING' === $data['transaction']['status'] && in_array( $data['transaction']['payment_type'], array( 'GUARANTEED_DIRECT_DEBIT_SEPA', 'INSTALMENT_DIRECT_DEBIT_SEPA' ), true ) ) {
-			$comments .= __( '\n\nYour order is under verification and we will soon update you with the order status. Please note that this may take upto 24 hours.', 'woocommerce-novalnet-gateway' );
+			$comments .= __( "\n\nYour order is under verification and we will soon update you with the order status. Please note that this may take upto 24 hours.", 'woocommerce-novalnet-gateway' );
 		} elseif ( ! empty( $data['transaction']['bank_details'] ) && ! empty( $data['transaction']['amount'] ) && empty( $data['instalment']['prepaid'] ) ) {
 			$comments .= $this->form_amount_transfer_comments( $data, $wc_order );
 		} elseif ( ! empty( $data['transaction']['nearest_stores'] ) ) {
@@ -193,18 +193,18 @@ class WC_Novalnet_Helper {
 		} elseif ( ! empty( $data['transaction']['partner_payment_reference'] ) ) {
 
 			/* translators: %s: amount */
-			$comments .= sprintf( __( '\nPlease use the following payment reference details to pay the amount of %s at a Multibanco ATM or through your internet banking.', 'woocommerce-novalnet-gateway' ), wc_novalnet_shop_amount_format( $data['transaction']['amount'] ) );
+			$comments .= sprintf( __( "\nPlease use the following payment reference details to pay the amount of %s at a Multibanco ATM or through your internet banking.", 'woocommerce-novalnet-gateway' ), wc_novalnet_shop_amount_format( $data['transaction']['amount'] ) );
 
 			/* translators: %s: partner_payment_reference */
-			$comments .= sprintf( __( '\nPayment Reference : %s', 'woocommerce-novalnet-gateway' ), $data['transaction']['partner_payment_reference'] );
+			$comments .= sprintf( __( "\nPayment Reference : %s", 'woocommerce-novalnet-gateway' ), $data['transaction']['partner_payment_reference'] );
 
 			if ( ! empty( $data['transaction']['service_supplier_id'] ) ) {
 				/* translators: %s: service_supplier_id */
-				$comments .= sprintf( __( '\nEntity : %s \n', 'woocommerce-novalnet-gateway' ), $data['transaction']['service_supplier_id'] );
+				$comments .= sprintf( __( "\nEntity : %s \n", 'woocommerce-novalnet-gateway' ), $data['transaction']['service_supplier_id'] );
 			}
 		}
 
-		$comments = str_replace( '\n', PHP_EOL, sanitize_textarea_field( $comments ) );
+		$comments = str_replace( "\n", PHP_EOL, sanitize_textarea_field( $comments ) );
 
 		return $comments;
 	}
@@ -233,7 +233,7 @@ class WC_Novalnet_Helper {
 				$data['transaction']['payment_data']['last_four']
 			) : '';
 			/* translators: %1$s: payment, %2$s: brand, %2$s: last four */
-			$comments .= sprintf( __( 'Your order was successfully processed using %1$s %2$s', 'woocommerce-novalnet-gateway\n' ), $payment, $card_mask );
+			$comments .= sprintf( __( "Your order was successfully processed using %1\$s %2\$s", 'woocommerce-novalnet-gateway' ), $payment, $card_mask );
 		}
 
 		if ( ! empty( $data['transaction']['tid'] ) ) {
@@ -289,9 +289,9 @@ class WC_Novalnet_Helper {
 
 		if ( ! empty( $data['transaction']['due_date'] ) ) {
 			/* translators: %s: due_date */
-			$comments .= sprintf( __( '\nSlip expiry date : %s', 'woocommerce-novalnet-gateway' ), wc_novalnet_formatted_date( $data['transaction']['due_date'] ) );
+			$comments .= sprintf( __( "\nSlip expiry date : %s", 'woocommerce-novalnet-gateway' ), wc_novalnet_formatted_date( $data['transaction']['due_date'] ) );
 		}
-		$comments .= __( '\n\nStore(s) near to you: \n\n', 'woocommerce-novalnet-gateway' );
+		$comments .= __( "\n\nStore(s) near to you: \n\n", 'woocommerce-novalnet-gateway' );
 
 		foreach ( $nearest_stores as $nearest_store ) {
 			$address = array();
@@ -309,7 +309,7 @@ class WC_Novalnet_Helper {
 				}
 			}
 			$comments .= WC()->countries->get_formatted_address( $address, PHP_EOL );
-			$comments .= '\n\n';
+			$comments .= "\n\n";
 		}
 		return $comments;
 	}
@@ -331,38 +331,38 @@ class WC_Novalnet_Helper {
 		}
 		if ( in_array( $input['transaction']['status'], array( 'CONFIRMED', 'PENDING' ), true ) && ! empty( $input['transaction']['due_date'] ) ) {
 			/* translators: %1$s: amount, %2$s: due date */
-			$comments = sprintf( __( '\n \n Please transfer the amount of %1$s to the following account on or before %2$s \n\n', 'woocommerce-novalnet-gateway' ), wc_novalnet_shop_amount_format( $order_amount ), wc_novalnet_formatted_date( $input['transaction']['due_date'] ) );
+			$comments = sprintf( __( "\n Please transfer the amount of %1\$s to the following account on or before %2\$s \n", 'woocommerce-novalnet-gateway' ), wc_novalnet_shop_amount_format( $order_amount ), wc_novalnet_formatted_date( $input['transaction']['due_date'] ) );
 
 			if ( ! empty( $input['instalment']['cycle_amount'] ) ) {
 				/* translators: %1$s: amount, %2$s: due date */
-				$comments = sprintf( __( '\n \n Please transfer the instalment cycle amount of %1$s to the following account on or before %2$s \n \n', 'woocommerce-novalnet-gateway' ), wc_novalnet_shop_amount_format( $order_amount ), wc_novalnet_formatted_date( $input['transaction']['due_date'] ) );
+				$comments = sprintf( __( "\n \n Please transfer the instalment cycle amount of %1\$s to the following account on or before %2\$s \n \n", 'woocommerce-novalnet-gateway' ), wc_novalnet_shop_amount_format( $order_amount ), wc_novalnet_formatted_date( $input['transaction']['due_date'] ) );
 			}
 		} else {
 			/* translators: %s: amount*/
-			$comments = sprintf( __( ' \n \n Please transfer the amount of %1$s to the following account. \n\n', 'woocommerce-novalnet-gateway' ), wc_novalnet_shop_amount_format( $order_amount ) );
+			$comments = sprintf( __( "\n \n Please transfer the amount of %1\$s to the following account. \n\n", 'woocommerce-novalnet-gateway' ), wc_novalnet_shop_amount_format( $order_amount ) );
 
 			if ( ! empty( $input['instalment']['cycle_amount'] ) ) {
 				/* translators: %s: amount*/
-				$comments = sprintf( __( ' \n \n Please transfer the instalment cycle amount of %1$s to the following account. \n \n', 'woocommerce-novalnet-gateway' ), wc_novalnet_shop_amount_format( $order_amount ) );
+				$comments = sprintf( __( " \n \n Please transfer the instalment cycle amount of %1\$s to the following account. \n \n", 'woocommerce-novalnet-gateway' ), wc_novalnet_shop_amount_format( $order_amount ) );
 			}
 		}
 
 		foreach (
 			array(
 				/* translators: %s: account_holder */
-				'account_holder' => __( 'Account holder: %s \n', 'woocommerce-novalnet-gateway' ),
+				'account_holder' => __( "Account holder: %s \n", 'woocommerce-novalnet-gateway' ),
 
 				/* translators: %s: bank_name */
-				'bank_name'      => __( 'Bank: %s \n', 'woocommerce-novalnet-gateway' ),
+				'bank_name'      => __( "Bank: %s \n", 'woocommerce-novalnet-gateway' ),
 
 				/* translators: %s: bank_place */
-				'bank_place'     => __( 'Place: %s \n', 'woocommerce-novalnet-gateway' ),
+				'bank_place'     => __( "Place: %s \n", 'woocommerce-novalnet-gateway' ),
 
 				/* translators: %s: iban */
-				'iban'           => __( 'IBAN: %s \n', 'woocommerce-novalnet-gateway' ),
+				'iban'           => __( "IBAN: %s \n", 'woocommerce-novalnet-gateway' ),
 
 				/* translators: %s: bic */
-				'bic'            => __( 'BIC: %s \n', 'woocommerce-novalnet-gateway' ),
+				'bic'            => __( "BIC: %s \n", 'woocommerce-novalnet-gateway' ),
 			) as $key => $text
 		) {
 			if ( ! empty( $input['transaction']['bank_details'][ $key ] ) ) {
@@ -370,18 +370,18 @@ class WC_Novalnet_Helper {
 			}
 		}
 
-		$comments .= __( '\n Please use any of the following payment references when transferring the amount. This is necessary to match it with your corresponding order', 'woocommerce-novalnet-gateway' );
+		$comments .= __( "\n Please use any of the following payment references when transferring the amount. This is necessary to match it with your corresponding order", 'woocommerce-novalnet-gateway' );
 
 		/* translators: %s:  TID */
-		$comments .= sprintf( __( '\n Payment Reference 1: TID %s', 'woocommerce-novalnet-gateway' ), $input['transaction']['tid'] );
+		$comments .= sprintf( __( "\n Payment Reference 1: TID %s", 'woocommerce-novalnet-gateway' ), $input['transaction']['tid'] );
 
 		// Form reference comments.
 		if ( ! empty( $input['transaction']['invoice_ref'] ) ) {
 			/* translators: %s: invoice_ref */
-			$comments .= sprintf( __( '\n Payment Reference 2: %s', 'woocommerce-novalnet-gateway' ), $input['transaction']['invoice_ref'] );
+			$comments .= sprintf( __( "\n Payment Reference 2: %s", 'woocommerce-novalnet-gateway' ), $input['transaction']['invoice_ref'] );
 		} elseif ( ! empty( $wc_order_id ) && ! empty( $input['merchant']['project'] ) ) {
 			/* translators: %s: project name */
-			$comments .= sprintf( __( '\n Payment Reference 2: %s', 'woocommerce-novalnet-gateway' ), 'BNR-' . $input['merchant']['project'] . '-' . $wc_order_id );
+			$comments .= sprintf( __( "\n Payment Reference 2: %s", 'woocommerce-novalnet-gateway' ), 'BNR-' . $input['merchant']['project'] . '-' . $wc_order_id );
 		}
 		return wc_novalnet_format_text( $comments );
 	}
