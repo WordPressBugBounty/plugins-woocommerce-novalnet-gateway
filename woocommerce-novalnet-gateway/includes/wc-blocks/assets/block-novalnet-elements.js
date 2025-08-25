@@ -411,8 +411,14 @@
 
 			var shipping = ["postalAddress", "phone", "email"];
 			var is_virtual        = paymentMethodData.walletSheetDetails.cart_has_virtual;
+			var needs_payer_phone    = paymentMethodData.needs_payer_phone;
 			if ( 1 == is_virtual ) {
-				var shipping = ["email"];
+				if(needs_payer_phone == 1){
+					var shipping = ["email","phone"];
+				}
+				else{
+					var shipping = ["email"];
+				}
 			}
             var requestData = {
 				clientKey: paymentMethodData.settings.client_key,

@@ -16,7 +16,7 @@
 	float:right;
 }
 #update_all_subscriptions_payment_method_field{
-	display:none;
+	display:block;
 }
 .novalnet-tooltip {
 	position:relative;

@@ -221,7 +221,6 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 				'redirect' => $response['result']['redirect_url'],
 			);
 		}
-
 		// Handle response.
 		return $this->check_transaction_status( $response, $wc_order );
 	}

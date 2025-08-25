@@ -73,13 +73,17 @@
 				var cornerRadius = 0;
 				var boxSizingVal = 'fill';
 			}
+			var needs_payer_phone = my_ajax_object .needs_payer_phone;
 			var shipping = ["postalAddress", "phone", "email"];
 			var is_virtual        = ( id.indexOf( 'product_page' ) > -1 ) ? $( "#product_has_virtual_product" ).val() : $( "#cart_has_virtual" ).val();
-
 			if ( 1 == is_virtual ) {
-				var shipping = ["email"];
+				if(needs_payer_phone == 1){
+				    var shipping = ["email","phone"];
+				}
+				else{
+					var shipping = ["email"];
+				}
 			}
-
 			var button_dimensions = {
 				width:"auto",
 				cornerRadius:parseInt( cornerRadius ),

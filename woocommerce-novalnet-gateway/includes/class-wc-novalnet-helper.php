@@ -1110,6 +1110,7 @@ class WC_Novalnet_Helper {
 		$payment_method_data['paymentWallet']      = $payment_wallet;
 		$payment_method_data['lang']               = wc_novalnet_shop_language();
 		$payment_method_data['walletContainerId']  = $source_page . '_' . $payment_wallet . '_button';
+		$payment_method_data['needs_payer_phone'] = 'required' === get_option( 'woocommerce_checkout_phone_field', 'required' );
 		$payment_method_data['walletSheetDetails'] = array_merge(
 			$wallet_sheet_detail,
 			array(

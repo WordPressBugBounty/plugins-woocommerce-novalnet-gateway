@@ -4,7 +4,7 @@ Donate link: https://www.novalnet.de
 Tags: Credit cards, Payments, Payment gateway, Novalnet payment
 Requires at least: 5.0
 Tested up to: 6.5
-Stable tag: 12.8.3
+Stable tag: 12.8.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -201,12 +201,12 @@ Please check out our ssl certified [Demo Store](https://woocommerce.novalnet.de/
 
 = Compatibility =   
 
-Novalnet payment plugin compatible for WooCommerce 4.0.0-9.9.5 and compatible for subscription 2.0.0-7.6.0.
+Novalnet payment plugin compatible for WooCommerce 4.0.0-10.1.1 and compatible for subscription 2.0.0-7.8.0.
 
 = Automatic Installation: =
 
 * Go to Plugins > “Add New”.
-* Download the WooCommerce payment plugin - Novalnet from WordPress repository and Click "Install Now" to install the plugin. A popup window will ask you to confirm your wish to install the plugin 12.8.3.
+* Download the WooCommerce payment plugin - Novalnet from WordPress repository and Click "Install Now" to install the plugin. A popup window will ask you to confirm your wish to install the plugin 12.8.5.
 
 = Note: = If this is the first time you've installed a WordPress plugin, you may need to enter the FTP login credential information. If you've installed the plugin before, it will still have the login information. This information is available through your web server host.
 
@@ -274,6 +274,15 @@ This online payment plugin only works with the WooCommerce webshop. Are you look
 5. Novalnet payments are displayed in the checkout
 
 == Changelog ==
+
+= 12.8.5 =
+
+  * [Fix] Restored deprecated instant email hook from the Germanized plugin used in the Novalnet plugin to handle order confirmation emails 
+  * [Enhanced] Wallet sheet now displays the phone number during express checkout in line with the checkout page flow
+
+= 12.8.4 =
+
+  * [Fix] Payment plugin has been updated to support German translations when custom identifiers are used
 
 = 12.8.3 =
 

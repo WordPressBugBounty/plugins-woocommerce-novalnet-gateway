@@ -196,7 +196,6 @@ final class WC_Novalnet {
 		include_once 'includes/class-wc-novalnet-helper.php';
 		include_once 'includes/class-wc-novalnet-subscription.php';
 		include_once 'includes/class-wc-novalnet-guaranteed-process.php';
-
 		// Store the request data.
 		$this->request = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification
 
@@ -247,6 +246,9 @@ final class WC_Novalnet {
 		// add virtual product in to the cart.
 		add_action( 'wp_ajax_add_virtual_product_in_cart', array( $this, 'add_virtual_product_in_cart' ) );
 		add_action( 'wp_ajax_nopriv_add_virtual_product_in_cart', array( $this, 'add_virtual_product_in_cart' ) );
+
+                // Restrict instant mail from Germanized plugin.
+		add_filter( 'woocommerce_gzd_instant_order_confirmation', array( $this, 'restrict_instant_email' ) );
 
 		// register the ajax action for authenticated users.
 		add_action( 'wp_ajax_novalnet_order_creation', array( $this, 'novalnet_order_creation' ) );
@@ -1118,7 +1120,14 @@ final class WC_Novalnet {
 		// Process Payment.
 		$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 		$result             = $available_gateways[ $payment_method ]->process_payment( $wc_order->get_id() );
-		wp_send_json( $result );
+		$gateway = $available_gateways[ $payment_method ];
+        $order_success_status = $gateway->settings['order_success_status'];
+        $gateway_id = $available_gateways[ $payment_method ]->id;
+        $active_plugins = get_option('active_plugins');
+		if (($gateway_id == 'novalnet_googlepay' || $gateway_id == 'novalnet_applepay') && $order_success_status == 'wc-completed' && in_array('woocommerce-germanized/woocommerce-germanized.php', $active_plugins)  ) {
+	     WC()->mailer()->emails['WC_Email_Customer_Processing_Order']->trigger( $wc_order->get_id() );
+		}
+			wp_send_json( $result );
 	}
 
 	/**
@@ -1147,6 +1156,7 @@ final class WC_Novalnet {
 				'googlepay_setting' => WC_Novalnet_Configuration::get_payment_settings( 'novalnet_googlepay' ),
 				'locale'            => get_locale(),
 				'client_key'        => WC_Novalnet_Configuration::get_global_settings( 'client_key' ),
+				'needs_payer_phone' => 'required' === get_option( 'woocommerce_checkout_phone_field', 'required' ),
 			)
 		);
 
@@ -1183,9 +1193,9 @@ final class WC_Novalnet {
 			'woocommerce-novalnet-gateway-admin-script'  => 'sha384-z+TnRg2sNMhV5X0BD1sw9GQlFQaZi3BpdTTkEwSck/po5cRf05WeuuGoq0SNc2Xu',
 			'woocommerce-novalnet-gateway-cc-script'     => 'sha384-3ZHfvOQB6dn7UBPIsOKcDZktjQz0NSPoInNhZOtXv4f75IggqcBGB1RrV+93utiI',
 			'woocommerce-novalnet-gateway-subscription-script' => 'sha384-5frcLecRDKnrzRRixoMQPeMmZ6KrO736KrXk3k5Va0FjhCJT6yMi/0R3qnp9eLDn',
-			'woocommerce-novalnet-gateway-wallet-script' => 'sha384-Dd8xzwCGanNfU3zwiKBxIHlK6IH4BF7C32tRoqUgjAY4UifShi554P5Tyo0iHOov',
+			'woocommerce-novalnet-gateway-wallet-script' => 'sha384-CXS8pk5VPzsnxdT47+VBfB8N4DGNWbK9HV3JMk4PwcDttR/pR9mnu2Q+4CMLcqZH',
 			// WC Block JS integrity.
-			'wc-novalnet-block-inputs'                   => 'sha384-ZWBHHwtoVVSTsRHOoi80H7MN8R7iYBDburtjnfP36zgcBW+7Wf61xlkuIxKkfC/x',
+			'wc-novalnet-block-inputs'                   => 'sha384-EskEihDi274GJc7sSW9GwGrHQE3Ka1C5hv9XOLKKNXH8i5XjpbKuFWT2wXmt5pe+',
 			'wc-novalnet-ach-blocks-integration'         => 'sha384-Bmy92vsHBrvobxOMCCTPPKEOGEcyA7e0sArshNPVJuvOeFcxOpWE/ydwLgbvPOE9',
 			'wc-novalnet-alipay-blocks-integration'      => 'sha384-QtCElQkKcvHcCYrk8uLP90WzMJ+qZiW4OC6cdGpe7lp7W7XmRMLzWu+rTOSla6uv',
 			'wc-novalnet-applepay-blocks-integration'    => 'sha384-vi4VykNLzIjISVf6DUmG3FuNBCL1kXuILy0u2Locf0lRXO775WNyAz78WhINWmGL',
@@ -1217,11 +1227,11 @@ final class WC_Novalnet {
 			'wc-novalnet-payconiq-blocks-integration'    => 'sha384-YvqEgrxo1HFh1JKqY8yDc78vN12fRdNkXQvssxxl+UaK+KrsN2RUBoYdWNOWOSGp',
 			'wc-novalnet-blik-blocks-integration'        => 'sha384-cnRPjj/mX4+pF3Oxr41ubDFU/vQrPbFVGkBJvHPqiGn/4Kx1yy38rrA72nK/S96p',
 		);
-
+		
 		if ( in_array( $handle, array_keys( $sri ), true ) && isset( $sri[ $handle ] ) ) {
 			return preg_replace( '/(<script\b[^><]*)>/i', '$1 integrity="' . $sri[ $handle ] . '" crossorigin="anonymous">', $tag );
 		}
-
+		
 		if ( 'woocommerce-novalnet-gateway-external-script-barzahlen' === $handle ) {
 			$data = explode( '?', $src );
 			if ( ! empty( $data['1'] ) ) {
@@ -1248,9 +1258,31 @@ final class WC_Novalnet {
 	 */
 	public function customize_style_sheet( $tag, $handle, $href, $media ) {
 		if ( 'woocommerce-novalnet-gateway-css' === $handle ) {
-			return preg_replace( '/(<link\b[^><]*)>/i', '$1  integrity="sha384-Y7I4B+j35ynWRKrNmGVVAYfqeAUUeqEZ8JhjZTgGMFOsM6bqsGk+IrMH/pD4KC6l" crossorigin="anonymous">', $tag );
+			return preg_replace( '/(<link\b[^><]*)>/i', '$1  integrity="sha384-tIaHiCP3FuQ0+i5HmhBxwwRr/5mc2XqulFazRE/ZLe+utg2J7t4rbjCn8jKe4QN1" crossorigin="anonymous">', $tag );
 		}
 		return $tag;
+	}
+
+         /**
+	 * Restrict instant order email.
+	 *
+	 * @since 12.0.0
+	 * @param string $value  Return value.
+	 *
+	 * @return string
+	 */
+	public function restrict_instant_email( $value ) {
+
+		if (
+			( isset( $this->request['payment_method'] ) && WC_Novalnet_Validation::check_string( $this->request['payment_method'] ) )
+			|| isset( $this->request['tid'] )
+			|| ( isset( $this->request['action'] ) && 'novalnet_order_creation' === $this->request['action'] )
+		) {
+			$value = false;
+		}
+
+
+		return $value;
 	}
 
 
