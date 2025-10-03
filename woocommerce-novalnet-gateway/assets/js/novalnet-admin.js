@@ -235,6 +235,33 @@
 					}
 				);
 			}
+
+
+			const params = new URLSearchParams(window.location.search);
+
+			if (params.get("page") === "wc-settings" && params.get("tab") === "checkout") {
+				// Deprecated Novalnet payment methods (will be removed in a future release)
+				const deprected_payments = ['novalnet_instantbank', 'novalnet_barzahlen', 'novalnet_giropay'];
+				function hidePayments() {
+					deprected_payments.forEach(payment_id => {
+						const element = document.getElementById(payment_id);
+						if (element) {
+							const parentDiv = element.closest(".sortable-item");
+							if (parentDiv && parentDiv.style.display !== "none") {
+								parentDiv.style.display = "none";
+							}
+						}
+					});
+				}
+		
+				hidePayments();
+		
+				const observer = new MutationObserver(() => {
+					hidePayments();
+				});
+		
+				observer.observe(document.body, { childList: true, subtree: true });
+			}
 		},
 
 		/**
@@ -682,6 +709,7 @@
 
 	$( document ).ready(
 		function () {
+
 			wc_novalnet_admin.init();
 		}
 	);

@@ -43,26 +43,6 @@ class WC_Gateway_Novalnet_Barzahlen extends WC_Novalnet_Abstract_Payment_Gateway
 		$this->assign_basic_payment_details();
 	}
 
-	/**
-	 * Returns the gateway icon.
-	 *
-	 * @return string
-	 */
-	public function get_icon() {
-		return apply_filters( 'woocommerce_gateway_icon', $this->built_logo(), $this->id );
-	}
-
-	/**
-	 * Displays the payment form, payment description on checkout.
-	 */
-	public function payment_fields() {
-
-		// Show TESTMODE notification.
-		$this->test_mode_notification();
-
-		// Display payment description.
-		$this->show_description();
-	}
 
 	/**
 	 * Refund process.
@@ -107,10 +87,7 @@ class WC_Gateway_Novalnet_Barzahlen extends WC_Novalnet_Abstract_Payment_Gateway
 	 * @return boolean
 	 */
 	public function is_available() {
-		if ( is_admin() || ! wc_novalnet_check_session() ) {
-			return parent::is_available();
-		}
-		return parent::is_available() && WC_Novalnet_Validation::is_payment_available( $this->settings, $this->id );
+		return false;
 	}
 
 	/**

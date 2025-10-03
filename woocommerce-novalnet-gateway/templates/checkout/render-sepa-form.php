@@ -14,6 +14,37 @@ endif;
 	<div class="wc-payment-form">
 	<?php
 
+	$first_name = ( isset( $contents['customer']['first_name'] ) ) ? $contents['customer']['first_name'] : ( isset( WC()->session->customer['first_name'] ) ? WC()->session->customer['first_name'] : '' );
+	$last_name  = ( isset( $contents['customer']['last_name'] ) ) ? $contents['customer']['last_name'] : ( isset( WC()->session->customer['last_name'] ) ? WC()->session->customer['last_name'] : '' );
+
+	$account_holder_field = array(
+		'required'          => true,
+		'class'             => array(
+			'form-row-wide',
+		),
+		'label'             => __( 'Account Holder', 'woocommerce-novalnet-gateway' ),
+		'id'                => $payment_type . '_holder',
+		'placeholder'       => 'Account Holder',
+		'custom_attributes' => array(
+			'onkeypress'   => 'return wc_novalnet.is_valid_name(event);',
+			'onkeyup'      => 'return wc_novalnet.is_valid_name(event);',
+			'onchange'     => 'return wc_novalnet.is_valid_name(event);',
+			'class'        => 'input-text',
+			'autocomplete' => 'OFF',
+		),
+	);
+
+	if ( ! empty( $first_name ) && ! empty( $last_name ) ) {
+		$account_holder_field['default'] = $first_name . ' ' . $last_name;
+	} else {
+		$account_holder_field['placeholder'] = __( 'Account Holder Name', 'woocommerce-novalnet-gateway' );
+	}
+
+	woocommerce_form_field(
+		$payment_type . '_holder',
+		$account_holder_field,
+	);
+
 	woocommerce_form_field(
 		$payment_type . '_iban',
 		array(

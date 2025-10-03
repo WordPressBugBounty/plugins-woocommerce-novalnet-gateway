@@ -4,7 +4,7 @@ Donate link: https://www.novalnet.de
 Tags: Credit cards, Payments, Payment gateway, Novalnet payment
 Requires at least: 5.0
 Tested up to: 6.5
-Stable tag: 12.8.5
+Stable tag: 12.9.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -75,11 +75,10 @@ Die vielfach automatisierten Abläufe sorgen dafür, dass Sie Kosten sparen und 
 
 * [Kreditkarte](https://www.novalnet.de/zahlungsart-kreditkarte/ "Kreditkarte"): Visa, Mastercard, American Express, JCB, UnionPay, Diners Club, Discover
 * Debitkarte: Maestro, Carte Bleue, CartaSi, Postepay, PostFinance, dankort
-* Online-Überweisung: Sofortüberweisung, Onlineüberweisung eps, iDEAL, giropay, Przelewy24, Alipay, WeChat Pay, Trustly & Blik etc.
+* Online-Überweisung: Onlineüberweisung eps, iDEAL, Przelewy24, Alipay, WeChat Pay, Trustly & Blik etc.
 * Wallet: Apple Pay, Google Pay, Payconiq, MB Way, PayPal & TWINT.
 * Vorkasse, Kauf auf Rechnung, Kauf auf Rechnung mit Zahlungsgarantie
 * [SEPA-Lastschrift](https://www.novalnet.de/sepa-lastschrift/ "SEPA-Lastschrift"), Lastschrift ACH
-* Barzahlen/viacash
 * Ratenzahlung
 * Direct Carrier Billing (Zahlen per Handyrechnung)
 * Kauf auf  Rechnung und [SEPA-Lastschrift sind auch mit Zahlungsgarantie](https://www.novalnet.de/lastschrift-mit-zahlungsgarantie/ "SEPA-Lastschrift sind auch mit Zahlungsgarantie") möglich.
@@ -121,11 +120,11 @@ Novalnet’s WooCommerce Payment Plugin supports:
 
 * Debit cards: Maestro, Visa, Carte Bleue, CartaSi, Postepay, PostFinance, dankort etc.
 
-* Online bank transfers: Sofort, Online bank transfer, eps, iDEAL, giropay, Przelewy24, PostFinance Card, PostFinance E-Finance, Bancontact, Alipay, WeChat Pay, Trustly & Blik etc.
+* Online bank transfers: Online bank transfer, eps, iDEAL, Przelewy24, PostFinance Card, PostFinance E-Finance, Bancontact, Alipay, WeChat Pay, Trustly & Blik etc.
 
 * E-wallets:  [PayPal](https://www.novalnet.com/payment-processing/paypal/ "PayPal"), Apple Pay, Google Pay, Payconiq, MB Way & TWINT.
 
-* Prepayment, Invoice, [Direct Debit SEPA](https://www.novalnet.com/solutions/payment-processing/sepa-direct-debit/ "Direct Debit SEPA"), Direct Debit ACH, [Barzahlen/viacash](https://www.novalnet.com/solutions/payment-processing/barzahlen/ "Barzahlen") & Multibanco.
+* Prepayment, Invoice, [Direct Debit SEPA](https://www.novalnet.com/solutions/payment-processing/sepa-direct-debit/ "Direct Debit SEPA"), Direct Debit ACH, & Multibanco.
 
 * Direct Debit SEPA with payment guarantee, Invoice with payment guarantee, Instalment by Invoice & Instalment by Direct Debit SEPA 
 
@@ -153,7 +152,7 @@ Novalnet’s WooCommerce Payment Plugin integrates your shop with one payment pl
 * Custom CSS configuration for Credit/Debit Card iframe
 * Automated invoice generation
 * Easy confirmation/cancellation of on-hold transactions for Direct Debit SEPA, Direct Debit SEPA with payment guarantee, Instalment payment for Direct Debit SEPA, Credit/Debit Card, Invoice, Invoice with payment guarantee, Instalment payment for Invoice, Prepayment, PayPal, Apple Pay & Google Pay
-* Refund option for Credit/Debit Cards, Direct Debit SEPA, Direct Debit ACH, Direct Debit SEPA with payment guarantee, Instalment by Direct Debit SEPA, Invoice, Invoice with payment guarantee, Instalment by Invoice, Prepayment, Barzahlen/viacash, Sofort, iDEAL, eps, giropay, PayPal, MB Way, Przelewy24, PostFinance Card, PostFinance E-Finance, Bancontact, Apple Pay, Google Pay, Online bank transfer, Alipay, WeChat pay, Trustly, Blik, Payconiq & TWINT.
+* Refund option for Credit/Debit Cards, Direct Debit SEPA, Direct Debit ACH, Direct Debit SEPA with payment guarantee, Instalment by Direct Debit SEPA, Invoice, Invoice with payment guarantee, Instalment by Invoice, Prepayment, iDEAL, eps, PayPal, MB Way, Przelewy24, PostFinance Card, PostFinance E-Finance, Bancontact, Apple Pay, Google Pay, Online bank transfer, Alipay, WeChat pay, Trustly, Blik, Payconiq & TWINT.
 * Automated e-mail notifications for staying up to date on the payment status
 * Clear overview of payment status from checkout to receivables
 * Secure end customer portal for payment inquiries 
@@ -165,7 +164,7 @@ Novalnet’s WooCommerce Payment Plugin integrates your shop with one payment pl
 * Dynamic subscription management for recurring payments
 * Subscription management (suspend, reactivate, cancel, change payment method, change next cycle date, change subscription amount)
 * Automatic order creation when subscriptions are renewed
-* Transaction amount update option for Direct Debit SEPA, Direct Debit ACH Invoice, Prepayment & Barzahlen/viacash
+* Transaction amount update option for Direct Debit SEPA, Direct Debit ACH Invoice & Prepayment
 * Order creation process handled for shop admin
 * Responsive templates
 
@@ -201,12 +200,12 @@ Please check out our ssl certified [Demo Store](https://woocommerce.novalnet.de/
 
 = Compatibility =   
 
-Novalnet payment plugin compatible for WooCommerce 4.0.0-10.1.1 and compatible for subscription 2.0.0-7.8.0.
+Novalnet payment plugin compatible for WooCommerce 4.0.0-9.9.5 and compatible for subscription 2.0.0-7.6.0.
 
 = Automatic Installation: =
 
 * Go to Plugins > “Add New”.
-* Download the WooCommerce payment plugin - Novalnet from WordPress repository and Click "Install Now" to install the plugin. A popup window will ask you to confirm your wish to install the plugin 12.8.5.
+* Download the WooCommerce payment plugin - Novalnet from WordPress repository and Click "Install Now" to install the plugin. A popup window will ask you to confirm your wish to install the plugin 12.9.0.
 
 = Note: = If this is the first time you've installed a WordPress plugin, you may need to enter the FTP login credential information. If you've installed the plugin before, it will still have the login information. This information is available through your web server host.
 
@@ -275,10 +274,11 @@ This online payment plugin only works with the WooCommerce webshop. Are you look
 
 == Changelog ==
 
-= 12.8.5 =
+= 12.9.0 = 
 
-  * [Fix] Restored deprecated instant email hook from the Germanized plugin used in the Novalnet plugin to handle order confirmation emails 
-  * [Enhanced] Wallet sheet now displays the phone number during express checkout in line with the checkout page flow
+  * [New] EPC QR code implemented for Invoice, Prepayment, Guarantee Invoice, and Instalment Invoice payments
+  * [New] Implemented Account Holder field for Direct Debit SEPA, Direct Debit SEPA with Payment Guarantee, and Instalment by Direct Debit SEPA, in compliance with Verification of Payee (VoP) regulations
+  * [Removed] Sofort, giropay, and Barzahlen/viacash payment methods
 
 = 12.8.4 =
 

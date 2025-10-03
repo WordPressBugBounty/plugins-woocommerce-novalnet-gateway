@@ -94,7 +94,7 @@ class WC_Novalnet_Helper {
 				'post_id'    => '',
 			)
 		);
-
+		
 		$override_log_setting = ( ! empty( $args['is_scheduled_payment'] ) && true === $args['is_scheduled_payment'] ) ? true : false;
 
 		// Perform server call and format the response.
@@ -150,6 +150,7 @@ class WC_Novalnet_Helper {
 
 				if ( false === strpos( $url, 'merchant/details' ) ) {
 					$res_data = wc_novalnet_unserialize_data( $response['body'] );
+
 					if ( isset( $res_data['transaction']['payment_data'] ) ) {
 						unset( $res_data['transaction']['payment_data'] );
 					}
@@ -187,9 +188,17 @@ class WC_Novalnet_Helper {
 			$comments .= __( "\n\nYour order is under verification and we will soon update you with the order status. Please note that this may take upto 24 hours.", 'woocommerce-novalnet-gateway' );
 		} elseif ( ! empty( $data['transaction']['bank_details'] ) && ! empty( $data['transaction']['amount'] ) && empty( $data['instalment']['prepaid'] ) ) {
 			$comments .= $this->form_amount_transfer_comments( $data, $wc_order );
-		} elseif ( ! empty( $data['transaction']['nearest_stores'] ) ) {
-
-			$comments .= $this->form_nearest_store_comments( $data );
+			if(!$wc_order || is_int($wc_order) && !empty($data['transaction']['order_no'])){
+				$wc_order = wc_get_order($data['transaction']['order_no'] ?? $wc_order);
+			}
+			
+			if ( ! empty( $data['transaction']['bank_details']['qr_image'] ) ) {
+				// Store the QR code in the session because the email may be triggered before the order meta is saved.
+				if(isset(WC()->session)){
+					WC()->session->set( 'novalnet_qr_url', $data['transaction']['bank_details']['qr_image']);
+				}
+				$this->novalnet_update_wc_order_meta( $wc_order, '_novalnet_epc_qr_code', $data['transaction']['bank_details']['qr_image'], true );
+			}
 		} elseif ( ! empty( $data['transaction']['partner_payment_reference'] ) ) {
 
 			/* translators: %s: amount */
@@ -202,7 +211,7 @@ class WC_Novalnet_Helper {
 				/* translators: %s: service_supplier_id */
 				$comments .= sprintf( __( "\nEntity : %s \n", 'woocommerce-novalnet-gateway' ), $data['transaction']['service_supplier_id'] );
 			}
-		}
+		}	
 
 		$comments = str_replace( "\n", PHP_EOL, sanitize_textarea_field( $comments ) );
 
@@ -275,46 +284,6 @@ class WC_Novalnet_Helper {
 	}
 
 	/**
-	 * Form payment comments.
-	 *
-	 * @since 12.0.0
-	 * @param array $data The comment data.
-	 *
-	 * @return string
-	 */
-	public function form_nearest_store_comments( $data ) {
-
-		$nearest_stores = $data['transaction']['nearest_stores'];
-		$comments       = '';
-
-		if ( ! empty( $data['transaction']['due_date'] ) ) {
-			/* translators: %s: due_date */
-			$comments .= sprintf( __( "\nSlip expiry date : %s", 'woocommerce-novalnet-gateway' ), wc_novalnet_formatted_date( $data['transaction']['due_date'] ) );
-		}
-		$comments .= __( "\n\nStore(s) near to you: \n\n", 'woocommerce-novalnet-gateway' );
-
-		foreach ( $nearest_stores as $nearest_store ) {
-			$address = array();
-			foreach (
-				array(
-					'store_name'   => 'company',
-					'street'       => 'address_1',
-					'city'         => 'city',
-					'zip'          => 'postcode',
-					'country_code' => 'country',
-				) as $nn_key => $wc_key
-			) {
-				if ( ! empty( $nearest_store[ $nn_key ] ) ) {
-					$address[ $wc_key ] = $nearest_store[ $nn_key ];
-				}
-			}
-			$comments .= WC()->countries->get_formatted_address( $address, PHP_EOL );
-			$comments .= "\n\n";
-		}
-		return $comments;
-	}
-
-	/**
 	 * Form Bank details comments.
 	 *
 	 * @since 12.0.0
@@ -352,17 +321,19 @@ class WC_Novalnet_Helper {
 				/* translators: %s: account_holder */
 				'account_holder' => __( "Account holder: %s \n", 'woocommerce-novalnet-gateway' ),
 
+				/* translators: %s: iban */
+				'iban'           => __( "IBAN: %s \n", 'woocommerce-novalnet-gateway' ),
+
+				/* translators: %s: bic */
+				'bic'            => __( "BIC: %s \n", 'woocommerce-novalnet-gateway' ),
+				
 				/* translators: %s: bank_name */
 				'bank_name'      => __( "Bank: %s \n", 'woocommerce-novalnet-gateway' ),
 
 				/* translators: %s: bank_place */
 				'bank_place'     => __( "Place: %s \n", 'woocommerce-novalnet-gateway' ),
 
-				/* translators: %s: iban */
-				'iban'           => __( "IBAN: %s \n", 'woocommerce-novalnet-gateway' ),
 
-				/* translators: %s: bic */
-				'bic'            => __( "BIC: %s \n", 'woocommerce-novalnet-gateway' ),
 			) as $key => $text
 		) {
 			if ( ! empty( $input['transaction']['bank_details'][ $key ] ) ) {
@@ -383,6 +354,9 @@ class WC_Novalnet_Helper {
 			/* translators: %s: project name */
 			$comments .= sprintf( __( "\n Payment Reference 2: %s", 'woocommerce-novalnet-gateway' ), 'BNR-' . $input['merchant']['project'] . '-' . $wc_order_id );
 		}
+
+
+
 		return wc_novalnet_format_text( $comments );
 	}
 
@@ -778,8 +752,6 @@ class WC_Novalnet_Helper {
 				$insert_data['additional_info'] = wc_novalnet_serialize_data( wc_novalnet_unserialize_data( $insert_data['additional_info'] ) + $server_response['transaction']['bank_details'] );
 			} elseif ( ! empty( $server_response['transaction']['bank_details'] ) ) {
 				$insert_data['additional_info'] = wc_novalnet_serialize_data( $server_response['transaction']['bank_details'] );
-			} elseif ( ! empty( $server_response['transaction']['nearest_stores'] ) ) {
-				$insert_data['additional_info'] = wc_novalnet_serialize_data( $server_response['transaction']['nearest_stores'] );
 			}
 		}
 

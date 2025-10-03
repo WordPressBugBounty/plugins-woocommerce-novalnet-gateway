@@ -16,14 +16,17 @@
                 const { onPaymentSetup } = eventRegistration;
                 const { company: billingCompany} =  e.billing.billingAddress;
                 const { cartTotal : cartTotal } = e.billing;
+                const { billingAddress : billingCustomer } = e.billing;
                 const dateOfBirth = ( 0 !== billingCompany.length && 'yes' == paymentMethodData.settings.allow_b2b ) ? null : novalnetPaymentElement.getBirthField( paymentMethodId );
                 wpElement.useEffect( () => {
                     const unsubscribe = onPaymentSetup( async () => {
+                        const novalnet_instalment_sepa_holder = document.getElementById( paymentMethodId + '_holder' ).value;
                         const novalnet_instalment_sepa_iban = document.getElementById( paymentMethodId + '_iban' ).value;
                         const novalnet_instalment_sepa_bic  = document.getElementById( paymentMethodId + '_bic' ).value;
                         const novalnet_instalment_sepa_period  = document.getElementById( paymentMethodId + '_cycle' ).value;
                         if ( novalnet_instalment_sepa_iban.length != 0 ) {
                             const paymentMethodData = {
+                                novalnet_instalment_sepa_holder,
                                 novalnet_instalment_sepa_iban,
                                 novalnet_instalment_sepa_bic,
                                 novalnet_instalment_sepa_period
@@ -60,6 +63,7 @@
                 return Object(wpElement.createElement)(
                     'div',
                     null,
+                    novalnetPaymentElement.getHolderField( paymentMethodId, billingCustomer ),
                     novalnetPaymentElement.getIBANField( paymentMethodId ),
                     novalnetPaymentElement.getBICField( paymentMethodId ),
                     dateOfBirth,

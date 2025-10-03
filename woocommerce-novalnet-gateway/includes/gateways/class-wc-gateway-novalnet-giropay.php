@@ -41,19 +41,6 @@ class WC_Gateway_Novalnet_Giropay extends WC_Novalnet_Abstract_Payment_Gateways 
 
 		// Assign payment details.
 		$this->assign_basic_payment_details();
-
-		// Handle redirection payment response.
-		add_action( 'woocommerce_api_response_novalnet_giropay', array( $this, 'check_novalnet_payment_response' ), 10 );
-	}
-
-	/**
-	 * Returns the gateway icon.
-	 *
-	 * @return string
-	 */
-	public function get_icon() {
-
-		return apply_filters( 'woocommerce_gateway_icon', $this->built_logo(), $this->id );
 	}
 
 	/**
@@ -65,17 +52,6 @@ class WC_Gateway_Novalnet_Giropay extends WC_Novalnet_Abstract_Payment_Gateways 
 		$this->unset_other_payment_session();
 	}
 
-	/**
-	 * Displays the payment form, payment description on checkout.
-	 */
-	public function payment_fields() {
-
-		// Show TESTMODE notification.
-		$this->test_mode_notification();
-
-		// Display payment description.
-		$this->show_description();
-	}
 
 	/**
 	 * Process payment flow of the gateway.
@@ -111,10 +87,7 @@ class WC_Gateway_Novalnet_Giropay extends WC_Novalnet_Abstract_Payment_Gateways 
 	 * @return boolean
 	 */
 	public function is_available() {
-		if ( is_admin() || ! wc_novalnet_check_session() ) {
-			return parent::is_available();
-		}
-		return parent::is_available() && WC_Novalnet_Validation::is_payment_available( $this->settings );
+		return false;
 	}
 
 	/**
@@ -128,20 +101,6 @@ class WC_Gateway_Novalnet_Giropay extends WC_Novalnet_Abstract_Payment_Gateways 
 			$this->redirect_payment_params( $wc_order, $parameters );
 	}
 
-
-	/**
-	 * Manage redirect process.
-	 */
-	public function check_novalnet_payment_response() {
-
-		// Checks redirect response.
-		if ( wc_novalnet_check_isset( novalnet()->request, 'wc-api', 'response_' . $this->id ) ) {
-
-			// Process redirect response.
-			$status = $this->process_redirect_payment_response();
-			return wc_novalnet_safe_redirect( $status['redirect'] );
-		}
-	}
 
 	/**
 	 * Payment configurations in shop backend.

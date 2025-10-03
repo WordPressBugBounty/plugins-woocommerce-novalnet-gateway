@@ -598,7 +598,9 @@ class WC_Novalnet_Webhook {
 			$recurring_order = apply_filters( 'novalnet_create_renewal_order', $this->wcs_order );
 			$recurring_order->set_payment_method( $this->wcs_order->get_payment_method() );
 			$recurring_order->set_payment_method_title( $this->wcs_order->get_payment_method_title() );
-
+			if ( ! empty( $this->event_data['transaction']['bank_details']['qr_image'] ) ) {
+				novalnet()->helper()->novalnet_update_wc_order_meta( $recurring_order, '_novalnet_epc_qr_code', $this->event_data['transaction']['bank_details']['qr_image'], true );
+			}
 			/* translators: %1$s: tid, %2$s: amount, %3$s: date, %4$s: tid */
 			$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Subscription has been successfully renewed for the TID: %1$s with the amount %2$s on %3$s. The renewal TID is:%4$s.', 'woocommerce-novalnet-gateway' ), $this->parent_tid, wc_novalnet_shop_amount_format( $this->event_data['transaction']['amount'] ), wc_novalnet_formatted_date(), $this->event_tid ) );
 
@@ -807,10 +809,10 @@ class WC_Novalnet_Webhook {
 	public function handle_credit() {
 		if ( 'ONLINE_TRANSFER_CREDIT' === $this->event_data['transaction']['payment_type'] ) {
 			/* translators: %1$s: tid, %2$s: amount, %3$s: date, %4$s: parent_tid */
-			$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Credit has been successfully received for the TID: %1$s with amount %2$s on %3$s. Please refer PAID order details in our Novalnet Admin Portal for the TID: %4$s', 'woocommerce-novalnet-gateway' ), $this->parent_tid, wc_novalnet_shop_amount_format( $this->event_data['transaction']['amount'] ), wc_novalnet_formatted_date(), $this->event_data['transaction']['tid'] ) );
+			$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Credit has been successfully received for the TID: %1$s with amount %2$s on %3$s. New TID: %4$s for the credit', 'woocommerce-novalnet-gateway' ), $this->parent_tid, wc_novalnet_shop_amount_format( $this->event_data['transaction']['amount'] ), wc_novalnet_formatted_date(), $this->event_data['transaction']['tid'] ) );
 		} else {
 			/* translators: %s: post type */
-			$this->response['message'] = sprintf( __( 'Credit has been successfully received for the TID: %1$s with amount %2$s on %3$s. Please refer PAID order details in our Novalnet Admin Portal for the TID: %4$s. ', 'woocommerce-novalnet-gateway' ), $this->parent_tid, wc_novalnet_shop_amount_format( $this->event_data['transaction']['amount'] ), wc_novalnet_formatted_date(), $this->event_data['transaction']['tid'] );
+			$this->response['message'] = sprintf( __( 'Credit has been successfully received for the TID: %1$s with amount %2$s on %3$s. New TID: %4$s for the credit', 'woocommerce-novalnet-gateway' ), $this->parent_tid, wc_novalnet_shop_amount_format( $this->event_data['transaction']['amount'] ), wc_novalnet_formatted_date(), $this->event_data['transaction']['tid'] );
 			$payment_settings          = WC_Novalnet_Configuration::get_payment_settings( $this->wc_order->get_payment_method() );
 			if ( in_array( $this->event_data['transaction']['payment_type'], array( 'INVOICE_CREDIT', 'CASHPAYMENT_CREDIT', 'MULTIBANCO_CREDIT' ), true ) ) {
 				$this->update_payment_credit_status_amount( $payment_settings['callback_status'] );

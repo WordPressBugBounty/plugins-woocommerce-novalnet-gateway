@@ -13,9 +13,11 @@
             ariaLabel: paymentTitle,
             content: Object(wpElement.createElement)((e)=>{
                 const { eventRegistration, emitResponse } = e;
+                const { billingAddress : billingCustomer } = e.billing;
                 const { onPaymentSetup } = eventRegistration;
                 wpElement.useEffect( () => {
                     const unsubscribe = onPaymentSetup( async () => {
+                        const novalnet_sepa_holder = document.getElementById( paymentMethodId + '_holder' ).value;
                         const novalnet_sepa_iban = document.getElementById( paymentMethodId + '_iban' ).value;
                         const novalnet_sepa_bic = document.getElementById( paymentMethodId + '_bic' ).value;
                         if ( novalnet_sepa_iban.length != 0 ) {
@@ -23,6 +25,7 @@
                                 type: emitResponse.responseTypes.SUCCESS,
                                 meta: {
                                     paymentMethodData: {
+                                        novalnet_sepa_holder,
                                         novalnet_sepa_iban,
                                         novalnet_sepa_bic
                                     },
@@ -47,6 +50,7 @@
                 return Object(wpElement.createElement)(
                     'div',
                     null,
+                    novalnetPaymentElement.getHolderField( paymentMethodId, billingCustomer ),
                     novalnetPaymentElement.getIBANField( paymentMethodId ),
                     novalnetPaymentElement.getBICField( paymentMethodId ),
                     Object(wpElement.RawHTML)({ children: paymentDescription })

@@ -89,7 +89,7 @@ foreach ( $saved_payment_settings as $payment ) {
 		$language                                    = strtolower( wc_novalnet_shop_language() );
 		$option_value[ 'instructions_' . $language ] = $option_value['payment_instruction'];
 		wc_novalnet_update_value( 'test_mode', $option_value );
-		if ( in_array( $payment, array( 'novalnet_invoice', 'novalnet_sepa', 'novalnet_cc', 'novalnet_paypal', 'novalnet_instalment_sepa', 'novalnet_instalment_invoice', 'novalnet_barzahlen' ), true ) ) {
+		if ( in_array( $payment, array( 'novalnet_invoice', 'novalnet_sepa', 'novalnet_cc', 'novalnet_paypal', 'novalnet_instalment_sepa', 'novalnet_instalment_invoice'), true ) ) {
 
 			if ( 'novalnet_cc' === $payment ) {
 				$option_value ['enable_iniline_form'] = 'yes';
@@ -112,9 +112,6 @@ foreach ( $saved_payment_settings as $payment ) {
 				$option_value['limit']          = $option_value['limit'];
 			} else {
 				$option_value['payment_status'] = 'capture';
-			}
-			if ( 'novalnet_barzahlen' === $payment ) {
-				$option_value['payment_duration'] = $option_value['barzahlen_payment_duration'];
 			}
 			if ( in_array( $payment, array( 'novalnet_sepa', 'novalnet_invoice' ), true ) && wc_novalnet_check_isset( $option_value, 'guarantee_payment', 'yes' ) ) {
 				$set_values            = $option_value;

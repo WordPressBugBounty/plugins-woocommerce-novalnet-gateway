@@ -394,24 +394,11 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 		if ( WC_Novalnet_Validation::is_success_status( $response ) ) {
 
 			if ( 'CANCEL_ALL_CYCLES' === (string) novalnet()->request['cancel_type'] ) {
-				$refund_note = '';
-				if ( isset( $response['transaction']['refund']['amount'] ) ) {
-					$refund_note = sprintf(
-						/* translators: %1$s: refund amount */
-						__( '& Refund has been initiated with the amount %1$s', 'woocommerce-novalnet-gateway' ),
-						wc_novalnet_shop_amount_format(
-							wc_novalnet_formatted_amount(
-								$response['transaction']['refund']['amount'] / 100
-							)
-						)
-					);
-				}
 				$message = sprintf(
 					/* translators: %1$s: tid, %2$s: date, %3$s: refund note */
-					__( 'Instalment has been cancelled for the TID: %1$s on %2$s %3$s', 'woocommerce-novalnet-gateway' ),
+					__( 'Instalment has been cancelled for the TID: %1$s on %2$s', 'woocommerce-novalnet-gateway' ),
 					$response['transaction']['tid'],
 					wc_novalnet_formatted_date(),
-					$refund_note
 				);
 				$wc_order->update_status( 'wc-cancelled', 'Cancelled', true );
 			} else {
@@ -917,7 +904,7 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 	 */
 	public static function novalnet_wc_admin_shop_order( $post_id, $post ) {
 		$request = novalnet()->request;
-		if ( is_admin() && 'auto-draft' === $request['post_status'] && in_array( $request['_payment_method'], array( 'novalnet_prepayment', 'novalnet_invoice', 'novalnet_sepa', 'novalnet_barzahlen', 'novalnet_guaranteed_invoice', 'novalnet_guaranteed_sepa', 'novalnet_multibanco' ), true ) ) {
+		if ( is_admin() && 'auto-draft' === $request['post_status'] && in_array( $request['_payment_method'], array( 'novalnet_prepayment', 'novalnet_invoice', 'novalnet_sepa', 'novalnet_guaranteed_invoice', 'novalnet_guaranteed_sepa', 'novalnet_multibanco' ), true ) ) {
 			WC()->initialize_session();
 			WC()->session->set( 'admin_add_shop_order', true );
 			$order    = wc_get_order( $post_id );
@@ -979,7 +966,6 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 					'novalnet_prepayment',
 					'novalnet_invoice',
 					'novalnet_sepa',
-					'novalnet_barzahlen',
 					'novalnet_multibanco',
 				);
 

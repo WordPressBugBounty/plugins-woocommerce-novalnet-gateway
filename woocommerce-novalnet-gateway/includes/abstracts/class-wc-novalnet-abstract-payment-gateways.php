@@ -1105,7 +1105,6 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 
 		$parameters['custom']['input7']    = 'renewal_order_by';
 		$parameters['custom']['inputval7'] = 'shop_cron';
-
 		// Submit the given request.
 		$response = novalnet()->helper()->submit_request(
 			$parameters,
@@ -1187,25 +1186,6 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 		// Check Novalnet payment.
 		if ( ! empty( $this->settings[ 'instructions_' . $language ] ) ) {
 			echo wp_kses_post( wpautop( wptexturize( $this->settings[ 'instructions_' . $language ] ) ) );
-		}
-
-		$wc_order       = wc_get_order( $wc_order_id );
-		$checkout_token = novalnet()->helper()->novalnet_get_wc_order_meta( $wc_order, '_nn_cp_checkout_token' );
-		if ( ! empty( $checkout_token ) ) {
-			$overlay_details = wc_novalnet_unserialize_data( $checkout_token );
-			if ( ! empty( $overlay_details['checkout_js'] ) && ! empty( $overlay_details['checkout_token'] ) ) {
-				wp_enqueue_script( 'woocommerce-novalnet-gateway-external-script-barzahlen', esc_url( $overlay_details['checkout_js'] . '?token=' . esc_attr( $overlay_details['checkout_token'] ) ), array(), NOVALNET_VERSION, false );
-				echo wp_kses(
-					"<button id='barzahlen_button' class='bz-checkout-btn' style='z-index: 10;'>" . __( 'Pay now with Barzahlen', 'woocommerce-novalnet-gateway' ) . '</button>',
-					array(
-						'button' => array(
-							'id'    => true,
-							'class' => true,
-							'style' => true,
-						),
-					)
-				);
-			}
 		}
 	}
 

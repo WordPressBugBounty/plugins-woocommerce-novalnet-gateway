@@ -230,7 +230,7 @@ class WC_Novalnet_Validation {
 
 		// Set min_amount equals to 1 if the cart contains subscription and min_amount empty.
 		if ( empty( $settings ['min_amount'] ) && apply_filters( 'novalnet_cart_contains_subscription', true )
-		&& in_array( $payment_type, array( 'novalnet_barzahlen', 'novalnet_multibanco', 'novalnet_paypal' ), true ) && ! is_admin() && ! is_account_page() ) {
+		&& in_array( $payment_type, array('novalnet_multibanco', 'novalnet_paypal' ), true ) && ! is_admin() && ! is_account_page() ) {
 			$settings ['min_amount'] = 1;
 		}
 

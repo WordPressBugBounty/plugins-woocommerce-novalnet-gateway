@@ -141,6 +141,7 @@ class WC_Gateway_Novalnet_Guaranteed_Sepa extends WC_Novalnet_Abstract_Payment_G
 			$session = novalnet()->helper()->set_post_value_session(
 				$this->id,
 				array(
+					'novalnet_guaranteed_sepa_holder',
 					'novalnet_guaranteed_sepa_iban',
 					'novalnet_guaranteed_sepa_dob',
 					'novalnet_guaranteed_sepa_bic',
@@ -153,6 +154,7 @@ class WC_Gateway_Novalnet_Guaranteed_Sepa extends WC_Novalnet_Abstract_Payment_G
 			if ( ! WC_Novalnet_Validation::validate_payment_input_field(
 				$session,
 				array(
+					'novalnet_guaranteed_sepa_holder',
 					'novalnet_guaranteed_sepa_iban',
 				)
 			) && ( wc_novalnet_check_isset( $session, 'wc-novalnet_guaranteed_sepa-payment-token', 'new' ) || empty( $session ['wc-novalnet_guaranteed_sepa-payment-token'] ) ) ) {
@@ -224,6 +226,7 @@ class WC_Gateway_Novalnet_Guaranteed_Sepa extends WC_Novalnet_Abstract_Payment_G
 			$session = novalnet()->helper()->set_post_value_session(
 				$this->id,
 				array(
+					'novalnet_guaranteed_sepa_holder',
 					'novalnet_guaranteed_sepa_iban',
 					'novalnet_guaranteed_sepa_dob',
 					'novalnet_guaranteed_sepa_bic',
@@ -238,7 +241,7 @@ class WC_Gateway_Novalnet_Guaranteed_Sepa extends WC_Novalnet_Abstract_Payment_G
 
 				// Assign account details.
 				$parameters['transaction'] ['payment_data'] = array(
-					'account_holder' => $parameters ['customer']['first_name'] . ' ' . $parameters ['customer']['last_name'],
+			    	        'account_holder' => $session['novalnet_guaranteed_sepa_holder'],
 					'iban'           => strtoupper( $session ['novalnet_guaranteed_sepa_iban'] ),
 				);
 				if ( ! empty( $session['novalnet_guaranteed_sepa_bic'] ) ) {

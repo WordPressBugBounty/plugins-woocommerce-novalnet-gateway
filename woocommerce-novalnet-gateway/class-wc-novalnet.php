@@ -66,6 +66,7 @@ final class WC_Novalnet {
 			'novalnet_guaranteed_sepa',
 			'novalnet_instalment_sepa',
 			'novalnet_ach',
+			'novalnet_paypal',
 		),
 		'subscription'        => array(
 			'novalnet_cc',
@@ -228,6 +229,10 @@ final class WC_Novalnet {
 		// Align the transaction details.
 		add_action( 'woocommerce_order_item_meta_end', array( $this, 'align_transaction_info' ), 10, 3 );
 
+		add_filter( 'woocommerce_email_order_meta_fields', array($this, 'add_epc_qr_to_order_emails'), 10, 3 );
+
+		add_action( 'woocommerce_order_details_after_order_table', array( $this, 'add_epc_qr_to_order_success_page' ), 5 );
+
 		// Add plugin scripts (front-end).
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_script' ) );
 
@@ -299,6 +304,51 @@ final class WC_Novalnet {
 		// Prevents unpaid order auto cancelling.
 		add_action( 'woocommerce_cancel_unpaid_order', array( $this, 'prevent_unpaid_order_cancelling' ), 10, 2 );
 	}
+
+	/**
+	 * Add EPC QR code block to WooCommerce order emails.
+	 *
+	 * @since 12.9.0
+	 * @param array      $fields        Existing email order meta fields.
+	 * @param bool       $sent_to_admin Whether the email is sent to admin.
+	 * @param WC_Order   $order         WooCommerce order object.
+	 *
+	 * @return array Modified email meta fields including EPC QR code if available.
+	 */
+	 public function add_epc_qr_to_order_emails( $fields, $sent_to_admin, $order ) {
+
+		$qr_url = ( isset( WC()->session ) && WC()->session->get( 'novalnet_qr_url' ) )? WC()->session->get( 'novalnet_qr_url' ) : $this->helper()->novalnet_get_wc_order_meta( $order, '_novalnet_epc_qr_code' );
+
+		if (!empty($qr_url)) {
+				$fields['epc_qr'] = array(
+					'label' => sprintf(__("Alternatively, you can use the QR code below for your convenience. Please scan it with your banking app to complete the payment ", 'woocommerce-novalnet-gateway' )),
+					'value' => '<img src="' . esc_url( $qr_url ) . '" alt="QR Code" style="max-width:200px;height:auto;" />',
+				);
+			}
+
+		return $fields;
+	}
+
+	/**
+     * Display QR block after customer note on Success page and my account order page
+	 * 
+	 * @since 12.9.0
+	 * @param WC_Order   $order  WooCommerce order object.
+     */
+    public function add_epc_qr_to_order_success_page( $order ) {
+        if ( ! $order instanceof WC_Order ) {
+            return;
+        }
+		$qr_url = $this->helper()->novalnet_get_wc_order_meta($order,'_novalnet_epc_qr_code');
+		if (!empty($qr_url)) {
+			echo '<section class="woocommerce-order-qr" style="margin:20px 0; padding:15px; border:1px solid #ddd; border-radius:8px;">';
+			echo '<b><p style="margin-bottom:10px;">' . esc_html__( 'Scan & Pay', 'woocommerce-novalnet-gateway' ) . '</p></b>';
+			echo '<p>' . esc_html__( "Alternatively, you can use the QR code below for your convenience. Please scan it with your banking app to complete the payment.", 'woocommerce-novalnet-gateway' ) . '</p>';
+			echo '<img src="' . $qr_url . '" alt="EPC QR Code" style="max-width:220px;height:auto;margin:10px auto;display:block;" />';
+			echo '</section>';
+		}
+    }
+	
 
 	/**
 	 * Prevents WooCommerce's hold stock feature from cancelling Novalnet orders.
@@ -1190,7 +1240,7 @@ final class WC_Novalnet {
 	public function customize_script( $tag, $handle, $src ) {
 		$sri = array(
 			'woocommerce-novalnet-gateway-script'        => 'sha384-8ZYWJ8Q/m/pjhu2t/z2KTywdiMNrCkltZbLWohy3W6jCtxiuKkc5IHhqyxCV9LtF',
-			'woocommerce-novalnet-gateway-admin-script'  => 'sha384-z+TnRg2sNMhV5X0BD1sw9GQlFQaZi3BpdTTkEwSck/po5cRf05WeuuGoq0SNc2Xu',
+			'woocommerce-novalnet-gateway-admin-script'  => 'sha384-RP5Sq75QLT68HQ5cNqhKaq5H2G4SHhmAWNEiUKkWQMdsQkhdjjiQVIcousFJFhbb',
 			'woocommerce-novalnet-gateway-cc-script'     => 'sha384-3ZHfvOQB6dn7UBPIsOKcDZktjQz0NSPoInNhZOtXv4f75IggqcBGB1RrV+93utiI',
 			'woocommerce-novalnet-gateway-subscription-script' => 'sha384-5frcLecRDKnrzRRixoMQPeMmZ6KrO736KrXk3k5Va0FjhCJT6yMi/0R3qnp9eLDn',
 			'woocommerce-novalnet-gateway-wallet-script' => 'sha384-CXS8pk5VPzsnxdT47+VBfB8N4DGNWbK9HV3JMk4PwcDttR/pR9mnu2Q+4CMLcqZH',
@@ -1200,18 +1250,15 @@ final class WC_Novalnet {
 			'wc-novalnet-alipay-blocks-integration'      => 'sha384-QtCElQkKcvHcCYrk8uLP90WzMJ+qZiW4OC6cdGpe7lp7W7XmRMLzWu+rTOSla6uv',
 			'wc-novalnet-applepay-blocks-integration'    => 'sha384-vi4VykNLzIjISVf6DUmG3FuNBCL1kXuILy0u2Locf0lRXO775WNyAz78WhINWmGL',
 			'wc-novalnet-bancontact-blocks-integration'  => 'sha384-KPM7PQGu/mQaXTThAFZ5h7wnAfnmuIo+H/48RasycappxtLjUmx1OPYZgot//726',
-			'wc-novalnet-barzahlen-blocks-integration'   => 'sha384-fW4p1U0EpxJZAjl2nevPgPJSvqizI8d/kuu1CZD/wfxrKGa0tV57IzN7gTKXg3fr',
 			'wc-novalnet-cc-blocks-integration'          => 'sha384-F8zD2dTXrgnyUIPNkh9p6FYTRoPYHb/HXhj5FIzLsbNh33vFnp+tfYIIDLbsNGLC',
 			'wc-novalnet-eps-blocks-integration'         => 'sha384-htnO0AI56CywkfrmXJmONTPGkEvpp2OIFCCoifPtGWtEJGubsxixOxgAxIC+DkSV',
-			'wc-novalnet-giropay-blocks-integration'     => 'sha384-X5YdgRQXv4/8k9HGQqhrvw4cChNm2kLTGxeJ8zaiZaEYTTPsfFbNNyDAirXLGQrh',
 			'wc-novalnet-twint-blocks-integration'       => 'sha384-Ex8xPFmmKdPHtXN61aJu10neu12WQK6PkpSSEunQJrFwOjuH5VuP5KWbeUu8HeTr',
 			'wc-novalnet-googlepay-blocks-integration'   => 'sha384-Bz2pPowHvJ8CySS3nJFkIBuzWbMd7PIZWHjrCW5ZvndnYgrM+AJTHf3kQSdCkxmZ',
 			'wc-novalnet-guaranteed-invoice-blocks-integration' => 'sha384-Ztzv1UF02W+v8nwcAG4t3V3oHBKXqM1vO+H2FYnhUS642+xlCHpX6WDC3JnJ6/pB',
-			'wc-novalnet-guaranteed-sepa-blocks-integration' => 'sha384-zraEQJSPxcLac2AeHR3LMJ+z2eTfxSiM/k0BV6AqDL2p3jZXhbg+1Qiay0DMZv0h',
+			'wc-novalnet-guaranteed-sepa-blocks-integration' => 'sha384-TXRV9d7xcB0qQc24AjC2aYsqhMr2k74lf0JrEPnd66Xo3U1emMQ4bP5FP3Vo87QT',
 			'wc-novalnet-ideal-blocks-integration'       => 'sha384-vxnvoHpxeQGivWXOfGkKNZenC7BHs79kRfehwvV6mtr2QObmpdyiboY++iD/1vmC',
 			'wc-novalnet-instalment-invoice-blocks-integration' => 'sha384-NDxghaccAxWnVWyfmI5iufH+3/f0/xfchxQQ+J0yScx3P6wDoLGOjlMed/01nkEe',
-			'wc-novalnet-instalment-sepa-blocks-integration' => 'sha384-hfH8XFVDeis2ZRkRwQ1MVheEtrBaXJrEI2JIHEB3r+o+dihlIwhGPznAzuA7nmEH',
-			'wc-novalnet-instantbank-blocks-integration' => 'sha384-Ss5Yb7zKPLrRpV2PCNQsKLBD64qOQa1Z5ObBJ+phnlTTB6GcYmn60kCr4IdguhZ0',
+			'wc-novalnet-instalment-sepa-blocks-integration' => 'sha384-r7I31jkLgXc/bkRuBSrwGdXxQArbEQBDeb7B2P6QaKhZjvNagyiEKISlvHVjh2rh',
 			'wc-novalnet-invoice-blocks-integration'     => 'sha384-5v91/uq+TH4FS9RMKZJgBwD49INgIRUr9Wx42fSkVKEcMrzNPW6CbBwQTMqxVHbr',
 			'wc-novalnet-multibanco-blocks-integration'  => 'sha384-Xu+zQJjhaoOHrFvsAJyggsOJ5/o4ll6dXY7iCQLygNG0KYKBjfHXZ2yioziMid9u',
 			'wc-novalnet-online-bank-transfer-blocks-integration' => 'sha384-v0HJByHPsgI9PcWMSj3YtGm/YgciRQH06w1+3vz9nPVIdz6+1WP1/v7cDVTio4XW',
@@ -1220,7 +1267,7 @@ final class WC_Novalnet {
 			'wc-novalnet-postfinance-card-blocks-integration' => 'sha384-wi2xNtJsnzEJH0HrELn7jaMEPmrvcYtHJmKj/xwRprZ9HO0xMhUN2N3aRMVlHWVy',
 			'wc-novalnet-prepayment-blocks-integration'  => 'sha384-arywJ0d3AkvjZqFBIAA6cHHNuzsDbfzxW5LePjw214hjuWCKmmJzV1foFg2omwc+',
 			'wc-novalnet-przelewy24-blocks-integration'  => 'sha384-Nk6kffPZbnDdGkR42K58jDbg0+8nsnXzD6v0ZkSCZ5HH7sam9ecTLKllvwHa2R9I',
-			'wc-novalnet-sepa-blocks-integration'        => 'sha384-JgHe1DmoxiAbOkqJ79yBQu0nceVbzu1w0emg4zp1jjJNxyL+eIP3f9pxrdNrYnwj',
+			'wc-novalnet-sepa-blocks-integration'        => 'sha384-dA7zl0Nq+77ixr4dJO1XV0uyt3c0btaILEOOZIapU2wlp1h3hTYN4NS/UAEG3hWe',
 			'wc-novalnet-trustly-blocks-integration'     => 'sha384-+CrMzrjzg4bK4Udj+NmXMspiC+SF+CC24zMX0dRTtp41wlHKMhIWHUnFhVTdZXKY',
 			'wc-novalnet-wechatpay-blocks-integration'   => 'sha384-qqs/HxfDcF0/oR56J9Nyko9ZpahoAPjaPhKUO7P/dBxFxcwVdl6f2m9HqUVJ0LZu',
 			'wc-novalnet-mbway-blocks-integration'       => 'sha384-eScqKFqdUvh9DlBYBjjRFmtZAMmY98yPNFteFzMrgWbmUkODDGatm1z0g3XiH9fQ',
@@ -1231,17 +1278,7 @@ final class WC_Novalnet {
 		if ( in_array( $handle, array_keys( $sri ), true ) && isset( $sri[ $handle ] ) ) {
 			return preg_replace( '/(<script\b[^><]*)>/i', '$1 integrity="' . $sri[ $handle ] . '" crossorigin="anonymous">', $tag );
 		}
-		
-		if ( 'woocommerce-novalnet-gateway-external-script-barzahlen' === $handle ) {
-			$data = explode( '?', $src );
-			if ( ! empty( $data['1'] ) ) {
-				$args = array();
-				wp_parse_str( $data['1'], $args );
-				if ( ! empty( $args['token'] ) ) {
-					$tag = str_replace( ' src=', ' data-token="' . $args['token'] . '" class="bz-checkout" src=', $tag );
-				}
-			}
-		}
+
 		return $tag;
 	}
 

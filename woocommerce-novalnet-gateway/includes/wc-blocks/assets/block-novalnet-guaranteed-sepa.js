@@ -12,16 +12,19 @@
             }, null),
             ariaLabel: paymentTitle,
             content: Object(wpElement.createElement)((e)=>{
+                const { billingAddress : billingCustomer } = e.billing;
                 const { eventRegistration, emitResponse } = e;
                 const { onPaymentSetup } = eventRegistration;
                 const { company: billingCompany} =  e.billing.billingAddress;
                 const dateOfBirth = ( 0 !== billingCompany.length && 'yes' == paymentMethodData.settings.allow_b2b ) ? null : novalnetPaymentElement.getBirthField( paymentMethodId );
                 wpElement.useEffect( () => {
                     const unsubscribe = onPaymentSetup( async () => {
+                        const novalnet_guaranteed_sepa_holder = document.getElementById( paymentMethodId + '_holder' ).value;
                         const novalnet_guaranteed_sepa_iban = document.getElementById( paymentMethodId + '_iban' ).value;
                         const novalnet_guaranteed_sepa_bic  = document.getElementById( paymentMethodId + '_bic' ).value;
                         if ( novalnet_guaranteed_sepa_iban.length != 0 ) {
                             const paymentMethodData = {
+                                novalnet_guaranteed_sepa_holder,
                                 novalnet_guaranteed_sepa_iban,
                                 novalnet_guaranteed_sepa_bic
                             };
@@ -57,6 +60,7 @@
                 return Object(wpElement.createElement)(
                     'div',
                     null,
+                    novalnetPaymentElement.getHolderField( paymentMethodId, billingCustomer ),
                     novalnetPaymentElement.getIBANField( paymentMethodId ),
                     novalnetPaymentElement.getBICField( paymentMethodId ),
                     dateOfBirth,

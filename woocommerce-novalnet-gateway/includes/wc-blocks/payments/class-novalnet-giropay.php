@@ -38,7 +38,7 @@ final class Novalnet_Giropay extends AbstractPaymentMethodType {
 	 * @return boolean
 	 */
 	public function is_active() {
-		return ! empty( $this->settings['enabled'] ) && 'yes' === $this->settings['enabled'];
+		return false;
 	}
 
 	/**
@@ -47,8 +47,7 @@ final class Novalnet_Giropay extends AbstractPaymentMethodType {
 	 * @return array
 	 */
 	public function get_payment_method_script_handles() {
-		$script_handle = novalnet()->helper()->register_payment_script( $this->name );
-		return array( $script_handle );
+		return [];
 	}
 
 	/**
@@ -57,6 +56,6 @@ final class Novalnet_Giropay extends AbstractPaymentMethodType {
 	 * @return array
 	 */
 	public function get_payment_method_data() {
-		return novalnet()->helper()->get_payment_method_block_data( $this->name );
+		return [];
 	}
 }

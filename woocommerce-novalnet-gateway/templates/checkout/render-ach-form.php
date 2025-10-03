@@ -24,6 +24,7 @@ endif;
 		),
 		'label'             => __( 'Account Holder', 'woocommerce-novalnet-gateway' ),
 		'id'                => $payment_type . '_holder',
+		'placeholder'       => 'Account Holder',
 		'custom_attributes' => array(
 			'onkeypress'   => 'return wc_novalnet.is_valid_name(event);',
 			'onkeyup'      => 'return wc_novalnet.is_valid_name(event);',
