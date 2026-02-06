@@ -1074,7 +1074,9 @@ class WC_Novalnet_Subscription {
 			( 'shop_subscription' === novalnet()->helper()->novalnet_get_wc_order_type( $wcs_order ) ) &&
 			in_array( $payment_type, array( 'novalnet_cc', 'novalnet_sepa', 'novalnet_invoice', 'novalnet_prepayment', 'novalnet_ach' ), true )
 		) {
-			$recurring_payment_type = $wcs_order->get_meta( '_payment_method' );
+			$recurring_payment_type = $wcs_order->get_payment_method();
+
+
 			$is_change_payment      = false;
 			$new_payment_data       = false;
 			$mandatory_input_fields = array(
@@ -1106,7 +1108,7 @@ class WC_Novalnet_Subscription {
 			}
 
 			if ( $is_change_payment && empty( $post_meta['post_meta']['novalnet_payment_change']['value'] ) ) {
-				throw new Exception( __( 'Please accept the change of payment method by clicking on the checkbox.', 'woocommerce-novalnet-gateway' ) );
+				throw new Exception( esc_html(__( 'Please accept the change of payment method by clicking on the checkbox.', 'woocommerce-novalnet-gateway' ) ));
 			}
 
 			$wc_order_id = novalnet()->helper()->get_order_post_id( $wcs_order );
@@ -1320,7 +1322,7 @@ class WC_Novalnet_Subscription {
 			$data['amount']         = '0';
 			$data['currency']       = get_woocommerce_currency();
 			$data['admin']          = 'true';
-			$data['error_message']  = __( 'Card type not accepted, try using another card type', 'woocommererce-novalnet-gateway' );
+			$data['error_message']  = __( 'Card type not accepted, try using another card type', 'woocommerce-novalnet-gateway' );
 
 			// Enqueue script.
 			wp_enqueue_script( 'woocommerce-novalnet-gateway-admin-cc-script', novalnet()->plugin_url . '/assets/js/novalnet-cc.min.js', array( 'jquery' ), NOVALNET_VERSION, true );
@@ -1659,7 +1661,7 @@ class WC_Novalnet_Subscription {
 			wp_safe_redirect( $view_subscription_url );
 			exit;
 		} elseif ( ! empty( $exception ) ) {
-			throw new Exception( $message );
+			throw new Exception( esc_html($message) );
 		}
 	}
 

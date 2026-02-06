@@ -675,7 +675,7 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 							}
 						} else {
 							/* translators: %s: Message */
-							novalnet()->helper()->update_comments( $wc_order, sprintf( __( 'Amount update failed due to: %s' ), wc_novalnet_response_text( $response ) ), 'note', false );
+							novalnet()->helper()->update_comments( $wc_order, sprintf( __( 'Amount update failed due to: %s', 'woocommerce-novalnet-gateway' ), wc_novalnet_response_text( $response ) ), 'note', false );
 						}
 					}
 				}
@@ -880,7 +880,7 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 						$wc_order->set_status( $old_status, $message, true );
 						$wc_order->save();
 						if ( version_compare( WOOCOMMERCE_VERSION, '3.0.0', '>' ) ) {
-							throw new Exception( $message );
+							throw new Exception( esc_html($message) );
 						}
 					}
 				} else {
@@ -888,7 +888,7 @@ class WC_Novalnet_Admin extends WC_Settings_API {
 					$wc_order->set_status( $old_status, $message, true );
 					$wc_order->save();
 					if ( version_compare( WOOCOMMERCE_VERSION, '3.0.0', '>' ) ) {
-						throw new Exception( $message );
+						throw new Exception( esc_html($message) );
 					}
 				}
 			}

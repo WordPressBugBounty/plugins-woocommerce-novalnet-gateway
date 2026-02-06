@@ -240,7 +240,7 @@ class WC_Payment_Token_Novalnet extends WC_Payment_Token {
 			$brand   = "<img src='$icon' alt='" . $brand . "' title='" . $brand . "' />";
 			$display = sprintf(
 				/* translators: %1$s: credit card type %2$s: last 4 digits %3$s: expiry month %4$s: expiry year */
-				__( '%1$s ending in %2$s (expires %3$s/%4$s)', 'woocommerce' ),
+				__( '%1$s ending in %2$s (expires %3$s/%4$s)', 'woocommerce-novalnet-gateway' ),
 				$brand,
 				$this->get_last4(),
 				$this->get_expiry_month(),

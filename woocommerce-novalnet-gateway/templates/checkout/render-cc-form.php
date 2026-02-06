@@ -17,23 +17,23 @@ endif;
 <?php
 	$novalnet_cc_data = wp_json_encode(
 		array(
-			'standard_label' => $contents ['standard_label'],
-			'standard_input' => $contents ['standard_input'],
-			'standard_css'   => $contents ['standard_css'],
+			'standard_label' => $contents['standard_label'] ?? '',
+			'standard_input' => $contents['standard_input'] ?? '',
+			'standard_css'   => $contents['standard_css'] ?? '',
 			'client_key'     => WC_Novalnet_Configuration::get_global_settings( 'client_key' ),
-			'inline_form'    => (int) ( ! empty( $contents ['enable_iniline_form'] ) && 'yes' === $contents ['enable_iniline_form'] ),
+			'inline_form'    => (int) ( ! empty( $contents['enable_iniline_form'] ) && 'yes' === $contents['enable_iniline_form'] ),
 			'lang'           => wc_novalnet_shop_language(),
-			'test_mode'      => (int) ( ! empty( $contents ['test_mode'] ) && 'yes' === $contents ['test_mode'] ),
-			'enforce_3d'     => (int) ( ! empty( $contents ['enforce_3d'] ) && 'yes' === $contents ['enforce_3d'] ),
-			'currency'       => $contents['currency'],
-			'first_name'     => ( isset( $contents['customer']['first_name'] ) ) ? $contents['customer']['first_name'] : WC()->session->customer['first_name'],
-			'last_name'      => ( isset( $contents['customer']['last_name'] ) ) ? $contents['customer']['last_name'] : WC()->session->customer['last_name'],
-			'street'         => ( isset( $contents['customer']['billing']['street'] ) ) ? $contents['customer']['billing']['street'] : WC()->session->customer['address'],
-			'city'           => ( isset( $contents['customer']['billing']['city'] ) ) ? $contents['customer']['billing']['city'] : WC()->session->customer['city'],
-			'zip'            => ( isset( $contents['customer']['billing']['zip'] ) ) ? $contents['customer']['billing']['zip'] : WC()->session->customer['postcode'],
-			'country_code'   => ( isset( $contents['customer']['billing']['country_code'] ) ) ? $contents['customer']['billing']['country_code'] : WC()->session->customer['country'],
-			'email'          => ( isset( $contents['customer']['email'] ) ) ? $contents['customer']['email'] : WC()->session->customer['email'],
-			'tel'            => ( isset( $contents['customer']['tel'] ) ) ? $contents['customer']['tel'] : WC()->session->customer['phone'],
+			'test_mode'      => (int) ( ! empty( $contents['test_mode'] ) && 'yes' === $contents['test_mode'] ),
+			'enforce_3d'     => (int) ( ! empty( $contents['enforce_3d'] ) && 'yes' === $contents['enforce_3d'] ),
+			'currency'       => $contents['currency'] ?? get_woocommerce_currency(),
+			'first_name'     => $contents['customer']['first_name'] ?? ( WC()->session->customer['first_name'] ?? '' ),
+			'last_name'      => $contents['customer']['last_name'] ?? ( WC()->session->customer['last_name'] ?? '' ),
+			'street'         => $contents['customer']['billing']['street'] ?? ( WC()->session->customer['address'] ?? '' ),
+			'city'           => $contents['customer']['billing']['city'] ?? ( WC()->session->customer['city'] ?? '' ),
+			'zip'            => $contents['customer']['billing']['zip'] ?? ( WC()->session->customer['postcode'] ?? '' ),
+			'country_code'   => $contents['customer']['billing']['country_code'] ?? ( WC()->session->customer['country'] ?? '' ),
+			'email'          => $contents['customer']['email'] ?? ( WC()->session->customer['email'] ?? '' ),
+			'tel'            => $contents['customer']['tel'] ?? ( WC()->session->customer['phone'] ?? '' ),
 		)
 	);
 	?>

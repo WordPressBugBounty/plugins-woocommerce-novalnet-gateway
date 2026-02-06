@@ -96,13 +96,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<td>
 						<?php if ( ! empty( $instalment['tid'] ) && ! empty( $instalment['amount'] ) && $transaction_details['amount'] > $transaction_details['refunded_amount'] ) : ?>
 							<div style="text-align:center"; class="wc-order-data-row novalnet-instalment-data-row-toggle refund_button_<?php echo esc_attr( $cycle ); ?>">
-								<button type="button" class="button refund-items" id="refund_link_<?php echo esc_attr( $cycle ); ?>" style="cursor:pointer;" onclick="return wc_novalnet_admin.show_instalment_refund('<?php echo esc_attr( $cycle ); ?>');"><?php esc_attr_e( 'Refund', 'woocommerce' ); ?></button>
+								<button type="button" class="button refund-items" id="refund_link_<?php echo esc_attr( $cycle ); ?>" style="cursor:pointer;" onclick="return wc_novalnet_admin.show_instalment_refund('<?php echo esc_attr( $cycle ); ?>');"><?php esc_attr_e( 'Refund', 'woocommerce-novalnet-gateway' ); ?></button>
 							</div>
 							<div id="div_refund_link_<?php echo esc_attr( $cycle ); ?>" class="wc-order-data-row novalnet-instalment-data-row-toggle" style="display: none;">
 								<table class="wc-order-totals">
 									<tbody>
 										<tr>
-											<td class="label" style="float:right;"><label for="refund_amount"><?php esc_attr_e( 'Refund amount', 'woocommerce' ); ?>:</label></td>
+											<td class="label" style="float:right;"><label for="refund_amount"><?php esc_attr_e( 'Refund amount', 'woocommerce-novalnet-gateway' ); ?>:</label></td>
 											<td class="total" style="width:10px;">
 												<input type="text" style="float:left;" id="novalnet_instalment_refund_amount_<?php echo esc_attr( $cycle ); ?>" name="novalnet_instalment_refund_amount_<?php echo esc_attr( $cycle ); ?>" class="wc_input_price" value="<?php echo number_format( $instalment['amount'] / 100, wc_get_price_decimals(), wc_get_price_decimal_separator(), wc_get_price_thousand_separator() ); ?>"/>
 												<input type="hidden" id="novalnet_instalment_tid_<?php echo esc_attr( $cycle ); ?>" name="novalnet_instalment_tid_<?php echo esc_attr( $cycle ); ?>" value="<?php echo esc_attr( $instalment['tid'] ); ?>"/>
@@ -120,8 +120,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 								</table>
 								<div class="clear"></div>
 								<div class="refund-actions" style="text-align:right">
-									<button class="button button-primary do-api-refund align_right" onclick="return wc_novalnet_admin.instalment_amount_refund(<?php echo esc_attr( $cycle ); ?>)"><?php esc_attr_e( 'Confirm', 'woocommerce' ); ?></button>
-									<button type="button" class="button cancel-action" id="refund_cancel_link_<?php echo esc_attr( $cycle ); ?>" id="refund_cancel_link_<?php echo esc_attr( $cycle ); ?>" onclick="return wc_novalnet_admin.hide_instalment_refund('<?php echo esc_attr( $cycle ); ?>');"><?php esc_attr_e( 'Cancel', 'woocommerce' ); ?></button>
+									<button class="button button-primary do-api-refund align_right" onclick="return wc_novalnet_admin.instalment_amount_refund(<?php echo esc_attr( $cycle ); ?>)"><?php esc_attr_e( 'Confirm', 'woocommerce-novalnet-gateway' ); ?></button>
+									<button type="button" class="button cancel-action" id="refund_cancel_link_<?php echo esc_attr( $cycle ); ?>" id="refund_cancel_link_<?php echo esc_attr( $cycle ); ?>" onclick="return wc_novalnet_admin.hide_instalment_refund('<?php echo esc_attr( $cycle ); ?>');"><?php esc_attr_e( 'Cancel', 'woocommerce-novalnet-gateway' ); ?></button>
 								</div>
 							</div>
 						<?php endif; ?>

@@ -113,7 +113,7 @@ class WC_Novalnet_Amount_Refund {
 				);
 				if ( is_wp_error( $result ) ) {
 					/* translators: %s: amount, message  */
-					$message = sprintf( __( 'Payment refund failed for the order: %1$s due to: %2$s.' ), $wc_order_id, $result->get_error_message() );
+					$message = sprintf( __( 'Payment refund failed for the order: %1$s due to: %2$s.', 'woocommerce-novalnet-gateway' ), $wc_order_id, $result->get_error_message() );
 					novalnet()->helper()->log_error( $message );
 					novalnet()->helper()->update_comments( $wc_order, wc_novalnet_format_text( $message ) );
 				}

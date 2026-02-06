@@ -202,12 +202,6 @@ class WC_Novalnet_Webhook {
 			$org_post_id           = novalnet()->helper()->get_post_id( $this->event_data['transaction']['order_no'] );
 			$order_reference_match = ( ! empty( $org_post_id ) && (string) $this->order_reference['order_no'] === (string) $org_post_id );
 		}
-
-		if ( ! empty( $this->event_data['custom']['nn_order_id'] ) ) {
-			$org_post_id           = novalnet()->helper()->get_post_id( $this->event_data['custom']['nn_order_id'] );
-			$order_reference_match = ( ! empty( $org_post_id ) && (string) $this->order_reference['order_no'] === (string) $org_post_id );
-		}
-
 		if ( ! empty( $this->parent_tid ) ) {
 			$org_post_id = novalnet()->db()->get_post_id_by_meta_data( $this->parent_tid, '_novalnet_renewal_tid' );
 			if ( ! empty( $this->wcs_order ) && 'CREDIT' === $this->event_type && ! empty( $org_post_id ) && (string) $this->order_reference['order_no'] === (string) $org_post_id ) {
@@ -599,7 +593,7 @@ class WC_Novalnet_Webhook {
 			$recurring_order->set_payment_method( $this->wcs_order->get_payment_method() );
 			$recurring_order->set_payment_method_title( $this->wcs_order->get_payment_method_title() );
 			if ( ! empty( $this->event_data['transaction']['bank_details']['qr_image'] ) ) {
-				novalnet()->helper()->novalnet_update_wc_order_meta( $recurring_order, '_novalnet_epc_qr_code', $this->event_data['transaction']['bank_details']['qr_image'], true );
+				novalnet()->helper()->novalnet_update_wc_order_meta( $recurring_order, '_novalnet_qr_code', $this->event_data['transaction']['bank_details']['qr_image'], true );
 			}
 			/* translators: %1$s: tid, %2$s: amount, %3$s: date, %4$s: tid */
 			$this->response['message'] = wc_novalnet_format_text( sprintf( __( 'Subscription has been successfully renewed for the TID: %1$s with the amount %2$s on %3$s. The renewal TID is:%4$s.', 'woocommerce-novalnet-gateway' ), $this->parent_tid, wc_novalnet_shop_amount_format( $this->event_data['transaction']['amount'] ), wc_novalnet_formatted_date(), $this->event_tid ) );
@@ -1012,7 +1006,7 @@ class WC_Novalnet_Webhook {
 			if ( is_wp_error( $refund ) ) {
 				$this->notify_customer = false;
 				/* translators: %1$s: date, %2$s: message*/
-				$this->response['message'] .= PHP_EOL . sprintf( __( 'Payment refund failed for the order: %1$s due to: %2$s' ), $this->wc_order_id, $refund->get_error_message() );
+				$this->response['message'] .= PHP_EOL . sprintf( __( 'Payment refund failed for the order: %1$s due to: %2$s', 'woocommerce-novalnet-gateway' ), $this->wc_order_id, $refund->get_error_message() );
 				novalnet()->helper()->debug( $this->response['message'], $this->wc_order_id );
 			}
 		}
@@ -1134,7 +1128,7 @@ class WC_Novalnet_Webhook {
 							);
 							if ( is_wp_error( $refund ) ) {
 								/* translators: %1$s: date, %2$s: message*/
-								$this->response['message'] = sprintf( __( 'Payment refund failed for the order: %1$s due to: %2$s' ), $this->wc_order->get_id(), $refund->get_error_message() );
+								$this->response['message'] = sprintf( __( 'Payment refund failed for the order: %1$s due to: %2$s', 'woocommerce-novalnet-gateway' ), $this->wc_order->get_id(), $refund->get_error_message() );
 								novalnet()->helper()->debug( $this->response['message'], $this->wc_order_id );
 							} else {
 								$this->update_data['refunded_amount'] = (int) $this->order_reference['refunded_amount'] + $refund_amount;
@@ -1150,7 +1144,7 @@ class WC_Novalnet_Webhook {
 								$fee->set_order_id( $this->wc_order->get_id() );
 
 								/* translators: %s: formatted_fee */
-								$fee->set_name( sprintf( __( '%s fee', 'woocommerce' ), wc_clean( $formatted_fee ) ) );
+								$fee->set_name( sprintf( __( '%s fee', 'woocommerce-novalnet-gateway' ), wc_clean( $formatted_fee ) ) );
 
 								$this->wc_order->add_item( $fee );
 								$this->wc_order->calculate_taxes( false );
@@ -1402,7 +1396,7 @@ class WC_Novalnet_Webhook {
 					$this->wcs_order = wcs_get_subscription( $this->wcs_order_id );
 					if ( empty( $this->wcs_order ) || ! is_object( $this->wcs_order ) ) {
 						/* translators: %d refers to the subscription order ID */
-						$message = sprintf( __( 'Subscription order reference not found in the shop for the subscription order: %d', 'novalnet' ), $this->wcs_order_id );
+						$message = sprintf( __( 'Subscription order reference not found in the shop for the subscription order: %d', 'woocommerce-novalnet-gateway' ), $this->wcs_order_id );
 						$this->display_message( array( 'message' => $message ) );
 					}
 					$this->order_reference['payment_type'] = $this->wcs_order->get_payment_method();

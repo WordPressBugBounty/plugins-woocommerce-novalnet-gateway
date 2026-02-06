@@ -643,7 +643,7 @@ class WC_Novalnet_Configuration extends WC_Settings_API {
 		$translations = wp_get_available_translations();
 
 		$languages = array(
-			'EN' => __( 'English' ),
+			'EN' => __( 'English', 'woocommerce-novalnet-gateway'),
 		);
 		foreach ( get_available_languages() as $language ) {
 			$languages[ wc_novalnet_shop_language( $language ) ] = $translations[ $language ]['native_name'];
@@ -705,9 +705,9 @@ class WC_Novalnet_Configuration extends WC_Settings_API {
 				'default'     => $desc_lang,
 			);
 			$form_fields[ 'instructions_' . $language ] = array(
-				'title'       => __( 'Instructions', 'woocommerce' ),
+				'title'       => __( 'Instructions', 'woocommerce-novalnet-gateway' ),
 				'type'        => 'textarea',
-				'description' => __( 'Instructions that will be added to the thank you page and emails.', 'woocommerce' ),
+				'description' => __( 'Instructions that will be added to the thank you page and emails.', 'woocommerce-novalnet-gateway' ),
 				'desc_tip'    => true,
 			);
 		}
@@ -727,7 +727,7 @@ class WC_Novalnet_Configuration extends WC_Settings_API {
 		);
 		if ( ! in_array( $payment_type, array( 'novalnet_applepay', 'novalnet_googlepay' ), true ) ) {
 			$form_fields['enable_for_methods'] = array(
-				'title'             => __( 'Enable for shipping methods', 'woocommerce' ),
+				'title'             => __( 'Enable for shipping methods', 'woocommerce-novalnet-gateway' ),
 				'type'              => 'multiselect',
 				'class'             => 'wc-enhanced-select',
 				'css'               => 'width: 400px;',
@@ -737,13 +737,13 @@ class WC_Novalnet_Configuration extends WC_Settings_API {
 				'options'           => load_shipping_method_options(),
 				'desc_tip'          => true,
 				'custom_attributes' => array(
-					'data-placeholder' => __( 'Select shipping methods', 'woocommerce' ),
+					'data-placeholder' => __( 'Select shipping methods', 'woocommerce-novalnet-gateway' ),
 				),
 			);
 		}
 
 		$form_fields['enable_for_virtual'] = array(
-			'title'   => __( 'Accept for virtual orders', 'woocommerce' ),
+			'title'   => __( 'Accept for virtual orders', 'woocommerce-novalnet-gateway' ),
 			/* translators: %1$s: payment_en_title*/
 			'label'   => sprintf( __( 'Accept %1$s if the order is virtual', 'woocommerce-novalnet-gateway' ), $payment_title_lang ),
 			'type'    => 'checkbox',

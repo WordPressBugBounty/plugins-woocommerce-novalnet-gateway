@@ -44,8 +44,8 @@ foreach ( $contents['available_wallets'] as $wallet ) {
 			<input type = "hidden" id = "pay_for_order" value = "' . esc_attr( $wallet_sheet_details['pay_for_order'] ) . '">
 			<input type = "hidden" id = "pay_for_order_id" value = "' . esc_attr( $wallet_sheet_details['pay_for_order_id'] ) . '">
 			<input type = "hidden" id = "cart_has_one_time_shipping" value = "' . esc_attr( $wallet_sheet_details['cart_has_one_time_shipping'] ) . '">
-			<input type = "hidden" id = "novalnet_wallet_article_details" value = "' . htmlentities( wp_json_encode( $wallet_sheet_details['article_details'] ) ) . '">
-			<input type = "hidden" id = "novalnet_wallet_shipping_details" value = "' . htmlentities( wp_json_encode( $wallet_sheet_details['shipping_details'] ) ) . '">
+			<input type = "hidden" id = "novalnet_wallet_article_details" value = "' . esc_attr( wp_json_encode( $wallet_sheet_details['article_details'] ) ) . '">
+			<input type = "hidden" id = "novalnet_wallet_shipping_details" value = "' . esc_attr( wp_json_encode( $wallet_sheet_details['shipping_details'] ) ) . '">
 			<div data-type="cart" style="margin: 7px 0px" data-storeName="data-storeName" data-storeLang="' . esc_attr( wc_novalnet_shop_wallet_language() ) . '" data-total="' . esc_attr( (string) ( $wallet_sheet_details['cart_total'] * 100 ) ) . '" data-currency="' . esc_attr( get_woocommerce_currency() ) . '" data-country="' . esc_attr( $wallet_sheet_details['default_country'] ) . '" data-shopname="' . esc_attr( $wallet_sheet_details['seller_name'] ) . '"   data-id="' . esc_attr( $data_id ) . '" id="' . esc_attr( $wallet_id ) . '"></div>';
 
 		if ( 'googlepay' === $wallet ) {

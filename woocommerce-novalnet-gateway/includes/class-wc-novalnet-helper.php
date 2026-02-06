@@ -169,17 +169,18 @@ class WC_Novalnet_Helper {
 			),
 		);
 	}
+	
 
 	/**
 	 * Prepare the Novalnet transaction comments.
 	 *
 	 * @since 12.0.0
 	 * @param array $data The data.
-	 * @param array $wc_order The order object.
+	 * @param mixed $wc_order_id The order id.
 	 * @return array
 	 */
-	public function prepare_payment_comments( $data, $wc_order = false ) {
-
+	public function prepare_payment_comments( $data, $wc_order_id = false) 
+	{
 		// Forming basic comments.
 		$comments = $this->form_comments( $data );
 		if ( 'PENDING' === $data['transaction']['status'] && in_array( $data['transaction']['payment_type'], array( 'GUARANTEED_INVOICE', 'INSTALMENT_INVOICE' ), true ) ) {
@@ -187,26 +188,25 @@ class WC_Novalnet_Helper {
 		} elseif ( 'PENDING' === $data['transaction']['status'] && in_array( $data['transaction']['payment_type'], array( 'GUARANTEED_DIRECT_DEBIT_SEPA', 'INSTALMENT_DIRECT_DEBIT_SEPA' ), true ) ) {
 			$comments .= __( "\n\nYour order is under verification and we will soon update you with the order status. Please note that this may take upto 24 hours.", 'woocommerce-novalnet-gateway' );
 		} elseif ( ! empty( $data['transaction']['bank_details'] ) && ! empty( $data['transaction']['amount'] ) && empty( $data['instalment']['prepaid'] ) ) {
-			$comments .= $this->form_amount_transfer_comments( $data, $wc_order );
-			if(!$wc_order || is_int($wc_order) && !empty($data['transaction']['order_no'])){
-				$wc_order = wc_get_order($data['transaction']['order_no'] ?? $wc_order);
+			$comments .= $this->form_amount_transfer_comments( $data, $wc_order_id);
+			if (empty($wc_order_id) && (!empty($data['custom']['nn_order_id']) || !empty($data['custom']['inputval5']))) {
+				$wc_order_id = $data['custom']['nn_order_id'] ?? $data['custom']['inputval5'];
 			}
-			
-			if ( ! empty( $data['transaction']['bank_details']['qr_image'] ) ) {
-				// Store the QR code in the session because the email may be triggered before the order meta is saved.
-				if(isset(WC()->session)){
-					WC()->session->set( 'novalnet_qr_url', $data['transaction']['bank_details']['qr_image']);
+			if (!empty($wc_order_id)) {
+				$wc_order = wc_get_order($wc_order_id);
+				if ( $wc_order && !empty( $data['transaction']['bank_details']['qr_image'])) {
+					// Store the QR code in the session because the email may be triggered before the order meta is saved.
+					if(isset(WC()->session)){
+						WC()->session->set( 'novalnet_qr_url', $data['transaction']['bank_details']['qr_image']);
+					}
+					$this->novalnet_update_wc_order_meta( $wc_order, '_novalnet_qr_code', $data['transaction']['bank_details']['qr_image'], true );
 				}
-				$this->novalnet_update_wc_order_meta( $wc_order, '_novalnet_epc_qr_code', $data['transaction']['bank_details']['qr_image'], true );
 			}
 		} elseif ( ! empty( $data['transaction']['partner_payment_reference'] ) ) {
-
 			/* translators: %s: amount */
 			$comments .= sprintf( __( "\nPlease use the following payment reference details to pay the amount of %s at a Multibanco ATM or through your internet banking.", 'woocommerce-novalnet-gateway' ), wc_novalnet_shop_amount_format( $data['transaction']['amount'] ) );
-
 			/* translators: %s: partner_payment_reference */
 			$comments .= sprintf( __( "\nPayment Reference : %s", 'woocommerce-novalnet-gateway' ), $data['transaction']['partner_payment_reference'] );
-
 			if ( ! empty( $data['transaction']['service_supplier_id'] ) ) {
 				/* translators: %s: service_supplier_id */
 				$comments .= sprintf( __( "\nEntity : %s \n", 'woocommerce-novalnet-gateway' ), $data['transaction']['service_supplier_id'] );

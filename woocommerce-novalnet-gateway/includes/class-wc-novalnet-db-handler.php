@@ -165,7 +165,7 @@ class WC_Novalnet_DB_Handler {
 					return $wc_order_id;
 				}
 			} else {
-				return $this->handle_query( $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = %s AND meta_value = %s", $meta_key, $meta_value ) ) );
+				return $this->handle_query( $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = %s AND meta_value = %s", $meta_key, $meta_value ) ) ); // db call ok; no-cache ok.
 			}
 		}
 		// Check for column exists.
@@ -182,7 +182,6 @@ class WC_Novalnet_DB_Handler {
 	 * @return array
 	 */
 	public function get_transaction_details( $post_id, $tid = '', $subs_id = '' ) {
-
 		global $wpdb;
 		$result = array();
 

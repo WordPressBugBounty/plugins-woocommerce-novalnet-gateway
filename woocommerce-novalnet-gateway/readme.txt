@@ -1,10 +1,10 @@
-=== WooCommerce payment plugin - Novalnet AG ===
-Contributors: Novalnet AG
+=== Novalnet Payment Gateway for WooCommerce ===
+Contributors: Novalnet
 Donate link: https://www.novalnet.de
 Tags: Credit cards, Payments, Payment gateway, Novalnet payment
 Requires at least: 5.0
 Tested up to: 6.5
-Stable tag: 12.9.0
+Stable tag: 12.10.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -194,18 +194,18 @@ To process Novalnet payments through this WooCommerce Payment Plugin, a [Novalne
 
 = REFERENCE =
 
-Please check out our ssl certified [Demo Store](https://woocommerce.novalnet.de/ "Demo Store")
+Please check out our ssl certified [Demo Store](https://woocommercev12.novaldemo.com "Demo Store")
 
 == Installation ==
 
 = Compatibility =   
 
-Novalnet payment plugin compatible for WooCommerce 4.0.0-9.9.5 and compatible for subscription 2.0.0-7.6.0.
+Novalnet payment plugin compatible for WooCommerce 4.0.0-10.4.3 and compatible for subscription 2.0.0-8.3.1.
 
 = Automatic Installation: =
 
 * Go to Plugins > “Add New”.
-* Download the WooCommerce payment plugin - Novalnet from WordPress repository and Click "Install Now" to install the plugin. A popup window will ask you to confirm your wish to install the plugin 12.9.0.
+* Download the WooCommerce payment plugin - Novalnet from WordPress repository and Click "Install Now" to install the plugin. A popup window will ask you to confirm your wish to install the plugin 12.10.1.
 
 = Note: = If this is the first time you've installed a WordPress plugin, you may need to enter the FTP login credential information. If you've installed the plugin before, it will still have the login information. This information is available through your web server host.
 
@@ -274,11 +274,29 @@ This online payment plugin only works with the WooCommerce webshop. Are you look
 
 == Changelog ==
 
+= 12.10.1 =
+
+  * [Fix] Optimized webhook handling for renewal transactions to ensure consistent updates to subsequent events 
+  * [Enhanced] Improved QR code handling in customer emails for supported payment methods when using the Germanized plugin
+  
+= 12.10.0 = 
+
+  * [New] EPC/SPC QR code implemented for Invoice, Prepayment, Guarantee Invoice, and Instalment Invoice payments
+  * [New] Implemented Account Holder field for Direct Debit SEPA, Direct Debit SEPA with Payment Guarantee, and Instalment by Direct Debit SEPA, in compliance with Verification of Payee (VoP) regulations
+  * [Fix] PayPal subscription tokenization handling for recurring payments
+  * [Fix] Adjusted the payment plugin to support the Custom Order Numbers for WooCommerce plugin
+  * [Enhanced] Plugin has been optimized based on the WooCommerce trademark policy
+  * [Removed] Sofort, giropay, and Barzahlen/viacash payment methods
+
 = 12.9.0 = 
 
   * [New] EPC QR code implemented for Invoice, Prepayment, Guarantee Invoice, and Instalment Invoice payments
   * [New] Implemented Account Holder field for Direct Debit SEPA, Direct Debit SEPA with Payment Guarantee, and Instalment by Direct Debit SEPA, in compliance with Verification of Payee (VoP) regulations
   * [Removed] Sofort, giropay, and Barzahlen/viacash payment methods
+  
+= 12.8.5 =
+  * [Fix] Restored deprecated instant email hook from the Germanized plugin used in the Novalnet plugin to handle order confirmation emails 
+  * [Enhanced] Wallet sheet now displays the phone number during express checkout in line with the checkout page flow
 
 = 12.8.4 =
 
@@ -1017,7 +1035,7 @@ Now, just the following steps have to be executed for going live:
 
 Now execute the following steps to go live and start your sales:
 
-* Install the WooCommerce Payment Plugin by Novalnet directly from the Wordpress repository 
+* Install the Novalnet Payment Gateway for WooCommerce directly from the Wordpress repository 
 * Find the detailed information in the Installation Guide (incl. in the package) 
 * Configure Product Activation Key and Payment Access Key in the shop admin panel
 * Activate & configure the preferred payment types in your shop admin panel 

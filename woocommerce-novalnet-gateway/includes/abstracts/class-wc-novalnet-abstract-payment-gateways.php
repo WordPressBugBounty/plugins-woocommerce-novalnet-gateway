@@ -316,7 +316,7 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 			'currency'       => get_woocommerce_currency(),
 
 			// Add formated order number.
-			'order_no'       => ltrim( $wc_order->get_order_number(), _x( '#', 'hash before order number', 'woocommerce' ) ),
+			'order_no'       => ltrim( $wc_order->get_order_number(), _x( '#', 'hash before order number', 'woocommerce-novalnet-gateway' ) ),
 
 			// Add System details.
 			'system_name'    => 'wordpress-woocommerce',
@@ -354,7 +354,7 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 
 			$customer_validation = WC_Novalnet_Validation::has_valid_customer_data( $parameters );
 			if ( isset( $customer_validation['is_invalid'] ) && true === $customer_validation['is_invalid'] ) {
-				throw new Exception( $customer_validation['message'] );
+				throw new Exception( esc_html($customer_validation['message']) );
 			}
 		}
 
@@ -538,7 +538,15 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 			$wc_order->set_customer_note( wc_novalnet_format_text( $customer_note ) );
 			$wc_order->save();
 		}
-
+        
+		if ( isset( WC()->session ) ) {
+			
+			foreach ( [ 'novalnet_qr_url', '_novalnet_epc_qr_code' ] as $key ) {
+				if ( WC()->session->__isset( $key ) ) {
+					WC()->session->__unset( $key );
+				}
+			}
+		}
 		if ( novalnet()->helper()->novalnet_get_wc_order_meta( $wc_order, '_novalnet_renewal_subscription_order' ) ) {
 			$wcs_order = wcs_get_subscriptions_for_renewal_order( $wc_order );
 			if ( ! empty( $wcs_order ) && is_object( $wcs_order ) ) {
@@ -682,7 +690,7 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway 
 		if ( ! is_admin() && ! empty( WC()->session ) ) {
 			// Display message.
 			if ( doing_action( 'woocommerce_rest_checkout_process_payment_with_context' ) ) {
-				throw new \Exception( $message );
+				throw new \Exception( esc_html($message) );
 			} else {
 				$this->display_info( $message );
 			}

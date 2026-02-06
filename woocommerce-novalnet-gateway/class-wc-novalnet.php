@@ -229,9 +229,9 @@ final class WC_Novalnet {
 		// Align the transaction details.
 		add_action( 'woocommerce_order_item_meta_end', array( $this, 'align_transaction_info' ), 10, 3 );
 
-		add_filter( 'woocommerce_email_order_meta_fields', array($this, 'add_epc_qr_to_order_emails'), 10, 3 );
+		add_filter( 'woocommerce_email_order_meta_fields', array($this, 'add_qr_to_order_emails'), 10, 3 );
 
-		add_action( 'woocommerce_order_details_after_order_table', array( $this, 'add_epc_qr_to_order_success_page' ), 5 );
+		add_action( 'woocommerce_order_details_after_order_table', array( $this, 'add_qr_to_order_success_page' ), 5 );
 
 		// Add plugin scripts (front-end).
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_script' ) );
@@ -306,23 +306,31 @@ final class WC_Novalnet {
 	}
 
 	/**
-	 * Add EPC QR code block to WooCommerce order emails.
+	 * Add  QR code block to WooCommerce order emails.
 	 *
 	 * @since 12.9.0
 	 * @param array      $fields        Existing email order meta fields.
 	 * @param bool       $sent_to_admin Whether the email is sent to admin.
 	 * @param WC_Order   $order         WooCommerce order object.
 	 *
-	 * @return array Modified email meta fields including EPC QR code if available.
+	 * @return array Modified email meta fields including  QR code if available.
 	 */
-	 public function add_epc_qr_to_order_emails( $fields, $sent_to_admin, $order ) {
+	 public function add_qr_to_order_emails( $fields, $sent_to_admin, $order ) {
 
-		$qr_url = ( isset( WC()->session ) && WC()->session->get( 'novalnet_qr_url' ) )? WC()->session->get( 'novalnet_qr_url' ) : $this->helper()->novalnet_get_wc_order_meta( $order, '_novalnet_epc_qr_code' );
-
+		$qr_url = (
+			isset(WC()->session) && WC()->session->get('novalnet_qr_url')
+		)
+			? WC()->session->get('novalnet_qr_url')
+			: (
+				!empty($this->helper()->novalnet_get_wc_order_meta($order, '_novalnet_qr_code'))
+					? $this->helper()->novalnet_get_wc_order_meta($order, '_novalnet_qr_code')
+					: $this->helper()->novalnet_get_wc_order_meta($order, '_novalnet_epc_qr_code')
+			);
+		
 		if (!empty($qr_url)) {
-				$fields['epc_qr'] = array(
-					'label' => sprintf(__("Alternatively, you can use the QR code below for your convenience. Please scan it with your banking app to complete the payment ", 'woocommerce-novalnet-gateway' )),
-					'value' => '<img src="' . esc_url( $qr_url ) . '" alt="QR Code" style="max-width:200px;height:auto;" />',
+				$fields['qr_code'] = array(
+					'label' => sprintf(__("Alternatively, you can use the QR code below for your convenience. Please scan it with your banking app to complete the payment", 'woocommerce-novalnet-gateway' )),
+					'value' => '<img src="' . esc_url( $qr_url ) . '" alt="' . esc_attr( 'QR Code' ) . '" style="' . esc_attr( 'max-width:220px;height:auto;margin:10px auto;display:block;' ) . '" />',
 				);
 			}
 
@@ -335,16 +343,20 @@ final class WC_Novalnet {
 	 * @since 12.9.0
 	 * @param WC_Order   $order  WooCommerce order object.
      */
-    public function add_epc_qr_to_order_success_page( $order ) {
+    public function add_qr_to_order_success_page( $order ) {
         if ( ! $order instanceof WC_Order ) {
             return;
         }
-		$qr_url = $this->helper()->novalnet_get_wc_order_meta($order,'_novalnet_epc_qr_code');
+
+		$qr_url = !empty($this->helper()->novalnet_get_wc_order_meta($order, '_novalnet_qr_code'))
+		? $this->helper()->novalnet_get_wc_order_meta($order, '_novalnet_qr_code')
+		: $this->helper()->novalnet_get_wc_order_meta($order, '_novalnet_epc_qr_code');
+
 		if (!empty($qr_url)) {
 			echo '<section class="woocommerce-order-qr" style="margin:20px 0; padding:15px; border:1px solid #ddd; border-radius:8px;">';
 			echo '<b><p style="margin-bottom:10px;">' . esc_html__( 'Scan & Pay', 'woocommerce-novalnet-gateway' ) . '</p></b>';
 			echo '<p>' . esc_html__( "Alternatively, you can use the QR code below for your convenience. Please scan it with your banking app to complete the payment.", 'woocommerce-novalnet-gateway' ) . '</p>';
-			echo '<img src="' . $qr_url . '" alt="EPC QR Code" style="max-width:220px;height:auto;margin:10px auto;display:block;" />';
+			echo '<img src="' . esc_url( $qr_url ) . '" alt="' . esc_attr( ' QR Code' ) . '" style="' . esc_attr( 'max-width:220px;height:auto;margin:10px auto;display:block;' ) . '" />';
 			echo '</section>';
 		}
     }
@@ -1096,6 +1108,7 @@ final class WC_Novalnet {
 					'result'   => 'error',
 					'redirect' => ($customer_id->get_error_code() === 'registration-error-email-exists' )
 						? sprintf(
+							  /* translators: %s: Customer's email address. */
 							__( 'An account is already registered with %s. Please log in or use a different email address.', 'woocommerce-novalnet-gateway' ),
 							$data['billing_email']
 						)
