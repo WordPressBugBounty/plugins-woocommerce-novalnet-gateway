@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Novalnet Bancontact Payment.
  *
@@ -16,150 +17,159 @@
  * @author  Novalnet
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
+if (! defined('ABSPATH')) {
+    exit; // Exit if accessed directly.
 }
 
 /**
  * WC_Gateway_Novalnet_Bancontact Class.
  */
-class WC_Gateway_Novalnet_Bancontact extends WC_Novalnet_Abstract_Payment_Gateways {
+class WC_Gateway_Novalnet_Bancontact extends WC_Novalnet_Abstract_Payment_Gateways
+{
+    /**
+     * Id for the gateway.
+     *
+     * @var string
+     */
+    public $id = 'novalnet_bancontact';
 
+    /**
+     * Settings of the gateway.
+     *
+     * @var array
+     */
+    public $settings = array();
 
-	/**
-	 * Id for the gateway.
-	 *
-	 * @var string
-	 */
-	public $id = 'novalnet_bancontact';
+    /**
+     * Constructor for the gateway.
+     */
+    public function __construct()
+    {
 
-	/**
-	 * Settings of the gateway.
-	 *
-	 * @var array
-	 */
-	public $settings = array();
+        // Assign payment details.
+        $this->assign_basic_payment_details();
 
-	/**
-	 * Constructor for the gateway.
-	 */
-	public function __construct() {
+        // Handle redirection payment response.
+        add_action('woocommerce_api_response_novalnet_bancontact', array( $this, 'check_novalnet_payment_response' ), 10);
+    }
 
-		// Assign payment details.
-		$this->assign_basic_payment_details();
+    /**
+     * Returns the gateway icon.
+     *
+     * @return string
+     */
+    public function get_icon()
+    {
 
-		// Handle redirection payment response.
-		add_action( 'woocommerce_api_response_novalnet_bancontact', array( $this, 'check_novalnet_payment_response' ), 10 );
-	}
+        return apply_filters('woocommerce_gateway_icon', $this->built_logo(), $this->id);
+    }
 
-	/**
-	 * Returns the gateway icon.
-	 *
-	 * @return string
-	 */
-	public function get_icon() {
+    /**
+     * Validate payment fields on the frontend.
+     */
+    public function validate_fields()
+    {
 
-		return apply_filters( 'woocommerce_gateway_icon', $this->built_logo(), $this->id );
-	}
+        // Unset other payment session.
+        $this->unset_other_payment_session();
+    }
 
-	/**
-	 * Validate payment fields on the frontend.
-	 */
-	public function validate_fields() {
+    /**
+     * Displays the payment form, payment description on checkout.
+     */
+    public function payment_fields()
+    {
 
-		// Unset other payment session.
-		$this->unset_other_payment_session();
-	}
+        // Show TESTMODE notification.
+        $this->test_mode_notification();
 
-	/**
-	 * Displays the payment form, payment description on checkout.
-	 */
-	public function payment_fields() {
+        // Display payment description.
+        $this->show_description();
+    }
 
-		// Show TESTMODE notification.
-		$this->test_mode_notification();
+    /**
+     * Process payment flow of the gateway.
+     *
+     * @param int $order_id the order id.
+     *
+     * @return array
+     */
+    public function process_payment($order_id)
+    {
 
-		// Display payment description.
-		$this->show_description();
-	}
+        return $this->perform_payment_call($order_id);
+    }
 
-	/**
-	 * Process payment flow of the gateway.
-	 *
-	 * @param int $order_id the order id.
-	 *
-	 * @return array
-	 */
-	public function process_payment( $order_id ) {
+    /**
+     * Refund process.
+     *
+     * @since 12.0.0.
+     *
+     * @param int    $order_id  The order number.
+     * @param double $amount    The total amount of refund.
+     * @param string $reason    The reason for refund.
+     *
+     * @return boolean
+     */
+    public function process_refund($order_id, $amount = null, $reason = '')
+    {
 
-		return $this->perform_payment_call( $order_id );
-	}
+        return WC_Novalnet_Amount_Refund::execute($order_id, wc_novalnet_formatted_amount($amount), $reason);
+    }
 
-	/**
-	 * Refund process.
-	 *
-	 * @since 12.0.0.
-	 *
-	 * @param int    $order_id  The order number.
-	 * @param double $amount    The total amount of refund.
-	 * @param string $reason    The reason for refund.
-	 *
-	 * @return boolean
-	 */
-	public function process_refund( $order_id, $amount = null, $reason = '' ) {
+    /**
+     * Check if the gateway is available for use.
+     *
+     * @return boolean
+     */
+    public function is_available()
+    {
+        if (is_admin() || ! wc_novalnet_check_session()) {
+            return parent::is_available();
+        }
+        return parent::is_available() && WC_Novalnet_Validation::is_payment_available($this->settings);
+    }
 
-		return WC_Novalnet_Amount_Refund::execute( $order_id, wc_novalnet_formatted_amount( $amount ), $reason );
-	}
+    /**
+     * Form gateway parameters to process in the Novalnet server.
+     *
+     * @param WC_Order $wc_order   The order object.
+     * @param array    $parameters The basic parameters.
+     */
+    public function generate_payment_parameters($wc_order, &$parameters)
+    {
 
-	/**
-	 * Check if the gateway is available for use.
-	 *
-	 * @return boolean
-	 */
-	public function is_available() {
-		if ( is_admin() || ! wc_novalnet_check_session() ) {
-			return parent::is_available();
-		}
-		return parent::is_available() && WC_Novalnet_Validation::is_payment_available( $this->settings );
-	}
+        $this->redirect_payment_params($wc_order, $parameters);
 
-	/**
-	 * Form gateway parameters to process in the Novalnet server.
-	 *
-	 * @param WC_Order $wc_order   The order object.
-	 * @param array    $parameters The basic parameters.
-	 */
-	public function generate_payment_parameters( $wc_order, &$parameters ) {
+    }
 
-		$this->redirect_payment_params( $wc_order, $parameters );
+    /**
+     * Manage redirect process.
+     */
+    public function check_novalnet_payment_response()
+    {
 
-	}
+        // Checks redirect response.
+        if (wc_novalnet_check_isset(novalnet()->request, 'wc-api', 'response_' . $this->id)) {
 
-	/**
-	 * Manage redirect process.
-	 */
-	public function check_novalnet_payment_response() {
+            // Process redirect response.
+            $status = $this->process_redirect_payment_response();
+            return wc_novalnet_safe_redirect($status['redirect']);
+        }
+    }
 
-		// Checks redirect response.
-		if ( wc_novalnet_check_isset( novalnet()->request, 'wc-api', 'response_' . $this->id ) ) {
+    /**
+     * Payment configurations in shop backend.
+     */
+    public function init_form_fields()
+    {
 
-			// Process redirect response.
-			$status = $this->process_redirect_payment_response();
-			return wc_novalnet_safe_redirect( $status['redirect'] );
-		}
-	}
+        // Basic payment fields.
+        WC_Novalnet_Configuration::basic($this->form_fields, $this->id);
 
-	/**
-	 * Payment configurations in shop backend.
-	 */
-	public function init_form_fields() {
+        // Additional configuration.
+        WC_Novalnet_Configuration::additional($this->form_fields, $this->id);
 
-		// Basic payment fields.
-		WC_Novalnet_Configuration::basic( $this->form_fields, $this->id );
-
-		// Additional configuration.
-		WC_Novalnet_Configuration::additional( $this->form_fields, $this->id );
-
-	}
+    }
 
 }

@@ -69,19 +69,54 @@
 					);
 				}
 
-				/**Process hash call. */
-				$( document.body ).on(
-					'click',
-					'#' + wc_novalnet.form_id(),
-					function( event ) {
-						if ( '' == $( '#novalnet_cc_pan_hash' ).val() && wc_novalnet.check_payment( 'novalnet_cc' ) && ( undefined === $( '#wc-novalnet_cc-payment-token-new' ).val() || $( '#wc-novalnet_cc-payment-token-new' ).is( ":checked" ) ) ) {
-							event.preventDefault();
-							event.stopImmediatePropagation();
-							wc_novalnet.load_block( 'main' );
-							NovalnetUtility.getPanHash();
-						}
-					}
-				);
+				
+				var novalnet_cc_processing = false;
+
+$(document.body).on('click', '#' + wc_novalnet.form_id(), function (event) {
+
+	var isOrderStepExists = $('#next-step-payment').length > 0;
+
+if (!isOrderStepExists) {
+	if (
+        $('#novalnet_cc_pan_hash').val() === '' &&
+        wc_novalnet.check_payment('novalnet_cc') &&
+        (
+            undefined === $('#wc-novalnet_cc-payment-token-new').val() ||
+            $('#wc-novalnet_cc-payment-token-new').is(':checked')
+        )
+    ) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            wc_novalnet.load_block('main');
+            NovalnetUtility.getPanHash();
+    }
+
+ }
+ else{
+
+	if (novalnet_cc_processing) {
+        return;
+    }
+    if (
+        $('#novalnet_cc_pan_hash').val() === '' &&
+        wc_novalnet.check_payment('novalnet_cc') &&
+        (
+            undefined === $('#wc-novalnet_cc-payment-token-new').val() ||
+            $('#wc-novalnet_cc-payment-token-new').is(':checked')
+        )
+    ) {
+        if ($(event.target).closest('#next-step-payment').length) {
+            novalnet_cc_processing = true;
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            wc_novalnet.load_block('main');
+            NovalnetUtility.getPanHash();
+        }
+    }
+}
+   
+});
+
 
 				$( '#wc-novalnet_cc-payment-token-new' ).on(
 					'click',

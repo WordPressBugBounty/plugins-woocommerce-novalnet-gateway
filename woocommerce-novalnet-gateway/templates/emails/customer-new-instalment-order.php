@@ -15,36 +15,36 @@
  * @version 3.5.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+if (! defined('ABSPATH')) {
+    exit;
 }
 
 /*
  * @hooked WC_Emails::email_header() Output the email header
  */
-do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
+do_action('woocommerce_email_header', $email_heading, $email); ?>
 
 <?php /* translators: %s: Customer first name */ ?>
-<p><?php printf( esc_html__( 'Hi %s,', 'woocommerce-novalnet-gateway' ), esc_html( $order->get_billing_first_name() ) ); ?></p>
+<p><?php printf(esc_html__('Hi %s,', 'woocommerce-novalnet-gateway'), esc_html($order->get_billing_first_name())); ?></p>
 <?php /* translators: %s: Site title */ ?>
-<p><?php printf( esc_html__( 'Your instalment order with %s has been completed. Your order details are shown below for your reference:', 'woocommerce-novalnet-gateway' ), esc_html( wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES ) ) ); ?></p>
+<p><?php printf(esc_html__('Your instalment order with %s has been completed. Your order details are shown below for your reference:', 'woocommerce-novalnet-gateway'), esc_html(wp_specialchars_decode(get_option('blogname'), ENT_QUOTES))); ?></p>
 <?php
 
-do_action( 'woocommerce_email_order_details', $order, $sent_to_admin, $plain_text, $email );
-do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, $email );
+do_action('woocommerce_email_order_details', $order, $sent_to_admin, $plain_text, $email);
+do_action('woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, $email);
 
 /*
  * @hooked WC_Emails::customer_details() Shows customer details
  * @hooked WC_Emails::email_address() Shows email address
  */
-do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
+do_action('woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email);
 
 ?>
 <p>
-<?php echo esc_html__( 'Thank you for shopping with us.', 'woocommerce-novalnet-gateway' ); ?>
+<?php echo esc_html__('Thank you for shopping with us.', 'woocommerce-novalnet-gateway'); ?>
 </p>
 <?php
 /*
  * @hooked WC_Emails::email_footer() Output the email footer
  */
-do_action( 'woocommerce_email_footer', $email );
+do_action('woocommerce_email_footer', $email);

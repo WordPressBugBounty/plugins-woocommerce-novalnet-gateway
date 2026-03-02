@@ -58,8 +58,10 @@
                             textTransform:'uppercase',
                         },
                         onKeyPress:(e) => {
-                            return NovalnetUtility.checkIban(e.nativeEvent, paymentType + '_bic_field' );
-                        },
+							if (!NovalnetUtility.allowIban(e)) {
+				               e.preventDefault();
+							}
+						},
                         onChange:(e) => {
                             return NovalnetUtility.formatIban(e.nativeEvent, paymentType + '_bic_field' );
                         },
@@ -452,23 +454,77 @@
 					},
 					button: {
 						dimensions: {
-                            width:"auto",
-                            cornerRadius:parseInt( cornerRadius ),
-                            height: parseInt( button_height ),
-                        },
-						locale: String( paymentMethodData.walletSheetDetails.store_lang ),
+							width: "auto",
+							cornerRadius: parseInt(cornerRadius),
+							height: parseInt(button_height),
+						},
+						locale: paymentMethodData.walletSheetDetails.store_lang === 'de'
+							? 'de-DE'
+							: 'en-US',
 						type: style,
 						boxSizing: boxSizingVal,
 					},
 					callbacks: {
 						onProcessCompletion: function (response, processedStatus) {
+							let customer_billing  = {};
+														let customer_shipping = {};
+
+														let billing  = response?.order?.billing?.contact || {};
+														let shipping = response?.order?.shipping?.contact || {};
+
+														let phone_number =
+															billing.phoneNumber ||
+															shipping.phoneNumber ||
+															"";
+
+					
+														const billing_address =
+															Array.isArray(billing.addressLines)
+																? billing.addressLines.join(' ')
+																: (billing.addressLines || "");
+
+														const shipping_address =
+															Array.isArray(shipping.addressLines)
+																? shipping.addressLines.join(' ')
+																: (shipping.addressLines || "");
+
+														customer_billing = {
+															first_name: billing.firstName || "",
+															last_name:  billing.lastName || "",
+															address_1:  billing_address,
+															city:       billing.locality || "",
+															email:      billing.email || shipping.email || "",
+															postcode:   billing.postalCode || "",
+															country:    billing.countryCode || "",
+															phone:      phone_number
+														};
+
+														
+														if (shipping.firstName || shipping.lastName) {
+															customer_shipping = {
+																first_name: shipping.firstName || "",
+																last_name:  shipping.lastName || "",
+																address_1:  shipping_address,
+																city:       shipping.locality || "",
+																email:      billing.email || shipping.email || "",
+																postcode:   shipping.postalCode || "",
+																country:    shipping.countryCode || "",
+																phone:      shipping.phoneNumber || ""
+															};
+														}
+							
                             // Only on success, we proceed further with the booking.
 							if ( "SUCCESS" == response.result.status ) {
 								var response = {response : response};
+
 								var data     = {
 									'action': 'novalnet_order_creation', // your action name.
 									'payment': wallet, // your action name.
-									'variable_name': response, // some additional data to send.
+									'customer_billing':customer_billing,
+                                    'customer_shipping':customer_shipping,
+									'billing':billing,
+									'shipping':shipping,
+									'variable_name':response,
 								};
 								if ( '' !== paymentMethodData.walletSheetDetails.pay_for_order_id ) {
 									data.pay_for_order_id = paymentMethodData.walletSheetDetails.pay_for_order_id;

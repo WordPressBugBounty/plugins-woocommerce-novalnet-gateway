@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Novalnet table creation for 12.0.4.
  *
@@ -7,8 +8,8 @@
  * @package  woocommerce-novalnet-gateway/includes/updates/
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
+if (! defined('ABSPATH')) {
+    exit; // Exit if accessed directly.
 }
 
 // Including upgrader file to perform table creation.
@@ -20,8 +21,8 @@ $collate = $wpdb->get_charset_collate();
 
 // Creating transaction details table to maintain the transaction log.
 novalnet()->db()->handle_query(
-	dbDelta(
-		"CREATE TABLE {$wpdb->prefix}novalnet_transaction_detail (
+    dbDelta(
+        "CREATE TABLE {$wpdb->prefix}novalnet_transaction_detail (
     id int(11) unsigned AUTO_INCREMENT COMMENT 'Auto increment ID',
     `date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Transaction Date',
     order_no int(11) unsigned COMMENT 'Post ID for the order',
@@ -39,13 +40,13 @@ novalnet()->db()->handle_query(
     KEY payment_type (payment_type),
     KEY order_no (order_no)
     )$collate COMMENT='Novalnet Transaction History';"
-	)
+    )
 );
 
 // Creating subscription table to maintain the subscription log.
 novalnet()->db()->handle_query(
-	dbDelta(
-		"CREATE TABLE {$wpdb->prefix}novalnet_subscription_details (
+    dbDelta(
+        "CREATE TABLE {$wpdb->prefix}novalnet_subscription_details (
     id int(11) unsigned AUTO_INCREMENT COMMENT 'Auto increment ID',
     order_no int(11) unsigned COMMENT 'Post ID for the order in shop',
     subs_order_no int(11) unsigned COMMENT 'Shop Subscription Order Number',
@@ -69,13 +70,13 @@ novalnet()->db()->handle_query(
     KEY subs_order_no (subs_order_no),
     KEY recurring_tid (recurring_tid)
 	)$collate COMMENT='Novalnet Subscription Payment Details'"
-	)
+    )
 );
 
 // Creating webhook table to maintain the webhook log.
 novalnet()->db()->handle_query(
-	dbDelta(
-		"CREATE TABLE {$wpdb->prefix}novalnet_webhook_history (
+    dbDelta(
+        "CREATE TABLE {$wpdb->prefix}novalnet_webhook_history (
     id int(11) unsigned AUTO_INCREMENT COMMENT 'Auto increment ID',
      `date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Webhook execution date and time',
     event_type varchar(64) COMMENT 'Webhook event type',
@@ -87,5 +88,5 @@ novalnet()->db()->handle_query(
     order_no int(11) unsigned COMMENT 'Post ID for the order in shop',
     PRIMARY KEY  (id)
     )$collate COMMENT='Novalnet Webhook History';"
-	)
+    )
 );

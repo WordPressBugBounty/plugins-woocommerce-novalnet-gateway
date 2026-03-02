@@ -291,6 +291,7 @@
 			$( document.body ).on( 'checkout_error', function( response ) {
 				wc_novalnet.init_ajax();
 			});
+			$('#update_all_subscriptions_payment_method').prop('checked', false);
 		}
 	);
 })( jQuery );

@@ -15,45 +15,45 @@
  * @version 3.3.1
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+if (! defined('ABSPATH')) {
+    exit;
 }
 
 $text_align = is_rtl() ? 'right' : 'left';?>
 
 <h2>
-	<?php wp_kses_post( __( 'Instalment Summary', 'woocommerce-novalnet-gateway' ) ); ?>
+	<?php  echo wp_kses_post(__('Instalment Summary', 'woocommerce-novalnet-gateway')); ?>
 </h2>
 
 <div style="margin-bottom: 40px;">
 	<table class="td" cellspacing="0" cellpadding="6" style="width: 100%; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;" border="1">
 		<thead>
 			<tr>
-				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php esc_attr_e( 'S.No', 'woocommerce-novalnet-gateway' ); ?></th>
-				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php esc_attr_e( 'Novalnet Transaction ID', 'woocommerce-novalnet-gateway' ); ?></th>
-				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php esc_attr_e( 'Amount', 'woocommerce-novalnet-gateway' ); ?></th>
-				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php esc_attr_e( 'Next Instalment Date', 'woocommerce-novalnet-gateway' ); ?></th>
+				<th class="td" scope="col" style="text-align:<?php echo esc_attr($text_align); ?>;"><?php esc_attr_e('S.No', 'woocommerce-novalnet-gateway'); ?></th>
+				<th class="td" scope="col" style="text-align:<?php echo esc_attr($text_align); ?>;"><?php esc_attr_e('Novalnet Transaction ID', 'woocommerce-novalnet-gateway'); ?></th>
+				<th class="td" scope="col" style="text-align:<?php echo esc_attr($text_align); ?>;"><?php esc_attr_e('Amount', 'woocommerce-novalnet-gateway'); ?></th>
+				<th class="td" scope="col" style="text-align:<?php echo esc_attr($text_align); ?>;"><?php esc_attr_e('Next Instalment Date', 'woocommerce-novalnet-gateway'); ?></th>
 			</tr>
 		</thead>
 		<tbody>
 			<?php
-			foreach ( $contents['instalments'] as $cycle => $instalment ) {
-				if ( ! is_array( $instalment ) ) {
-					continue;
-				}
-				?>
+            foreach ($contents['instalments'] as $cycle => $instalment) {
+                if (! is_array($instalment)) {
+                    continue;
+                }
+                ?>
 				<tr class="order">
-					<td class="td" style="text-align:<?php echo esc_attr( $text_align ); ?>; vertical-align: middle; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif; word-wrap:break-word;">
-						<?php echo esc_html( $cycle ); ?>
+					<td class="td" style="text-align:<?php echo esc_attr($text_align); ?>; vertical-align: middle; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif; word-wrap:break-word;">
+						<?php echo esc_html($cycle); ?>
 					</td>
-					<td class="td" style="text-align:<?php echo esc_attr( $text_align ); ?>; vertical-align: middle; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif; word-wrap:break-word;">
-						<?php echo esc_html( ! empty( $instalment['tid'] ) ? $instalment['tid'] : '-' ); ?>
+					<td class="td" style="text-align:<?php echo esc_attr($text_align); ?>; vertical-align: middle; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif; word-wrap:break-word;">
+						<?php echo esc_html(! empty($instalment['tid']) ? $instalment['tid'] : '-'); ?>
 					</td>
-					<td class="td" style="text-align:<?php echo esc_attr( $text_align ); ?>; vertical-align: middle; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif; word-wrap:break-word;">
-						<?php echo esc_html( wc_novalnet_shop_amount_format( $instalment['amount'] ) ); ?>
+					<td class="td" style="text-align:<?php echo esc_attr($text_align); ?>; vertical-align: middle; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif; word-wrap:break-word;">
+						<?php echo esc_html(wc_novalnet_shop_amount_format($instalment['amount'])); ?>
 					</td>
-					<td class="td" style="text-align:<?php echo esc_attr( $text_align ); ?>; vertical-align: middle; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif; word-wrap:break-word;">
-						<?php echo esc_html( ! empty( $instalment['date'] ) ? $instalment['date'] : '-' ); ?>
+					<td class="td" style="text-align:<?php echo esc_attr($text_align); ?>; vertical-align: middle; font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif; word-wrap:break-word;">
+						<?php echo esc_html(! empty($instalment['date']) ? $instalment['date'] : '-'); ?>
 					</td>
 				</tr>
 			<?php } ?>

@@ -18,33 +18,92 @@
 			instance.setPaymentIntent( wc_novalnet_wallet.walletPaymentRequest( id, payment_method ) );
 			instance.isPaymentMethodAvailable(
 				function(canShowWallet) {
-					if ( canShowWallet ) {
-						$( "#" + id ).empty();
-						instance.addPaymentButton( "#" + id );
-						$( ".wallet_seperator" ).show();
-						var productPage = "#product_page_" + wallet + "_button";
-						if ( ['product_page_googlepay_button', 'product_page_applepay_button'].includes( id ) ) {
-							var width = jQuery( productPage ).width() - 5 + "px";
-							if ('applepay' == wallet ) {
-								 $( "#product_page_applepay_button" ).find( "apple-pay-button" ).css( {'width': width} );
-							} else {
-								$( "#product_page_googlepay_button" ).find( "button" ).css( {'width': width} );
-							}
-
-						} else if ( ['mini_cart_page_applepay_button', 'mini_cart_page_googlepay_button'].includes( id ) ) {
-							if ( 'mini_cart_page_applepay_button' == id ) {
-								$( "#mini_cart_page_applepay_button" ).find( "apple-pay-button" ).css( {'min-width':'84%', 'width':'84%', 'margin-left' : '7.6%'} );
-							} else {
-								$( "#mini_cart_page_googlepay_button" ).find( "button" ).css( {'min-width':'85%', 'width':'20%', 'margin-left' : '7%'} );
-							}
+					if (canShowWallet) {
+						const $container = $("#" + id);
+						$container.empty();
+						instance.addPaymentButton("#" + id);
+					  
+						$(".wallet_seperator").show();
+					  
+						const isProductPage = [
+						  "product_page_googlepay_button",
+						  "product_page_applepay_button"
+						].includes(id);
+					  
+						const isMiniCart = [
+						  "mini_cart_page_applepay_button",
+						  "mini_cart_page_googlepay_button"
+						].includes(id);
+					  
+						const appleSelector = "apple-pay-button";
+						const googleSelector = "button";
+					  
+						if (isProductPage) {
+						  const width = $("#product_page_" + wallet + "_button").width() - 5 + "px";
+					  
+						  $container
+							.find(wallet === "applepay" ? appleSelector : googleSelector)
+							.css({ width });
+					  
+						} else if (isMiniCart) {
+					  
+						  if (wallet === "applepay") {
+							$container.find(appleSelector).css({
+							  "min-width": "84%",
+							  width: "84%",
+							  "margin-left": "7.6%"
+							});
+						  } else {
+							$container.find(googleSelector).css({
+							  "min-width": "85%",
+							  width: "20%",
+							  "margin-left": "7%"
+							});
+						  }
+					  
 						} else {
-							if ( ["shopping_cart_page_applepay_button", "checkout_page_applepay_button", "guest_checkout_page_applepay_button", "paylater_page_applepay_button" ].includes( id ) ) {
-								$( "#shopping_cart_page_applepay_button, #checkout_page_applepay_button, #guest_checkout_page_applepay_button, #paylater_page_applepay_button" ).find( "apple-pay-button" ).css( {'width': "100%"} );
-							} else {
-								$( "#shopping_cart_page_googlepay_button, #checkout_page_googlepay_button, #guest_checkout_page_googlepay_button", "#paylater_page_googlepay_button" ).find( "button" ).css( {'width': "100%"} );
-							}
-						}
-					} else {
+
+							
+								if (id.includes("paylater")) {
+									const $btn = $("#" + id);
+
+									$(".shop_table").after($btn);
+
+									$btn.css({
+									marginBottom: "20px"
+									});
+								}
+
+								$(".wallet_seperator").show();
+
+						  
+							const appleIds = [
+							  "#shopping_cart_page_applepay_button",
+							  "#checkout_page_applepay_button",
+							  "#guest_checkout_page_applepay_button",
+							  "#paylater_page_applepay_button"
+							];
+						  
+							const googleIds = [
+							  "#shopping_cart_page_googlepay_button",
+							  "#checkout_page_googlepay_button",
+							  "#guest_checkout_page_googlepay_button",
+							  "#paylater_page_googlepay_button"
+							];
+						  
+							const selector = wallet === "applepay"
+							  ? appleIds.join(", ")
+							  : googleIds.join(", ");
+						  
+							$(selector)
+							  .find(wallet === "applepay" ? appleSelector : googleSelector)
+							  .css({
+								width: "100%"
+							  });
+						  }
+						  
+					  }
+					   else {
 						$( "#" + id ).hide();
 					}
 				}
@@ -109,7 +168,9 @@
 						paymentDataPresent: false,
 					},
 					custom: {
-						lang: String( $( "#" + id ).attr( "data-storeLang" ) ),
+						lang: $( "#" + id ).attr( "data-storeLang" ) === 'de'
+						? 'de-DE'
+						: 'en-US',
 					},
 					order: {
 						paymentDataPresent: false,
@@ -125,19 +186,72 @@
 					},
 					button: {
 						dimensions: button_dimensions,
-						locale: String( $( "#" + id ).attr( "data-storeLang" ) ),
+						locale:$( "#" + id ).attr( "data-storeLang" ) === 'de'
+						? 'de-DE'
+						: 'en-US',
 						type: style,
 						boxSizing: boxSizingVal,
 					},
 					callbacks: {
 						onProcessCompletion: function (response, processedStatus) {
+							
+							let customer_billing  = {};
+														let customer_shipping = {};
+
+														let billing  = response?.order?.billing?.contact || {};
+														let shipping = response?.order?.shipping?.contact || {};
+
+														let phone_number =
+															billing.phoneNumber ||
+															shipping.phoneNumber ||
+															"";
+
+										
+														const billing_address =
+															Array.isArray(billing.addressLines)
+																? billing.addressLines.join(' ')
+																: (billing.addressLines || "");
+
+														const shipping_address =
+															Array.isArray(shipping.addressLines)
+																? shipping.addressLines.join(' ')
+																: (shipping.addressLines || "");
+
+														
+														customer_billing = {
+															first_name: billing.firstName || "",
+															last_name:  billing.lastName || "",
+															address_1:  billing_address,
+															city:       billing.locality || "",
+															email:      billing.email || shipping.email || "",
+															postcode:   billing.postalCode || "",
+															country:    billing.countryCode || "",
+															phone:      phone_number
+														};
+
+														if (shipping.firstName || shipping.lastName) {
+															customer_shipping = {
+																first_name: shipping.firstName || "",
+																last_name:  shipping.lastName || "",
+																address_1:  shipping_address,
+																city:       shipping.locality || "",
+																email:      billing.email || shipping.email || "",
+																postcode:   shipping.postalCode || "",
+																country:    shipping.countryCode || "",
+																phone:      shipping.phoneNumber || ""
+															};
+														}			
 							// Only on success, we proceed further with the booking.
 							if ( "SUCCESS" == response.result.status ) {
 								var response = {response : response};
 								var data     = {
 									'action': 'novalnet_order_creation', // your action name.
 									'payment': payment_method.toLowerCase(), // your action name.
-									'variable_name': response, // some additional data to send.
+									'customer_billing':customer_billing,
+                                    'customer_shipping':customer_shipping,
+									'billing':billing,
+									'shipping':shipping,
+									'variable_name':response,
 								};
 								if ( '' !== $( "#pay_for_order_id" ).val() ) {
 									data.pay_for_order_id = $( "#pay_for_order_id" ).val();

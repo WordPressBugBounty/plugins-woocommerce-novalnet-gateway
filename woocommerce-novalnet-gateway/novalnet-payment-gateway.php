@@ -1,11 +1,12 @@
 <?php
+
 /**
  * Plugin Name: Novalnet Payment Gateway for WooCommerce
  * Plugin URI:  https://www.novalnet.de/modul/woocommerce
  * Description: PCI compliant payment solution, covering a full scope of payment services and seamless integration for easy adaptability
  * Author:      Novalnet AG
  * Author URI:  https://www.novalnet.de
- * Version:     12.10.1
+ * Version:     12.10.2
  *
  * Requires at least: 5.0.0
  * Tested up to: 6.8.3
@@ -20,24 +21,24 @@
  * @package Novalnet payment plugin
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
+if (! defined('ABSPATH')) {
+    exit; // Exit if accessed directly.
 }
 
-if ( ! class_exists( 'WC_Novalnet' ) ) :
+if (! class_exists('WC_Novalnet')) :
 
-	ob_start();
+    ob_start();
 
-	// Define constants.
-	if ( ! defined( 'NOVALNET_VERSION' ) ) {
-		define( 'NOVALNET_VERSION', '12.10.1' );
-	}
-	if ( ! defined( 'NN_PLUGIN_FILE' ) ) {
-		define( 'NN_PLUGIN_FILE', __FILE__ );
-	}
+    // Define constants.
+    if (! defined('NOVALNET_VERSION')) {
+        define('NOVALNET_VERSION', '12.10.2');
+    }
+    if (! defined('NN_PLUGIN_FILE')) {
+        define('NN_PLUGIN_FILE', __FILE__);
+    }
 
-	// Including main class.
-	include_once 'class-wc-novalnet.php';
+    // Including main class.
+    include_once 'class-wc-novalnet.php';
 endif;
 
 
@@ -48,48 +49,55 @@ endif;
  *
  * @return WC_Novalnet
  */
-function novalnet() {
+function novalnet()
+{
 
-	// Initiate WC_Novalnet.
-	return WC_Novalnet::instance();
+    if (class_exists('WC_Settings_API')) {
+
+        return WC_Novalnet::instance();
+
+    }
+    // Initiate WC_Novalnet.
+
 }
 
 
 /**
  * Initiate the novalnet function.
  */
-add_action( 'plugins_loaded', 'novalnet' );
+add_action('plugins_loaded', 'novalnet');
 
-if ( ! function_exists( 'woocommerce_gateway_novalnet_woocommerce_block_support' ) ) {
+if (! function_exists('woocommerce_gateway_novalnet_woocommerce_block_support')) {
 
-	/**
-	 * Register Novalnet Payment for WooCommerce Blocks
-	 *
-	 * @since 12.6.2
-	 */
-	function woocommerce_gateway_novalnet_woocommerce_block_support() {
-		if ( class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ) {
-			// Including available Novalnet payment gateway files.
-			foreach ( glob( dirname( __FILE__ ) . '/includes/wc-blocks/payments/*.php' ) as $filename ) {
-				include_once $filename;
-			}
-			add_action(
-				'woocommerce_blocks_payment_method_type_registration',
-				function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
-					foreach ( array_keys( novalnet()->get_payment_types() ) as $payment_id ) {
-						$class_name = ucwords( $payment_id, '_' );
-						if ( class_exists( $class_name ) ) {
-							$payment_method_registry->register(
-								new $class_name()
-							);
-						}
-					}
-				},
-			);
-		}
-	}
+    /**
+     * Register Novalnet Payment for WooCommerce Blocks
+     *
+     * @since 12.6.2
+     */
+    function woocommerce_gateway_novalnet_woocommerce_block_support()
+    {
+        if (class_exists('Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType')) {
+            // Including available Novalnet payment gateway files.
+            foreach (glob(dirname(__FILE__) . '/includes/wc-blocks/payments/*.php') as $filename) {
+                include_once $filename;
+            }
+            add_action(
+                'woocommerce_blocks_payment_method_type_registration',
+                function (Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry) {
+                    foreach (array_keys(novalnet()->get_payment_types()) as $payment_id) {
+                        $class_name = ucwords($payment_id, '_');
+                        if (class_exists($class_name)) {
+                            $payment_method_registry->register(
+                                new $class_name()
+                            );
+                        }
+                    }
+                },
+            );
+        }
+    }
 
-	 
-	// Hook in Blocks integration. This action is called in a callback on plugins loaded.
-	add_action( 'woocommerce_blocks_loaded', 'woocommerce_gateway_novalnet_woocommerce_block_support' );
+
+    // Hook in Blocks integration. This action is called in a callback on plugins loaded.
+    add_action('woocommerce_blocks_loaded', 'woocommerce_gateway_novalnet_woocommerce_block_support');
 }

@@ -17,16 +17,29 @@
                 const requestObject = novalnetPaymentElement.getWalletRequestData( paymentMethodData.paymentWallet, paymentMethodData.walletContainerId , paymentMethodData, cartTotal, billingCurrency );
                 NovalnetPaymentObject.setPaymentIntent( requestObject );
                 wpElement.useEffect( () => {
-                    NovalnetPaymentObject.isPaymentMethodAvailable(
-                        function(canShowWallet) {
-                            if ( canShowWallet ) {
-                                $( '#' + paymentMethodData.walletContainerId ).empty();
-                                NovalnetPaymentObject.addPaymentButton( "#" + paymentMethodData.walletContainerId );
-                            } else {
-                                $( '#' + paymentMethodData.walletContainerId ).parent().hide();
-                            }
+                    NovalnetPaymentObject.isPaymentMethodAvailable(function (canShowWallet) {
+                        if (canShowWallet) {
+                            const containerId = paymentMethodData.walletContainerId;
+                            const container = document.getElementById(containerId);
+                    
+                            $('#' + containerId).empty();
+                            NovalnetPaymentObject.addPaymentButton("#" + containerId);
+                    
+                            // Wait for async rendering
+                            setTimeout(() => {
+                                const walletButton =
+                                    container.querySelector('button') ||
+                                    container.querySelector('apple-pay-button');
+                    
+                                if (walletButton) {
+                                    walletButton.style.width = "100%";
+                                }
+                            }, 100);
+                    
+                        } else {
+                            $('#' + paymentMethodData.walletContainerId).parent().hide();
                         }
-                    );
+                    });
                 }, []);
                 return novalnetPaymentElement.getWalletButtonContainer( paymentMethodData.walletContainerId );
             }, null),
