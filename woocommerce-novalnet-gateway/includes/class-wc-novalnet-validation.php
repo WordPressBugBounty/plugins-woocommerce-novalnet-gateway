@@ -228,10 +228,10 @@ class WC_Novalnet_Validation
             if ($order_shipping_items) {
                 $canonical_rate_ids = get_canonical_order_shipping_item_rate_ids($order_shipping_items);
             } else {
-                $canonical_rate_ids = get_canonical_package_rate_ids($chosen_shipping_methods_session);
+                $canonical_rate_ids = wc_novalnet_get_canonical_package_rate_ids($chosen_shipping_methods_session);
             }
 
-            if (! count(get_matching_rates($canonical_rate_ids, $settings['enable_for_methods']))) {
+            if (! count(wc_novalnet_get_matching_rates($canonical_rate_ids, $settings['enable_for_methods']))) {
                 return false;
             }
         }
@@ -676,7 +676,8 @@ class WC_Novalnet_Validation
      *
      * @return bool
      */
-    public static function can_proceed_zero_amount_booking($payment_id, $wc_order = '')
+     // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+    public static function wc_novalnet_can_proceed_zero_amount_booking($payment_id, $wc_order = '')
     {
         $process_zero_amount = false;
         $payment_settings    = WC_Novalnet_Configuration::get_payment_settings($payment_id);
@@ -691,7 +692,7 @@ class WC_Novalnet_Validation
         if (self::is_pay_for_order() && empty($wc_order) && ! is_object($wc_order)) {
             $wc_order = novalnet()->helper()->get_pay_order();
         }
-
-        return apply_filters('can_proceed_zero_amount_booking', $process_zero_amount, $wc_order);
+// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+        return apply_filters('wc_novalnet_can_proceed_zero_amount_booking', $process_zero_amount, $wc_order);
     }
 }

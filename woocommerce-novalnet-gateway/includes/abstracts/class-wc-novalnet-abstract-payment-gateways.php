@@ -1004,7 +1004,7 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway
 
         // Add Novalnet domains to the list of allowed hosts for safe redirect.
         add_filter('allowed_redirect_hosts', array( $this, 'allow_novalnet_redirect' ));
-
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
         add_filter('wc_novalnet_payment_description_contents_before_additional_info', array( $this, 'update_zero_amount_booking_description' ), 10, 2);
     }
 
@@ -1034,7 +1034,7 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway
      */
     public function update_zero_amount_booking_description($desc_contents, $payment_id)
     {
-        if (WC_Novalnet_Validation::can_proceed_zero_amount_booking($payment_id) && is_checkout()) {
+        if (WC_Novalnet_Validation::wc_novalnet_can_proceed_zero_amount_booking($payment_id) && is_checkout()) {
             $desc_contents[1] = sprintf('<p style="color:red">%1$s</p>', __('This order will be processed as zero amount booking which store your payment data for further online purchases.', 'woocommerce-novalnet-gateway'));
         }
         return $desc_contents;
@@ -1053,7 +1053,7 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway
     public function check_is_zero_amount_booking_txn($txn_parameters, $wc_order)
     {
         $payment = $this->id;
-        if (WC_Novalnet_Validation::can_proceed_zero_amount_booking($this->id, $wc_order) && $txn_parameters['transaction']['amount'] > 0) {
+        if (WC_Novalnet_Validation::wc_novalnet_can_proceed_zero_amount_booking($this->id, $wc_order) && $txn_parameters['transaction']['amount'] > 0) {
             $txn_parameters['custom']['input4']      = 'zero_txn_order_amount';
             $txn_parameters['custom']['inputval4']   = $txn_parameters['transaction']['amount'];
             $txn_parameters['transaction']['amount'] = '0';
@@ -1273,9 +1273,9 @@ abstract class WC_Novalnet_Abstract_Payment_Gateways extends WC_Payment_Gateway
 
         // Hide multiple payment fields.
         wc_novalnet_hide_multiple_payment();
-
         $contents   = array();
         $contents[] = $this->description;
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
         $contents   = apply_filters('wc_novalnet_payment_description_contents_before_additional_info', $contents, $this->id);
         if (! empty($additional_info)) {
             $contents = array_merge($contents, $additional_info);

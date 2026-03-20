@@ -9,6 +9,12 @@
 
 	wc_novalnet_wallet = {
 		initiate_wallet : function(id, wallet) {
+			if (typeof NovalnetPayment === "undefined") {
+				setTimeout(function(){
+					wc_novalnet_wallet.initiate_wallet(id, wallet);
+				}, 300);
+				return;
+			}
 			var instance = wallet + 'Instance';
 			if( 'undefined' === typeof id ){
 				return;

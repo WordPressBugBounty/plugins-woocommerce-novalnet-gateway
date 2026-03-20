@@ -1110,12 +1110,12 @@ class WC_Novalnet_Helper
             return array();
         }
 
-        $available_wallets = get_available_wallets($source_page);
+        $available_wallets = wc_novalnet_get_available_wallets($source_page);
         if (! in_array($payment_wallet, $available_wallets, true) || ! novalnet()->can_display_wallet_button()) {
             return array();
         }
 
-        $wallet_sheet_detail = get_wallet_sheet_details($payment_wallet);
+        $wallet_sheet_detail = wc_novalnet_get_wallet_sheet_details($payment_wallet);
         if (! ($wallet_sheet_detail['cart_has_subs'] <= 1 || 'yes' === get_option('novalnet_enable_shop_subs'))) {
             return array();
         }

@@ -118,7 +118,11 @@
                 paymentIframe,
                 {className: '', paymentMethodData: paymentMethodData },
             ),
-            edit: Object(wpElement.createElement)(paymentDescription, null),
+            edit: Object(wpElement.createElement)(
+                wpElement.RawHTML,
+                null,
+                paymentDescription
+            ),
             canMakePayment:()=>{
                 return true;
             },

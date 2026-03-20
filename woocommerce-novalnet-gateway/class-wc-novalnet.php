@@ -7,7 +7,10 @@
  * @category Class WC_Novalnet
  * @author   Novalnet
  */
-
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals
 /**
  * Main WC_Novalnet Class.
  *
@@ -463,7 +466,7 @@ final class WC_Novalnet
         // Get wallet settings.
         $data['wallet_area'] = 'paylater_page';
         // For paylater page get avilable_wallets in Checkout Page.
-        $data['available_wallets'] = get_available_wallets('checkout_page');
+        $data['available_wallets'] = wc_novalnet_get_available_wallets('checkout_page');
         if (count($data['available_wallets']) > 0) {
             novalnet()->helper()->load_template('render-wallet-button.php', $data);
         }
@@ -489,7 +492,7 @@ final class WC_Novalnet
 
         // Get wallet settings.
         $data['wallet_area']       = 'product_page';
-        $data['available_wallets'] = ($this->can_display_wallet_button(array( 'is_subscription_product' => $is_subscription_product ))) ? get_available_wallets('product_page') : array();
+        $data['available_wallets'] = ($this->can_display_wallet_button(array( 'is_subscription_product' => $is_subscription_product ))) ? wc_novalnet_get_available_wallets('product_page') : array();
 
         if (count($data['available_wallets']) > 0) {
             novalnet()->helper()->load_template('render-wallet-button.php', $data);
@@ -505,7 +508,7 @@ final class WC_Novalnet
     {
         // Get wallet settings.
         $data['wallet_area']       = 'guest_checkout_page';
-        $data['available_wallets'] = ($this->can_display_wallet_button()) ? get_available_wallets('guest_checkout_page') : array();
+        $data['available_wallets'] = ($this->can_display_wallet_button()) ? wc_novalnet_get_available_wallets('guest_checkout_page') : array();
         if (count($data['available_wallets']) > 0) {
             novalnet()->helper()->load_template('render-wallet-button.php', $data);
         }
@@ -520,7 +523,7 @@ final class WC_Novalnet
     {
         // Get wallet settings.
         $data['wallet_area']       = 'checkout_page';
-        $data['available_wallets'] = ($this->can_display_wallet_button()) ? get_available_wallets('checkout_page') : array();
+        $data['available_wallets'] = ($this->can_display_wallet_button()) ? wc_novalnet_get_available_wallets('checkout_page') : array();
         if (count($data['available_wallets']) > 0) {
             novalnet()->helper()->load_template('render-wallet-button.php', $data);
         }
@@ -535,7 +538,7 @@ final class WC_Novalnet
     {
         // Get wallet settings.
         $data['wallet_area']       = 'mini_cart_page';
-        $data['available_wallets'] = ($this->can_display_wallet_button()) ? get_available_wallets('mini_cart_page') : array();
+        $data['available_wallets'] = ($this->can_display_wallet_button()) ? wc_novalnet_get_available_wallets('mini_cart_page') : array();
         if (count($data['available_wallets']) > 0) {
             novalnet()->helper()->load_template('render-wallet-button.php', $data);
         }
@@ -550,7 +553,7 @@ final class WC_Novalnet
     {
         // Get wallet settings.
         $data['wallet_area']       = 'shopping_cart_page';
-        $data['available_wallets'] = ($this->can_display_wallet_button()) ? get_available_wallets('shopping_cart_page') : array();
+        $data['available_wallets'] = ($this->can_display_wallet_button()) ? wc_novalnet_get_available_wallets('shopping_cart_page') : array();
         if (count($data['available_wallets']) > 0) {
             novalnet()->helper()->load_template('render-wallet-button.php', $data);
         }
@@ -998,8 +1001,8 @@ final class WC_Novalnet
                 }
             }
         }
-        $customer_billing  = $this->request['customer_billing'];
-        $customer_shipping = $this->request['customer_shipping'];
+        $customer_billing  = isset($this->request['customer_billing']) ? $this->request['customer_billing'] : [];
+        $customer_shipping = isset($this->request['customer_shipping']) ? $this->request['customer_shipping'] : [];
         if (is_user_logged_in()) {
             // Update billing address from Applepay sheet.
             WC()->customer->set_billing_first_name(wc_clean($customer_billing['first_name']));
@@ -1246,14 +1249,14 @@ final class WC_Novalnet
             'woocommerce-novalnet-gateway-admin-script'  => 'sha384-RP5Sq75QLT68HQ5cNqhKaq5H2G4SHhmAWNEiUKkWQMdsQkhdjjiQVIcousFJFhbb',
             'woocommerce-novalnet-gateway-cc-script'     => 'sha384-JqFOpW6JQzLOJ2VMLFTgK3Pqn5+arZXhSIKWYi4XwatsLirQN6AcxFgtOJ5o5lIp',
             'woocommerce-novalnet-gateway-subscription-script' => 'sha384-5frcLecRDKnrzRRixoMQPeMmZ6KrO736KrXk3k5Va0FjhCJT6yMi/0R3qnp9eLDn',
-            'woocommerce-novalnet-gateway-wallet-script' => 'sha384-IMNSKggWBIs9PV6sEc9x6/DYVeUZrZcr5pSulSKPv80ujPN51XDwFi+JjwmJYc+u',
+            'woocommerce-novalnet-gateway-wallet-script' => 'sha384-f8HtKUpwuXSIetMv9RrYAnrXK0b+7lSwWJhUKJ+9ZtmqvkRZiM/T+KIUKJMGpldR',
             // WC Block JS integrity.
             'wc-novalnet-block-inputs'                   => 'sha384-ZL41qVpmSEQIMe8GtbCrmLXCKaCzOdt6rb1esdA7YUD/879mFnmHtLBRqe6yBNHi',
             'wc-novalnet-ach-blocks-integration'         => 'sha384-Bmy92vsHBrvobxOMCCTPPKEOGEcyA7e0sArshNPVJuvOeFcxOpWE/ydwLgbvPOE9',
             'wc-novalnet-alipay-blocks-integration'      => 'sha384-QtCElQkKcvHcCYrk8uLP90WzMJ+qZiW4OC6cdGpe7lp7W7XmRMLzWu+rTOSla6uv',
             'wc-novalnet-applepay-blocks-integration'    => 'sha384-FE+gTvFfhbBJpwwnqocUYUbecFKpEcz5YuRVtnWkDV95jYeGiz9qcV7vIBOtcor8',
             'wc-novalnet-bancontact-blocks-integration'  => 'sha384-KPM7PQGu/mQaXTThAFZ5h7wnAfnmuIo+H/48RasycappxtLjUmx1OPYZgot//726',
-            'wc-novalnet-cc-blocks-integration'          => 'sha384-F8zD2dTXrgnyUIPNkh9p6FYTRoPYHb/HXhj5FIzLsbNh33vFnp+tfYIIDLbsNGLC',
+            'wc-novalnet-cc-blocks-integration'          => 'sha384-5VtQp38e95Dj/X+3cxOkruUW/F0uYYxSv++EG9Kad1xKyAxjORJu850OtAiwvmhc',
             'wc-novalnet-eps-blocks-integration'         => 'sha384-htnO0AI56CywkfrmXJmONTPGkEvpp2OIFCCoifPtGWtEJGubsxixOxgAxIC+DkSV',
             'wc-novalnet-twint-blocks-integration'       => 'sha384-Ex8xPFmmKdPHtXN61aJu10neu12WQK6PkpSSEunQJrFwOjuH5VuP5KWbeUu8HeTr',
             'wc-novalnet-googlepay-blocks-integration'   => 'sha384-7mL81S30v4QDIYB6nT0MJzcsNfoPyvn1pHj5rbdlPauDIaJ3x+YR34I1XxW1NMht',

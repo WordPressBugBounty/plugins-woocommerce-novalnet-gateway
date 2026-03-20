@@ -6,6 +6,7 @@
  * @package woocommerce-novalnet-gateway/templates/myaccount
  * @version 11.3.4
  */
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals
 
 if (! defined('ABSPATH')) {
     exit; // Exit if accessed directly.

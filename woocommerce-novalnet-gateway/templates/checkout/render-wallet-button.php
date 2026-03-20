@@ -5,10 +5,11 @@
  * @author  Novalnet AG
  * @package woocommerce-novalnet-gateway/Templates/Checkout
  */
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals
 
-if (! defined('ABSPATH')) :
-    exit; // Exit if accessed directly.
-endif;
+ if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 ?>
 
 <?php
@@ -21,7 +22,7 @@ if (in_array($contents['wallet_area'], array( 'product_page', 'mini_cart_page', 
 
 
 foreach ($contents['available_wallets'] as $wallet) {
-    $wallet_sheet_details = get_wallet_sheet_details($wallet);
+    $wallet_sheet_details = wc_novalnet_get_wallet_sheet_details($wallet);
     if ($wallet_sheet_details['cart_has_subs'] <= 1 || 'yes' === get_option('novalnet_enable_shop_subs')) {
 
         if (! empty($product)) {
@@ -48,41 +49,60 @@ foreach ($contents['available_wallets'] as $wallet) {
 			<input type = "hidden" id = "novalnet_wallet_shipping_details" value = "' . esc_attr(wp_json_encode($wallet_sheet_details['shipping_details'])) . '">
 			<div data-type="cart" style="margin: 7px 0px" data-storeName="data-storeName" data-storeLang="' . esc_attr(wc_novalnet_shop_wallet_language()) . '" data-total="' . esc_attr((string) ($wallet_sheet_details['cart_total'] * 100)) . '" data-currency="' . esc_attr(get_woocommerce_currency()) . '" data-country="' . esc_attr($wallet_sheet_details['default_country']) . '" data-shopname="' . esc_attr($wallet_sheet_details['seller_name']) . '"   data-id="' . esc_attr($data_id) . '" id="' . esc_attr($wallet_id) . '"></div>';
 
-        if ('googlepay' === $wallet) {
-            wc_enqueue_js(
-                '
-					var id = jQuery("div").find(`[data-id="googlepay_wallet_button"]`).attr("id");
-					if( "mini_cart_page_googlepay_button" == id ) {
-						if($("#guest_checkout_page_googlepay_button").length){
-							$("#guest_checkout_page_googlepay_button").empty();
+			$handle = 'novalnet-wallet-inline';
+
+			wp_register_script($handle, '', array('jquery'), NOVALNET_VERSION, true);
+			wp_enqueue_script($handle);
+			
+			if ('googlepay' === $wallet) {
+			
+				wp_add_inline_script(
+					$handle,
+					'
+					var id = jQuery("div").find("[data-id=\"googlepay_wallet_button\"]").attr("id");
+			
+					if ("mini_cart_page_googlepay_button" == id) {
+			
+						if (jQuery("#guest_checkout_page_googlepay_button").length) {
+							jQuery("#guest_checkout_page_googlepay_button").empty();
 							wc_novalnet_wallet.initiate_wallet("guest_checkout_page_googlepay_button", "googlepay");
-						} else if($("#product_page_googlepay_button").length){
-							$("#product_page_googlepay_button").empty();
+			
+						} else if (jQuery("#product_page_googlepay_button").length) {
+							jQuery("#product_page_googlepay_button").empty();
 							wc_novalnet_wallet.initiate_wallet("product_page_googlepay_button", "googlepay");
 						}
 					}
-					$("#"+id).empty();
+			
+					jQuery("#"+id).empty();
 					wc_novalnet_wallet.initiate_wallet(id, "googlepay");
-				'
-            );
-        } elseif ('applepay' === $wallet) {
-            wc_enqueue_js(
-                '
-					var id = jQuery("div").find(`[data-id="applepay_wallet_button"]`).attr("id");
-					if( "mini_cart_page_applepay_button" == id ) {
-						if($("#guest_checkout_page_applepay_button").length){
-							$("#guest_checkout_page_applepay_button").empty();
+					'
+				);
+			
+			} elseif ('applepay' === $wallet) {
+			
+				wp_add_inline_script(
+					$handle,
+					'
+					var id = jQuery("div").find("[data-id=\"applepay_wallet_button\"]").attr("id");
+			
+					if ("mini_cart_page_applepay_button" == id) {
+			
+						if (jQuery("#guest_checkout_page_applepay_button").length) {
+							jQuery("#guest_checkout_page_applepay_button").empty();
 							wc_novalnet_wallet.initiate_wallet("guest_checkout_page_applepay_button", "applepay");
-						} else if($("#product_page_applepay_button").length){
-							$("#product_page_applepay_button").empty();
+			
+						} else if (jQuery("#product_page_applepay_button").length) {
+							jQuery("#product_page_applepay_button").empty();
 							wc_novalnet_wallet.initiate_wallet("product_page_applepay_button", "applepay");
 						}
 					}
-					$("#"+id).empty();
+			
+					jQuery("#"+id).empty();
 					wc_novalnet_wallet.initiate_wallet(id, "applepay");
-				'
-            );
-        }
+					'
+				);
+			}
+			
     }
 }
 if (in_array($contents['wallet_area'], array( 'checkout_page', 'guest_checkout_page' ), true)) {

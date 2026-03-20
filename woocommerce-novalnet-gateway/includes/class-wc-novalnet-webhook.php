@@ -20,6 +20,7 @@
  *
  * WC_Novalnet_Webhook
  */
+// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedClassFound
 class WC_Novalnet_Webhook
 {
     /**

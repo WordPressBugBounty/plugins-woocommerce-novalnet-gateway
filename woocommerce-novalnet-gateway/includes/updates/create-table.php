@@ -16,7 +16,7 @@ if (! defined('ABSPATH')) {
 require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
 global $wpdb;
-
+// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 $collate = $wpdb->get_charset_collate();
 
 // Creating transaction details table to maintain the transaction log.

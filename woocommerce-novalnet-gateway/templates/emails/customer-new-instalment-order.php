@@ -18,6 +18,7 @@
 if (! defined('ABSPATH')) {
     exit;
 }
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals
 
 /*
  * @hooked WC_Emails::email_header() Output the email header

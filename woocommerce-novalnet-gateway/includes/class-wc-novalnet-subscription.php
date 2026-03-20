@@ -143,12 +143,12 @@ class WC_Novalnet_Subscription
         add_filter('woocommerce_subscriptions_can_item_be_switched_by_user', array( $this, 'disable_subscription_switch' ), 10, 3);
 
         add_action('woocommerce_after_checkout_validation', array( $this, 'novalnet_subscription_renewal_switch_checkout_validation' ), 10, 2);
-
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
         add_filter('wc_novalnet_payment_description_contents_before_additional_info', array( $this, 'update_change_payment_methods_desc' ), 10, 2);
 
         add_filter('woocommerce_subscription_note_new_payment_method_title', array( $this, 'check_payment_title' ), 10, 3);
-
-        add_filter('can_proceed_zero_amount_booking', array( $this, 'check_zero_amount_booking' ), 10, 2);
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+        add_filter('wc_novalnet_can_proceed_zero_amount_booking', array( $this, 'check_zero_amount_booking' ), 10, 2);
 
         add_filter('woocommerce_get_checkout_payment_url', array( $this, 'replace_nn_failed_order_payment_url' ), 10, 2);
 
@@ -1371,33 +1371,44 @@ class WC_Novalnet_Subscription
 				<div class="clear"></div>
 			</div>
 			<?php
-            wc_enqueue_js(
-                "
-                wc_novalnet_cc.init();
-                jQuery( '.edit_address' ).on( 'click', function( evt ) {
-                    var elem          = $( this ),
-                    order_data_column = elem.closest( '.order_data_column' ),
-                    edit_address      = order_data_column.find( 'div.edit_address' ),
-                    is_billing        = Boolean( edit_address.find( 'input[name^=\"_billing_\"]' ).length );
-                    if ( is_billing && 'novalnet_cc' === jQuery( '#_payment_method option:selected' ).val() ) {
-                        jQuery( '#novalnet_cc_iframe' ).show();
-                        jQuery( '#novalnet-admin-psd2-notification' ).show();
-                    } else {
-                        jQuery( '#novalnet_cc_iframe' ).hide();
-                        jQuery( '#novalnet-admin-psd2-notification' ).hide()
-                    }
-                } );
-                jQuery( '#_payment_method' ).on( 'change', function() {
-                    if ( jQuery( '#_payment_method' ).is(':visible') && 'novalnet_cc' === jQuery( '#_payment_method' ).val() ) {
-                        jQuery( '#novalnet-admin-psd2-notification' ).show();
-                        jQuery( '#novalnet_cc_iframe' ).show();
-                    } else {
-                        jQuery( '#novalnet-admin-psd2-notification' ).hide();
-                        jQuery( '#novalnet_cc_iframe' ).hide();
-                    }
-                }).change();
+        $handle = 'novalnet-admin-inline';
+
+        wp_register_script($handle, '', array('jquery'), NOVALNET_VERSION, true);
+        wp_enqueue_script($handle);
+        
+        wp_add_inline_script(
+            $handle,
             "
-            );
+            wc_novalnet_cc.init();
+        
+            jQuery('.edit_address').on('click', function(evt) {
+                var elem = jQuery(this),
+                order_data_column = elem.closest('.order_data_column'),
+                edit_address = order_data_column.find('div.edit_address'),
+                is_billing = Boolean(edit_address.find('input[name^=\"_billing_\"]').length);
+        
+                if (is_billing && 'novalnet_cc' === jQuery('#_payment_method option:selected').val()) {
+                    jQuery('#novalnet_cc_iframe').show();
+                    jQuery('#novalnet-admin-psd2-notification').show();
+                } else {
+                    jQuery('#novalnet_cc_iframe').hide();
+                    jQuery('#novalnet-admin-psd2-notification').hide();
+                }
+            });
+        
+            jQuery('#_payment_method').on('change', function() {
+                if (jQuery('#_payment_method').is(':visible') && 'novalnet_cc' === jQuery('#_payment_method').val()) {
+                    jQuery('#novalnet-admin-psd2-notification').show();
+                    jQuery('#novalnet_cc_iframe').show();
+                } else {
+                    jQuery('#novalnet-admin-psd2-notification').hide();
+                    jQuery('#novalnet_cc_iframe').hide();
+                }
+            }).change();
+            "
+        );
+        
+        
         }
     }
 

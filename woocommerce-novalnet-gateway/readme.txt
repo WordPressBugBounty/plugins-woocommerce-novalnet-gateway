@@ -4,7 +4,7 @@ Donate link: https://www.novalnet.de
 Tags: Credit cards, Payments, Payment gateway, Novalnet payment
 Requires at least: 5.0
 Tested up to: 6.5
-Stable tag: 12.10.2
+Stable tag: 12.10.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -200,7 +200,7 @@ Please check out our ssl certified [Demo Store](https://woocommercev12.novaldemo
 
 = Compatibility =   
 
-Novalnet payment plugin compatible for WooCommerce 4.0.0-10.5.2 and compatible for subscription 2.0.0-8.4.0.
+Novalnet payment plugin compatible for WooCommerce 4.0.0-10.6.1 and compatible for subscription 2.0.0-8.5.0.
 
 = Automatic Installation: =
 
@@ -273,6 +273,10 @@ This online payment plugin only works with the WooCommerce webshop. Are you look
 5. Novalnet payments are displayed in the checkout
 
 == Changelog ==
+
+= 12.10.3 =
+
+  * [Fix] Deprecated functionalities were replaced for improved compatibility
 
 = 12.10.2 =
 

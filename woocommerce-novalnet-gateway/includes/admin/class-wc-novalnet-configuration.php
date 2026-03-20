@@ -282,7 +282,8 @@ class WC_Novalnet_Configuration extends WC_Settings_API
                 'authorize' => __('Authorize', 'woocommerce-novalnet-gateway'),
             ),
             'custom_attributes' => array(
-                'onchange' => 'return wc_novalnet_admin.toggle_onhold_limit(this, "' . $payment_type . '")',
+                'onchange' => 'if(typeof wc_novalnet_admin !== "undefined"){ return wc_novalnet_admin.toggle_onhold_limit(this, "' . $payment_type . '"); }',
+
             ),
         );
 
@@ -301,9 +302,17 @@ class WC_Novalnet_Configuration extends WC_Settings_API
             $form_fields['payment_status']['options']['zero_amount_booking'] = __('Authorize with zero amount', 'woocommerce-novalnet-gateway');
         }
 
-        wc_enqueue_js(
-            "jQuery( '#woocommerce_" . $payment_type . "_payment_status' ).change();"
-        );
+        $handle = 'novalnet-inline-js';
+
+wp_register_script($handle, '', array('jquery'), NOVALNET_VERSION, true);
+wp_enqueue_script($handle);
+
+wp_add_inline_script(
+    $handle,
+    "jQuery('#woocommerce_" . $payment_type . "_payment_status').change();"
+);
+
+        
     }
 
     /**
@@ -746,7 +755,7 @@ class WC_Novalnet_Configuration extends WC_Settings_API
                 'default'           => '',
                 /* translators: %1$s: payment_en_title*/
                 'description'       => sprintf(__('If %1$s is only available for certain methods, set it up here. Leave blank to enable for all methods.', 'woocommerce-novalnet-gateway'), $payment_title_lang),
-                'options'           => load_shipping_method_options(),
+                'options'           => wc_novalnet_load_shipping_method_options(),
                 'desc_tip'          => true,
                 'custom_attributes' => array(
                     'data-placeholder' => __('Select shipping methods', 'woocommerce-novalnet-gateway'),
@@ -762,13 +771,21 @@ class WC_Novalnet_Configuration extends WC_Settings_API
             'default' => 'yes',
         );
 
-        wc_enqueue_js(
+        $handle = 'novalnet-inline-js';
+
+        wp_register_script($handle, '', array('jquery'), NOVALNET_VERSION, true);
+        wp_enqueue_script($handle);
+        
+        wp_add_inline_script(
+            $handle,
             "
-            jQuery( document ).ready(function () {
-                jQuery( '#woocommerce_" . $payment_type . "_lang' ).change();
+            jQuery(document).ready(function () {
+                jQuery('#woocommerce_" . $payment_type . "_lang').change();
             });
-        "
+            "
         );
+        
+        
         return $form_fields;
     }
 

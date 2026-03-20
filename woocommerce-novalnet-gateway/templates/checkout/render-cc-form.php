@@ -5,12 +5,11 @@
  * @author  Novalnet
  * @package woocommerce-novalnet-gateway/templates/checkout
  */
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals
 
-if (! defined('ABSPATH')) :
-    exit; // Exit if accessed directly.
-endif;
-
-
+ if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 ?>
 
 <div class="wc-payment-form">

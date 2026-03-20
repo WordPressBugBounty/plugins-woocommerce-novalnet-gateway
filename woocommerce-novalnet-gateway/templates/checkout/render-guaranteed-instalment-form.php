@@ -5,11 +5,11 @@
  * @author  Novalnet AG
  * @package woocommerce-novalnet-gateway/templates/checkout
  */
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals
 
-if (! defined('ABSPATH')) :
-    exit; // Exit if accessed directly.
-endif;
-
+ if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 $show_dob                = $payment_type . '_show_dob';
 $change_payment_notifier = false;
 if (! empty(novalnet()->request ['change_payment_method'])) {

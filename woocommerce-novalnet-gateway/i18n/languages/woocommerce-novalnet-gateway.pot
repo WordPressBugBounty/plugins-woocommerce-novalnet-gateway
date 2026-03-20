@@ -2,8 +2,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Novalnet Payment Gateway for WooCommerce - "
-"12.10.1\n"
-"POT-Creation-Date: 2026-02-26 18:20+0530\n"
+"12.10.3\n"
+"POT-Creation-Date: 2026-03-17 11:06+0530\n"
 "PO-Revision-Date: 2017-05-26 18:35+0530\n"
 "Last-Translator: Novalnet AG <sales@novalnet.de>\n"
 "Language-Team: Novalnet <sales@novalnet.de>\n"
@@ -22,48 +22,48 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-SearchPath-0: .\n"
 
-#: class-wc-novalnet.php:331
+#: class-wc-novalnet.php:337
 msgid ""
 "Alternatively, you can use the QR code below for your "
 "convenience. Please scan it with your banking app to complete "
 "the payment"
 msgstr ""
 
-#: class-wc-novalnet.php:357
+#: class-wc-novalnet.php:363
 msgid "Scan & Pay"
 msgstr ""
 
-#: class-wc-novalnet.php:358
+#: class-wc-novalnet.php:364
 msgid ""
 "Alternatively, you can use the QR code below for your "
 "convenience. Please scan it with your banking app to complete "
 "the payment."
 msgstr ""
 
-#: class-wc-novalnet.php:1044
+#: class-wc-novalnet.php:1050
 msgid "WooCommerce Subscription not installed properly."
 msgstr ""
 
-#: class-wc-novalnet.php:1059 class-wc-novalnet.php:1069
+#: class-wc-novalnet.php:1065 class-wc-novalnet.php:1075
 msgid "Sorry, this order requires a shipping option."
 msgstr ""
 
-#: class-wc-novalnet.php:1098
+#: class-wc-novalnet.php:1104
 #, php-format
 msgid ""
 "An account is already registered with %s. Please log in or use "
 "a different email address."
 msgstr ""
 
-#: class-wc-novalnet.php:1161
+#: class-wc-novalnet.php:1167
 msgid "You must be logged in to checkout."
 msgstr ""
 
-#: class-wc-novalnet.php:1219
+#: class-wc-novalnet.php:1225
 msgid "Please enter valid birth date"
 msgstr ""
 
-#: class-wc-novalnet.php:1220
+#: class-wc-novalnet.php:1226
 #: includes/class-wc-novalnet-subscription.php:1207
 #: includes/class-wc-novalnet-subscription.php:1245
 #: includes/gateways/class-wc-gateway-novalnet-ach.php:169
@@ -77,7 +77,7 @@ msgstr ""
 msgid "Your account details are invalid"
 msgstr ""
 
-#: class-wc-novalnet.php:1222
+#: class-wc-novalnet.php:1228
 msgid ""
 "Unfortunately, previously chosen payment method is not "
 "available. Please choose another payment type."
@@ -95,9 +95,9 @@ msgid "#"
 msgstr ""
 
 #: includes/abstracts/class-wc-novalnet-abstract-payment-gateways.php:494
-#: includes/class-wc-novalnet-subscription.php:1955
-#: includes/class-wc-novalnet-subscription.php:1959
-#: includes/class-wc-novalnet-webhook.php:514
+#: includes/class-wc-novalnet-subscription.php:1966
+#: includes/class-wc-novalnet-subscription.php:1970
+#: includes/class-wc-novalnet-webhook.php:515
 #, php-format
 msgid ""
 "Successfully changed the payment method for next subscription "
@@ -105,7 +105,7 @@ msgid ""
 msgstr ""
 
 #: includes/abstracts/class-wc-novalnet-abstract-payment-gateways.php:592
-#: includes/class-wc-novalnet-webhook.php:713
+#: includes/class-wc-novalnet-webhook.php:714
 #, php-format
 msgid ""
 "Subscription has been cancelled since the subscription has "
@@ -233,13 +233,13 @@ msgid ""
 msgstr ""
 
 #: includes/admin/class-wc-novalnet-admin.php:408
-#: includes/class-wc-novalnet-webhook.php:790
+#: includes/class-wc-novalnet-webhook.php:791
 #, php-format
 msgid "Instalment has been cancelled for the TID: %1$s on %2$s"
 msgstr ""
 
 #: includes/admin/class-wc-novalnet-admin.php:416
-#: includes/class-wc-novalnet-webhook.php:787
+#: includes/class-wc-novalnet-webhook.php:788
 #, php-format
 msgid "Instalment has been stopped for the TID: %1$s on %2$s"
 msgstr ""
@@ -467,18 +467,18 @@ msgstr ""
 msgid "Authorize"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:290
+#: includes/admin/class-wc-novalnet-configuration.php:291
 msgid "Minimum transaction amount for authorization"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:292
-#: includes/admin/class-wc-novalnet-configuration.php:568
+#: includes/admin/class-wc-novalnet-configuration.php:293
+#: includes/admin/class-wc-novalnet-configuration.php:577
 msgid ""
 "(in minimum unit of currency. E.g. enter 100 which is equal to "
 "1.00)"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:293
+#: includes/admin/class-wc-novalnet-configuration.php:294
 msgid ""
 "In case the order amount exceeds the mentioned limit, the "
 "transaction will be set on-hold till your confirmation of the "
@@ -486,16 +486,16 @@ msgid ""
 "process all the transactions as on-hold."
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:301
+#: includes/admin/class-wc-novalnet-configuration.php:302
 #: includes/gateways/class-wc-gateway-novalnet-ach.php:260
 msgid "Authorize with zero amount"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:337
+#: includes/admin/class-wc-novalnet-configuration.php:346
 msgid "Novalnet API Configuration"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:341
+#: includes/admin/class-wc-novalnet-configuration.php:350
 #, php-format
 msgid ""
 "You must add the following webhook endpoint <code>%s</code> to "
@@ -504,11 +504,11 @@ msgid ""
 "you to receive notifications about the transaction status."
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:352
+#: includes/admin/class-wc-novalnet-configuration.php:361
 msgid "Your project is in test mode"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:352
+#: includes/admin/class-wc-novalnet-configuration.php:361
 #, php-format
 msgid ""
 "Please read the Installation Guide before you start and login "
@@ -517,11 +517,11 @@ msgid ""
 "or call +49 (089) 923068320."
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:355
+#: includes/admin/class-wc-novalnet-configuration.php:364
 msgid "Product activation key"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:356
+#: includes/admin/class-wc-novalnet-configuration.php:365
 msgid ""
 "Get your Product activation key from the <a href=\"https://"
 "admin.novalnet.de\" target=\"_blank\">Novalnet Admin Portal</"
@@ -529,17 +529,17 @@ msgid ""
 "Signature (Product activation key) "
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:358
+#: includes/admin/class-wc-novalnet-configuration.php:367
 msgid ""
 "Your product activation key is a unique token for merchant "
 "authentication and payment processing. "
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:367
+#: includes/admin/class-wc-novalnet-configuration.php:376
 msgid "Payment access key "
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:368
+#: includes/admin/class-wc-novalnet-configuration.php:377
 msgid ""
 "Get your Payment access key from the <a href=\"https://admin."
 "novalnet.de\" target=\"_blank\">Novalnet Admin Portal</a> "
@@ -547,69 +547,69 @@ msgid ""
 "access key"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:370
+#: includes/admin/class-wc-novalnet-configuration.php:379
 msgid ""
 "Your secret key used to encrypt the data to avoid user "
 "manipulation and fraud."
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:378
+#: includes/admin/class-wc-novalnet-configuration.php:387
 msgid "Select Tariff ID"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:379
-#: includes/admin/class-wc-novalnet-configuration.php:381
+#: includes/admin/class-wc-novalnet-configuration.php:388
+#: includes/admin/class-wc-novalnet-configuration.php:390
 msgid ""
 "Select a Tariff ID to match the preferred tariff plan you "
 "created at the Novalnet Admin Portal for this project"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:398
+#: includes/admin/class-wc-novalnet-configuration.php:407
 msgid "Auto Refund by Cancelled Status"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:399
+#: includes/admin/class-wc-novalnet-configuration.php:408
 msgid ""
 "Activate this option to automatically trigger a complete "
 "refund of the associated amount for orders whose status is set "
 "to \"Cancelled\"."
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:406
+#: includes/admin/class-wc-novalnet-configuration.php:415
 msgid "Display payment logo"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:407
+#: includes/admin/class-wc-novalnet-configuration.php:416
 msgid ""
 "The payment method logo(s) will be displayed on the checkout "
 "page"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:414
-#: includes/admin/class-wc-novalnet-configuration.php:415
+#: includes/admin/class-wc-novalnet-configuration.php:423
+#: includes/admin/class-wc-novalnet-configuration.php:424
 msgid "Debug log"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:421
+#: includes/admin/class-wc-novalnet-configuration.php:430
 #, php-format
 msgid ""
 "Find the Novalnet payment events log in this path:  <code>%s."
 "txt</code>"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:429
+#: includes/admin/class-wc-novalnet-configuration.php:438
 msgid "Notification / Webhook URL Setup"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:434
+#: includes/admin/class-wc-novalnet-configuration.php:443
 msgid "Notification / Webhook URL"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:439
+#: includes/admin/class-wc-novalnet-configuration.php:448
 msgid "Configure"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:440
+#: includes/admin/class-wc-novalnet-configuration.php:449
 msgid ""
 "You must configure the webhook endpoint in your <a "
 "href=\"https://admin.novalnet.de\" target=\"_blank\">Novalnet "
@@ -617,238 +617,238 @@ msgid ""
 "about the transaction"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:443
+#: includes/admin/class-wc-novalnet-configuration.php:452
 msgid "Allow manual testing of the Notification / Webhook URL"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:447
+#: includes/admin/class-wc-novalnet-configuration.php:456
 msgid ""
 "Enable this to test the Novalnet Notification / Webhook URL "
 "manually. Disable this before setting your shop live to block "
 "unauthorized calls from external parties"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:451
+#: includes/admin/class-wc-novalnet-configuration.php:460
 msgid "Send e-mail to "
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:452
+#: includes/admin/class-wc-novalnet-configuration.php:461
 msgid ""
 " Notification / Webhook URL execution messages will be sent to "
 "this e-mail"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:465
+#: includes/admin/class-wc-novalnet-configuration.php:474
 msgid "Subscription Management"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:471
+#: includes/admin/class-wc-novalnet-configuration.php:480
 msgid "Enable subscription"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:478
+#: includes/admin/class-wc-novalnet-configuration.php:487
 msgid "Subscription payments"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:487
+#: includes/admin/class-wc-novalnet-configuration.php:496
 msgid "Select Subscription Tariff ID"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:489
+#: includes/admin/class-wc-novalnet-configuration.php:498
 msgid ""
 "Select the preferred Novalnet subscription tariff ID available "
 "for your project. For more information, please refer the "
 "Installation Guide"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:498
+#: includes/admin/class-wc-novalnet-configuration.php:507
 msgid "Display Subscription Cancellation Option for End User"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:504
+#: includes/admin/class-wc-novalnet-configuration.php:513
 msgid "Enable Shop Based Subscriptions"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:508
+#: includes/admin/class-wc-novalnet-configuration.php:517
 msgid ""
 "By enabling this option, you agree to switch the subscription "
 "management from Novalnet to shop based subscription for all "
 "upcoming transactions."
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:533
+#: includes/admin/class-wc-novalnet-configuration.php:542
 msgid ""
 "Payment details stored during the checkout process can be used "
 "for future payments"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:536
+#: includes/admin/class-wc-novalnet-configuration.php:545
 msgid "One-click shopping"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:563
+#: includes/admin/class-wc-novalnet-configuration.php:572
 msgid "Minimum order amount"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:565
+#: includes/admin/class-wc-novalnet-configuration.php:574
 msgid ""
 "Minimum order amount to display the selected payment method "
 "(s) at during checkout"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:588
+#: includes/admin/class-wc-novalnet-configuration.php:597
 msgid "Callback / webhook order status"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:590
+#: includes/admin/class-wc-novalnet-configuration.php:599
 msgid ""
 "Status to be used when callback script is executed for payment "
 "received by Novalnet"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:609
+#: includes/admin/class-wc-novalnet-configuration.php:618
 msgid "Payment due date (in days)"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:610
+#: includes/admin/class-wc-novalnet-configuration.php:619
 msgid ""
 "Number of days after which the payment is debited (must be "
 "between 3 and 14 days)."
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:614
+#: includes/admin/class-wc-novalnet-configuration.php:623
 msgid ""
 "Number of days given to the buyer to transfer the amount to "
 "Novalnet (must be greater than 7 days). If this field is left "
 "blank, 14 days will be set as due date by default."
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:618
+#: includes/admin/class-wc-novalnet-configuration.php:627
 msgid ""
 "Number of days given to the buyer to transfer the amount to "
 "Novalnet (must be between 7 and 28 days). If this field is "
 "left blank, 14 days will be set as due date by default."
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:622
+#: includes/admin/class-wc-novalnet-configuration.php:631
 msgid "Slip expiry date (in days)"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:623
+#: includes/admin/class-wc-novalnet-configuration.php:632
 msgid ""
 "Number of days given to the buyer to pay at a store. If this "
 "field is left blank, 14 days will be set as slip expiry date "
 "by default."
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:658
+#: includes/admin/class-wc-novalnet-configuration.php:667
 msgid "English"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:667
+#: includes/admin/class-wc-novalnet-configuration.php:676
 msgid "Enable payment method"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:673
+#: includes/admin/class-wc-novalnet-configuration.php:682
 msgid "Enable test mode"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:677
+#: includes/admin/class-wc-novalnet-configuration.php:686
 msgid ""
 "The payment will be processed in the test mode therefore "
 "amount for this transaction will not be charged"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:686
+#: includes/admin/class-wc-novalnet-configuration.php:695
 msgid ""
 "Payment name & description language <span class=\"dashicons "
 "dashicons-translation\" aria-hidden=\"true\"></span>"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:701
+#: includes/admin/class-wc-novalnet-configuration.php:710
 msgid "Title"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:714
+#: includes/admin/class-wc-novalnet-configuration.php:723
 msgid "Description"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:720
+#: includes/admin/class-wc-novalnet-configuration.php:729
 msgid "Instructions"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:722
+#: includes/admin/class-wc-novalnet-configuration.php:731
 msgid ""
 "Instructions that will be added to the thank you page and "
 "emails."
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:732
+#: includes/admin/class-wc-novalnet-configuration.php:741
 msgid "Completed order status"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:737
+#: includes/admin/class-wc-novalnet-configuration.php:746
 msgid "Status to be used for successful orders"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:742
+#: includes/admin/class-wc-novalnet-configuration.php:751
 msgid "Enable for shipping methods"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:748
+#: includes/admin/class-wc-novalnet-configuration.php:757
 #, php-format
 msgid ""
 "If %1$s is only available for certain methods, set it up here. "
 "Leave blank to enable for all methods."
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:752
+#: includes/admin/class-wc-novalnet-configuration.php:761
 msgid "Select shipping methods"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:758
+#: includes/admin/class-wc-novalnet-configuration.php:767
 msgid "Accept for virtual orders"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:760
+#: includes/admin/class-wc-novalnet-configuration.php:769
 #, php-format
 msgid "Accept %1$s if the order is virtual"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:810
+#: includes/admin/class-wc-novalnet-configuration.php:827
 msgid "Business name"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:812
+#: includes/admin/class-wc-novalnet-configuration.php:829
 msgid ""
 "This is the text that appears as PAY SELLER NAME in the Apple "
 "Pay payment sheet."
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:816
+#: includes/admin/class-wc-novalnet-configuration.php:833
 msgid ""
 "The business name is rendered in the Google Pay payment sheet, "
 "and this text will appear as PAY \"BUSINESS NAME\" so that the "
 "customer knows where he is paying to."
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:824
+#: includes/admin/class-wc-novalnet-configuration.php:841
 #: includes/gateways/class-wc-gateway-novalnet-cc.php:307
 msgid "Enforce 3D secure payment outside EU"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:828
+#: includes/admin/class-wc-novalnet-configuration.php:845
 #: includes/gateways/class-wc-gateway-novalnet-cc.php:311
 msgid ""
 "By enabling this option, all payments from cards issued "
 "outside the EU will be authenticated via 3DS 2.0 SCA."
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:833
+#: includes/admin/class-wc-novalnet-configuration.php:850
 msgid "Google Merchant ID"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:835
+#: includes/admin/class-wc-novalnet-configuration.php:852
 msgid ""
 "Please note that Googles merchant identifier is required for "
 "processing the payment method in the live environment. Googles "
@@ -866,146 +866,146 @@ msgid ""
 "testing and submission of your integration to Google."
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:877
-#: includes/admin/class-wc-novalnet-configuration.php:884
-#: includes/admin/class-wc-novalnet-configuration.php:891
+#: includes/admin/class-wc-novalnet-configuration.php:894
+#: includes/admin/class-wc-novalnet-configuration.php:901
+#: includes/admin/class-wc-novalnet-configuration.php:908
 msgid ""
 "Funds are withdrawn from the buyer's account using credit/"
 "debit card details"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:898
+#: includes/admin/class-wc-novalnet-configuration.php:915
 msgid ""
 "Europe-wide Direct Debit system that allows you to collect "
 "Euro currencies from buyers in the 34 SEPA countries and "
 "associated regions"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:905
+#: includes/admin/class-wc-novalnet-configuration.php:922
 msgid ""
 "United state Direct Debit system that allows you to collect "
 "USD currencies from buyers in the USA countries and associated "
 "regions"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:912
+#: includes/admin/class-wc-novalnet-configuration.php:929
 msgid ""
 "Electronic wallet that alows buyers to pay using any payment "
 "modes they have added to their PayPal account"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:919
-#: includes/admin/class-wc-novalnet-configuration.php:926
-#: includes/admin/class-wc-novalnet-configuration.php:933
-#: includes/admin/class-wc-novalnet-configuration.php:954
+#: includes/admin/class-wc-novalnet-configuration.php:936
+#: includes/admin/class-wc-novalnet-configuration.php:943
+#: includes/admin/class-wc-novalnet-configuration.php:950
+#: includes/admin/class-wc-novalnet-configuration.php:971
 msgid ""
 "Dutch payment method that allow your buyers to make instant "
 "payments online through his own bank"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:940
+#: includes/admin/class-wc-novalnet-configuration.php:957
 msgid ""
 "Portugal based payment method where buyer’s pays in ATM or at "
 "retail outlets using a reference ID"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:947
+#: includes/admin/class-wc-novalnet-configuration.php:964
 msgid ""
 "Belgium based online payment method where buyer’s are "
 "redirected to Bancontact site/app for payment authorization"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:961
-#: includes/admin/class-wc-novalnet-configuration.php:1017
+#: includes/admin/class-wc-novalnet-configuration.php:978
+#: includes/admin/class-wc-novalnet-configuration.php:1034
 msgid ""
 "Poland based payment method which allows buyers pay using bank "
 "transfers or any other methods"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:968
+#: includes/admin/class-wc-novalnet-configuration.php:985
 msgid ""
 "Swiss based online account system where buyers are redirected "
 "to login and pay using their PostFinance Card"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:975
+#: includes/admin/class-wc-novalnet-configuration.php:992
 msgid ""
 "Swiss based online card payment method which allows buyers to "
 "pay using PostFinance Card"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:982
+#: includes/admin/class-wc-novalnet-configuration.php:999
 msgid ""
 "German based online payment method where funds are instantly "
 "transferred from buyer's account to your account"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:989
+#: includes/admin/class-wc-novalnet-configuration.php:1006
 msgid ""
 "A digital wallet that allows buyer's to make payments using "
 "their smartphones by scanning a QR code"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:996
+#: includes/admin/class-wc-novalnet-configuration.php:1013
 msgid ""
 "Austria based online banking method that allows your buyers to "
 "pay using any form of electronic payments"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:1003
-#: includes/admin/class-wc-novalnet-configuration.php:1010
+#: includes/admin/class-wc-novalnet-configuration.php:1020
+#: includes/admin/class-wc-novalnet-configuration.php:1027
 msgid ""
 "Pan European payment method allows buyers to pay through their "
 "own internet banking system"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:1022
+#: includes/admin/class-wc-novalnet-configuration.php:1039
 msgid ""
 "Payment is debited after order confirmation and, the goods are "
 "then delivered"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:1027
+#: includes/admin/class-wc-novalnet-configuration.php:1044
 msgid "A payable credit note with the order details"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:1034
+#: includes/admin/class-wc-novalnet-configuration.php:1051
 msgid ""
 "Transaction is completed through cash payments using cash "
 "slips in countries like Germany and Austria"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:1041
+#: includes/admin/class-wc-novalnet-configuration.php:1058
 msgid ""
 "Voucher based payment method where buyer pays in ATM or at "
 "retail outlets using a reference ID"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:1048
+#: includes/admin/class-wc-novalnet-configuration.php:1065
 msgid ""
 "Belgium based online payment method where buyers are "
 "redirected to Bancontact site/app for payment authorization"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:1055
+#: includes/admin/class-wc-novalnet-configuration.php:1072
 msgid ""
 "Guaranteed payment made to you either from the buyer or from "
 "payment guarantee for the purchase made through invoice"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:1064
+#: includes/admin/class-wc-novalnet-configuration.php:1081
 msgid ""
 "Guaranteed payment made to you either from the buyer or from "
 "payment guarantee for the purchase made through SEPA"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:1069
+#: includes/admin/class-wc-novalnet-configuration.php:1086
 msgid ""
 "Buyer pays his bill as instalment payments through a single or "
 "recurring invoice(s)"
 msgstr ""
 
-#: includes/admin/class-wc-novalnet-configuration.php:1076
+#: includes/admin/class-wc-novalnet-configuration.php:1093
 msgid ""
 "Through this payment method you can collect amount "
 "periodically like subscription or instalment payments through "
@@ -1016,73 +1016,73 @@ msgstr ""
 msgid "Payment method currently not available."
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-instalment-summary.php:17
-#: templates/emails/render-instalment-details.php:32
-#: templates/myaccount/render-instalment-details.php:19
-msgid "S.No"
-msgstr ""
-
 #: includes/admin/meta-boxes/views/html-instalment-summary.php:18
 #: templates/emails/render-instalment-details.php:33
 #: templates/myaccount/render-instalment-details.php:20
-msgid "Novalnet Transaction ID"
+msgid "S.No"
 msgstr ""
 
 #: includes/admin/meta-boxes/views/html-instalment-summary.php:19
 #: templates/emails/render-instalment-details.php:34
 #: templates/myaccount/render-instalment-details.php:21
-msgid "Amount"
+msgid "Novalnet Transaction ID"
 msgstr ""
 
 #: includes/admin/meta-boxes/views/html-instalment-summary.php:20
 #: templates/emails/render-instalment-details.php:35
 #: templates/myaccount/render-instalment-details.php:22
-msgid "Next Instalment Date"
+msgid "Amount"
 msgstr ""
 
 #: includes/admin/meta-boxes/views/html-instalment-summary.php:21
+#: templates/emails/render-instalment-details.php:36
 #: templates/myaccount/render-instalment-details.php:23
-msgid "Status"
+msgid "Next Instalment Date"
 msgstr ""
 
 #: includes/admin/meta-boxes/views/html-instalment-summary.php:22
+#: templates/myaccount/render-instalment-details.php:24
+msgid "Status"
+msgstr ""
+
+#: includes/admin/meta-boxes/views/html-instalment-summary.php:23
 msgid "Instalment Refund"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-instalment-summary.php:99
+#: includes/admin/meta-boxes/views/html-instalment-summary.php:100
 msgid "Refund"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-instalment-summary.php:105
+#: includes/admin/meta-boxes/views/html-instalment-summary.php:106
 msgid "Refund amount"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-instalment-summary.php:113
+#: includes/admin/meta-boxes/views/html-instalment-summary.php:114
 msgid "Note: Refund reason will be shown to the customer"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-instalment-summary.php:113
+#: includes/admin/meta-boxes/views/html-instalment-summary.php:114
 msgid "Reason for refund (optional):"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-instalment-summary.php:123
+#: includes/admin/meta-boxes/views/html-instalment-summary.php:124
 #: includes/wc-novalnet-functions.php:135
 msgid "Confirm"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-instalment-summary.php:124
+#: includes/admin/meta-boxes/views/html-instalment-summary.php:125
 msgid "Cancel"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-instalment-summary.php:149
+#: includes/admin/meta-boxes/views/html-instalment-summary.php:150
 msgid "Instalment Cancel"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-instalment-summary.php:151
+#: includes/admin/meta-boxes/views/html-instalment-summary.php:152
 msgid "Cancel All Instalment"
 msgstr ""
 
-#: includes/admin/meta-boxes/views/html-instalment-summary.php:154
+#: includes/admin/meta-boxes/views/html-instalment-summary.php:155
 msgid "Cancel All Remaining Instalments"
 msgstr ""
 
@@ -1247,7 +1247,7 @@ msgid ""
 msgstr ""
 
 #: includes/class-wc-novalnet-helper.php:740
-#: includes/class-wc-novalnet-webhook.php:334
+#: includes/class-wc-novalnet-webhook.php:335
 #, php-format
 msgid ""
 "Your order has been booked with the amount of %1$s. Your new "
@@ -1315,7 +1315,7 @@ msgid ""
 msgstr ""
 
 #: includes/class-wc-novalnet-subscription.php:710
-#: includes/class-wc-novalnet-subscription.php:1418
+#: includes/class-wc-novalnet-subscription.php:1429
 msgid "Change Payment"
 msgstr ""
 
@@ -1324,7 +1324,7 @@ msgid "The date should be in future."
 msgstr ""
 
 #: includes/class-wc-novalnet-subscription.php:937
-#: includes/class-wc-novalnet-webhook.php:350
+#: includes/class-wc-novalnet-webhook.php:351
 #, php-format
 msgid "This subscription transaction has been suspended on %s"
 msgstr ""
@@ -1370,12 +1370,12 @@ msgid "Card type not accepted, try using another card type"
 msgstr ""
 
 #: includes/class-wc-novalnet-subscription.php:1367
-#: templates/checkout/render-cc-form.php:40
+#: templates/checkout/render-cc-form.php:39
 msgid "More security with the new Payment Policy (PSD2) Info"
 msgstr ""
 
 #: includes/class-wc-novalnet-subscription.php:1368
-#: templates/checkout/render-cc-form.php:41
+#: templates/checkout/render-cc-form.php:40
 msgid ""
 "European card issuing banks often requires a password or some "
 "other form of authentication (EU Payment Services Directive "
@@ -1442,108 +1442,108 @@ msgid ""
 "Please select atleast one of the instalment cycles to proceed"
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:216
+#: includes/class-wc-novalnet-webhook.php:217
 msgid "Notification received from Novalnet for this order. "
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:364
+#: includes/class-wc-novalnet-webhook.php:365
 #, php-format
 msgid ""
 "Subscription suspend for TID %1$s not processed: No "
 "subscription found for Order ID %2$s"
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:385
+#: includes/class-wc-novalnet-webhook.php:386
 #, php-format
 msgid "Subscription has been cancelled due to: %s. "
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:413
+#: includes/class-wc-novalnet-webhook.php:414
 #, php-format
 msgid ""
 "Subscription cancel for TID %1$s not processed: No "
 "subscription found for Order ID %2$s"
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:427
+#: includes/class-wc-novalnet-webhook.php:428
 #, php-format
 msgid ""
 "Subscription has been reactivated for the TID:%1$s on %2$s. "
 "Next charging date :%3$s"
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:484
+#: includes/class-wc-novalnet-webhook.php:485
 #, php-format
 msgid ""
 "Subscription reactivation for TID %1$s not processed: No "
 "subscription found for Order ID %2$s"
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:506
+#: includes/class-wc-novalnet-webhook.php:507
 #, php-format
 msgid ""
 "Subscription updated successfully. You will be charged %1$s on "
 "%2$s."
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:528
+#: includes/class-wc-novalnet-webhook.php:529
 #, php-format
 msgid "Subscription has been successfully activated on %1$s"
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:543
+#: includes/class-wc-novalnet-webhook.php:544
 #, php-format
 msgid ""
 "Subscription update for TID %1$s not processed: No "
 "subscription found for Order ID %2$s"
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:557
+#: includes/class-wc-novalnet-webhook.php:558
 #, php-format
 msgid "Payment Reminder %1$s has been sent to the customer."
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:568
+#: includes/class-wc-novalnet-webhook.php:569
 #, php-format
 msgid ""
 "The transaction has been submitted to the collection agency. "
 "Collection Reference: %1$s"
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:588
+#: includes/class-wc-novalnet-webhook.php:589
 #, php-format
 msgid ""
 "Renewal creation for TID %1$s not processed: Payment method "
 "changed to %2$s"
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:606
+#: includes/class-wc-novalnet-webhook.php:607
 #, php-format
 msgid ""
 "Subscription has been successfully renewed for the TID: %1$s "
 "with the amount %2$s on %3$s. The renewal TID is:%4$s."
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:622
+#: includes/class-wc-novalnet-webhook.php:623
 #, php-format
 msgid ""
 "The subscription renewal for TID %1$s was failed on %2$s due "
 "to following reason: %3$s"
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:669
+#: includes/class-wc-novalnet-webhook.php:670
 #, php-format
 msgid " Next charging date will be on %1$s"
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:685
+#: includes/class-wc-novalnet-webhook.php:686
 #, php-format
 msgid ""
 "Renewal creation for TID %1$s not processed: No subscription "
 "found for Order ID %2$s"
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:732
+#: includes/class-wc-novalnet-webhook.php:733
 #, php-format
 msgid ""
 "A new instalment transaction has been received for the "
@@ -1551,103 +1551,103 @@ msgid ""
 "%2$s with the amount %3$s on %4$s. "
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:805
-#: includes/class-wc-novalnet-webhook.php:808
+#: includes/class-wc-novalnet-webhook.php:806
+#: includes/class-wc-novalnet-webhook.php:809
 #, php-format
 msgid ""
 "Credit has been successfully received for the TID: %1$s with "
 "amount %2$s on %3$s. New TID: %4$s for the credit"
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:874
+#: includes/class-wc-novalnet-webhook.php:875
 msgid "The amount has been overpaid"
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:893
+#: includes/class-wc-novalnet-webhook.php:894
 #, php-format
 msgid "The transaction has been confirmed on %1$s"
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:933
-#: includes/class-wc-novalnet-webhook.php:1061
-#: includes/class-wc-novalnet-webhook.php:1190
+#: includes/class-wc-novalnet-webhook.php:934
+#: includes/class-wc-novalnet-webhook.php:1062
+#: includes/class-wc-novalnet-webhook.php:1191
 #, php-format
 msgid "The transaction has been cancelled on %1$s"
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:951
+#: includes/class-wc-novalnet-webhook.php:952
 #, php-format
 msgid ""
 "Refund has been initiated for the TID:%1$s with the amount "
 "%2$s."
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:954
+#: includes/class-wc-novalnet-webhook.php:955
 #, php-format
 msgid " New TID:%s for the refunded amount."
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:1011
-#: includes/class-wc-novalnet-webhook.php:1136
+#: includes/class-wc-novalnet-webhook.php:1012
+#: includes/class-wc-novalnet-webhook.php:1137
 #, php-format
 msgid "Payment refund failed for the order: %1$s due to: %2$s"
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:1041
+#: includes/class-wc-novalnet-webhook.php:1042
 #, php-format
 msgid ""
 "Chargeback executed successfully for the TID: %1$s amount: "
 "%2$s on %3$s. The subsequent TID: %4$s."
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:1152
+#: includes/class-wc-novalnet-webhook.php:1153
 #, php-format
 msgid "%s fee"
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:1168
+#: includes/class-wc-novalnet-webhook.php:1169
 #, php-format
 msgid ""
 "Transaction updated successfully for the TID: %1$s with amount "
 "%2$s."
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:1174
+#: includes/class-wc-novalnet-webhook.php:1175
 #, php-format
 msgid ""
 "Transaction updated successfully for the TID: %1$s with due "
 "date %2$s."
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:1177
+#: includes/class-wc-novalnet-webhook.php:1178
 #, php-format
 msgid ""
 "Transaction updated successfully for the TID: %1$s with amount "
 "%2$s and due date %3$s."
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:1182
+#: includes/class-wc-novalnet-webhook.php:1183
 #, php-format
 msgid ""
 "The transaction status has been changed from pending to on-"
 "hold for the TID: %1$s on %2$s."
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:1186
+#: includes/class-wc-novalnet-webhook.php:1187
 #, php-format
 msgid ""
 "Transaction updated successfully for the TID: %1$s with the "
 "amount %2$s on %3$s"
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:1409
+#: includes/class-wc-novalnet-webhook.php:1410
 #, php-format
 msgid ""
 "Subscription order reference not found in the shop for the "
 "subscription order: %d"
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:1537
+#: includes/class-wc-novalnet-webhook.php:1538
 #, php-format
 msgid " - [Order #%1$s]"
 msgstr ""
@@ -1892,29 +1892,29 @@ msgstr ""
 msgid "Payment was not successful. An error occurred"
 msgstr ""
 
-#: includes/wc-novalnet-functions.php:798
+#: includes/wc-novalnet-functions.php:839
 msgid ""
 "I hereby grant the mandate for the SEPA direct debit "
 "(electronic transmission) and confirm that the given bank "
 "details are correct!"
 msgstr ""
 
-#: includes/wc-novalnet-functions.php:800
+#: includes/wc-novalnet-functions.php:841
 msgid ""
 "I authorise (A) Novalnet AG to send instructions to my bank to "
 "debit my account and (B) my bank to debit my account in "
 "accordance with the instructions from Novalnet AG."
 msgstr ""
 
-#: includes/wc-novalnet-functions.php:801
+#: includes/wc-novalnet-functions.php:842
 msgid "Creditor identifier: DE53ZZZ00000004253"
 msgstr ""
 
-#: includes/wc-novalnet-functions.php:802
+#: includes/wc-novalnet-functions.php:843
 msgid "Note:"
 msgstr ""
 
-#: includes/wc-novalnet-functions.php:803
+#: includes/wc-novalnet-functions.php:844
 msgid ""
 "You are entitled to a refund from your bank under the terms "
 "and conditions of your agreement with bank. A refund must be "
@@ -1922,22 +1922,22 @@ msgid ""
 "account was debited."
 msgstr ""
 
-#: includes/wc-novalnet-functions.php:1158
+#: includes/wc-novalnet-functions.php:1201
 #, php-format
 msgid "Any &quot;%1$s&quot; method"
 msgstr ""
 
-#: includes/wc-novalnet-functions.php:1173
+#: includes/wc-novalnet-functions.php:1216
 #, php-format
 msgid "%1$s (#%2$s)"
 msgstr ""
 
-#: includes/wc-novalnet-functions.php:1176
+#: includes/wc-novalnet-functions.php:1219
 #, php-format
 msgid "%1$s &ndash; %2$s"
 msgstr ""
 
-#: includes/wc-novalnet-functions.php:1176
+#: includes/wc-novalnet-functions.php:1219
 msgid "Other locations"
 msgstr ""
 
@@ -1976,32 +1976,32 @@ msgstr ""
 msgid "Instalment Amount"
 msgstr ""
 
-#: templates/checkout/render-instalment-suggestions-form.php:13
+#: templates/checkout/render-instalment-suggestions-form.php:14
 msgid "You can pay for the product in instalments."
 msgstr ""
 
-#: templates/checkout/render-instalment-suggestions-form.php:15
+#: templates/checkout/render-instalment-suggestions-form.php:16
 msgid "Learn more"
 msgstr ""
 
-#: templates/checkout/render-instalment-suggestions-form.php:20
+#: templates/checkout/render-instalment-suggestions-form.php:21
 msgid "Instalment Options"
 msgstr ""
 
-#: templates/checkout/render-instalment-suggestions-form.php:53
+#: templates/checkout/render-instalment-suggestions-form.php:54
 #, php-format
 msgid "Plan %s: "
 msgstr ""
 
-#: templates/checkout/render-instalment-suggestions-form.php:69
+#: templates/checkout/render-instalment-suggestions-form.php:70
 msgid "Things to note:"
 msgstr ""
 
-#: templates/checkout/render-instalment-suggestions-form.php:71
+#: templates/checkout/render-instalment-suggestions-form.php:72
 msgid "Available in Germany, Austria and Switzerland"
 msgstr ""
 
-#: templates/checkout/render-instalment-suggestions-form.php:72
+#: templates/checkout/render-instalment-suggestions-form.php:73
 msgid ""
 "The shipping address must be the same as the billing address"
 msgstr ""
@@ -2014,22 +2014,22 @@ msgstr ""
 msgid "BIC"
 msgstr ""
 
-#: templates/emails/customer-new-instalment-order.php:28
+#: templates/emails/customer-new-instalment-order.php:29
 #, php-format
 msgid "Hi %s,"
 msgstr ""
 
-#: templates/emails/customer-new-instalment-order.php:30
+#: templates/emails/customer-new-instalment-order.php:31
 #, php-format
 msgid ""
 "Your instalment order with %s has been completed. Your order "
 "details are shown below for your reference:"
 msgstr ""
 
-#: templates/emails/customer-new-instalment-order.php:44
+#: templates/emails/customer-new-instalment-order.php:45
 msgid "Thank you for shopping with us."
 msgstr ""
 
-#: templates/emails/render-instalment-details.php:25
+#: templates/emails/render-instalment-details.php:26
 msgid "Instalment Summary"
 msgstr ""

@@ -5,6 +5,7 @@
  * @author  Novalnet AG
  * @package woocommerce-novalnet-gateway/includes/admin/meta-boxes/views/
  */
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals
 
 if (! defined('ABSPATH')) {
     exit; // Exit if accessed directly.

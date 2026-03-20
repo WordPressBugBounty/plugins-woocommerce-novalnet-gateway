@@ -5,10 +5,11 @@
  * @author  Novalnet AG
  * @package woocommerce-novalnet-gateway/Templates/Checkout
  */
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals
 
-if (! defined('ABSPATH')) :
-    exit; // Exit if accessed directly.
-endif;
+ if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 ?>
 <span style="color: #96588a;"><?php esc_attr_e('You can pay for the product in instalments.', 'woocommerce-novalnet-gateway'); ?></span>
 <span id="novalnet-instalment-suggestions" style="text-decoration:underline;cursor:pointer;color:black;">

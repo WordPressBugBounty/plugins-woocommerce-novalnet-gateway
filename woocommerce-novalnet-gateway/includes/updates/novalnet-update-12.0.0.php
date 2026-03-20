@@ -7,6 +7,7 @@
  * @category Admin
  * @package  woocommerce-novalnet-gateway/includes/updates/
  */
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals
 
 if (! defined('ABSPATH')) {
     exit; // Exit if accessed directly.

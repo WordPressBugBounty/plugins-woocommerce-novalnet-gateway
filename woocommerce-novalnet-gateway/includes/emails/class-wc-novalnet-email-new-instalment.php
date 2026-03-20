@@ -13,10 +13,10 @@
 if (! defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
-
 /**
  * WC_Novalnet_Email_New_Instalment Class.
  */
+// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedClassFound
 class WC_Novalnet_Email_New_Instalment extends WC_Email_Customer_Completed_Order
 {
     /**

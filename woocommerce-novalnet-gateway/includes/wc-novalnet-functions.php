@@ -9,7 +9,7 @@
  * @category Core
  * @author   Novalnet
  */
-
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals
 if (! defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
@@ -416,13 +416,21 @@ function wc_novalnet_send_mail($email_to_address, $email_subject, $comments)
 function wc_novalnet_hide_multiple_payment()
 {
     if (class_exists('Woocommerce_German_Market')) {
-        wc_enqueue_js(
-            '
-			if ( $( "div[id=payment]" ).length > 1) {
-				' . wc_novalnet_process_multiple_payment_hide() . '
-			}
-		'
-        );
+        $handle = 'novalnet-inline-js';
+
+wp_register_script($handle, '', array('jquery'), NOVALNET_VERSION, true);
+wp_enqueue_script($handle);
+
+wp_add_inline_script(
+    $handle,
+    '
+    if ( jQuery("div[id=payment]").length > 1 ) {
+        ' . wc_novalnet_process_multiple_payment_hide() . '
+    }
+    '
+);
+
+        
     }
 }
 
@@ -547,7 +555,7 @@ function wc_novalnet_get_class_name($payment_type)
  * @param string $wallet The payment type.
  * @return array
  */
-function get_wallet_sheet_details($wallet)
+function wc_novalnet_get_wallet_sheet_details($wallet)
 {
 
     global $woocommerce;
@@ -567,7 +575,7 @@ function get_wallet_sheet_details($wallet)
     $pay_for_order    = false;
     $pay_for_order_id = '';
     // If paying from order, we need to get total from order not cart.
-    if (isset($_GET['pay_for_order']) && ! empty($_GET['key'])) { // @codingStandardsIgnoreLine.
+    if (isset($_GET['pay_for_order']) && ! empty($_GET['key'])) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
         global $wp;
         $pay_for_order    = true;
         $pay_for_order_id = wc_clean($wp->query_vars['order-pay']);
@@ -596,7 +604,7 @@ function get_wallet_sheet_details($wallet)
                 }
 
                 // Get product price.
-                $product_price = get_product_price($_product);
+                $product_price = wc_novalnet_get_product_price($_product);
                 $total = $product_price * $item_values['quantity'];
 
                 $currency = get_woocommerce_currency_symbol();
@@ -679,7 +687,7 @@ function get_wallet_sheet_details($wallet)
             $cart_products[] = $values['data']->get_id();
 
             // Get product price.
-            $product_price = get_product_price($_product);
+            $product_price = wc_novalnet_get_product_price($_product);
             $total = $product_price * $values['quantity'];
 
             $currency = get_woocommerce_currency_symbol();
@@ -720,6 +728,39 @@ function get_wallet_sheet_details($wallet)
                 'type'   => 'SUBTOTAL',
             );
         }
+
+        if ((! empty($product)) && ! in_array($product->get_id(), $cart_products, true)) {
+            if (! $product->is_downloadable() && ! $product->is_virtual()) {
+                $cart_has_virtual = 0;
+            } elseif (! $cart_has_normal_product) {
+                $cart_has_virtual = 1;
+            }
+            $product_total = 0;
+            $add_product   = $product->get_id();
+            if (in_array($product->get_type(), array( 'subscription', 'subscription_variation', 'variable-subscription' ), true)) {
+                $signup_fee = $product->get_meta('_subscription_sign_up_fee');
+                ++$cart_has_subs;
+                if ($signup_fee > 0) {
+                    $cart_subtotal    += $signup_fee;
+                    $product_total    += $signup_fee;
+                    $article_details[] = array(
+                        'label'  => 'Signup Fee',
+                        'amount' => wc_novalnet_amount_as_string($signup_fee),
+                        'type'   => 'SUBTOTAL',
+                    );
+                }
+            }
+            $product_price     = wc_novalnet_get_product_price($product);
+            $cart_subtotal    += $product_price;
+            $product_total    += $product_price;
+            $product_details   = $product->get_name() . ' ( 1 X ' . $product_price . ')';
+            $article_details[] = array(
+                'label'  => $product_details,
+                'amount' => wc_novalnet_amount_as_string($product_total),
+                'type'   => 'SUBTOTAL',
+            );
+        }
+
         // Add cart amount.
         $cart_tax_amount = 0;
         foreach (WC()->cart->get_taxes() as $tax_amount) {
@@ -811,7 +852,7 @@ function wc_novalnet_sepa_mandate_text($payment_type)
  *
  * @since 12.4.0
  */
-function get_available_wallets($page)
+function wc_novalnet_get_available_wallets($page)
 {
     // Get wallet settings.
     global $woocommerce;
@@ -827,7 +868,8 @@ function get_available_wallets($page)
         }
 
         if (class_exists('WC_Subscriptions_Switcher')) {
-            if ((isset($_GET['switch-subscription'])) || (isset(WC()->cart) && WC_Subscriptions_Switcher::cart_contains_switches())) { // phpcs:ignore WordPress.Security.NonceVerification
+            //  phpcs:ignore WordPress.Security.NonceVerification.Recommended
+            if ((isset($_GET['switch-subscription'])) || (isset(WC()->cart) && WC_Subscriptions_Switcher::cart_contains_switches())) { 
                 continue;
             }
         }
@@ -846,7 +888,8 @@ function get_available_wallets($page)
 
             $items               = $woocommerce->cart->get_cart();
             $pay_for_order_total = 0;
-            if (isset($_GET['pay_for_order']) && ! empty($_GET['key'])) { // @codingStandardsIgnoreLine.
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+            if (isset($_GET['pay_for_order']) && ! empty($_GET['key'])) { 
                 global $wp;
                 $pay_for_order       = true;
                 $pay_for_order_id    = wc_clean($wp->query_vars['order-pay']);
@@ -858,7 +901,7 @@ function get_available_wallets($page)
             $cart_has_subs       = 0;
             $cart_has_subs_valid = 0;
             foreach ($items as $item => $values) {
-                if (isset($_GET['pay_for_order']) && ! empty($_GET['key'])) { // phpcs:ignore WordPress.Security.NonceVerification
+                if (isset($_GET['pay_for_order']) && ! empty($_GET['key'])) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
                     $_product = wc_get_product($values['product_id']);
                 } else {
                     $_product = wc_get_product($values['data']->get_id());
@@ -1002,7 +1045,7 @@ function set_paypal_sheet_details(&$parameters, $wc_order)
             }
 
             // Get product price.
-            $product_price = get_product_price($_product);
+            $product_price = wc_novalnet_get_product_price($_product);
 
             // Is_downloadable.
             $is_virtual = $_product->is_virtual();
@@ -1116,7 +1159,7 @@ function set_paypal_sheet_details(&$parameters, $wc_order)
  *
  * @return string
  */
-function get_product_price($_product)
+function wc_novalnet_get_product_price($_product)
 {
     if (wc_prices_include_tax()) {
         $product_price = wc_get_price_excluding_tax($_product);
@@ -1133,10 +1176,10 @@ function get_product_price($_product)
  *
  * @return array
  */
-function load_shipping_method_options()
+function wc_novalnet_load_shipping_method_options()
 {
     // Since this is expensive, we only want to do it if we're actually on the settings page.
-    if (! is_accessing_settings()) {
+    if (! wc_novalnet_is_accessing_settings()) {
         return array();
     }
 
@@ -1188,7 +1231,7 @@ function load_shipping_method_options()
  *
  * @return bool
  */
-function is_accessing_settings()
+function wc_novalnet_is_accessing_settings()
 {
     if (is_admin()) {
         // phpcs:disable WordPress.Security.NonceVerification
@@ -1234,7 +1277,7 @@ function get_canonical_order_shipping_item_rate_ids($order_shipping_items)
  * @param array $shipping_methods Shipping methods.
  * @return boolean
  */
-function get_matching_rates($rate_ids, $shipping_methods)
+function wc_novalnet_get_matching_rates($rate_ids, $shipping_methods)
 {
     // First, match entries in 'method_id:instance_id' format. Then, match entries in 'method_id' format by stripping off the instance ID from the candidates.
     return array_unique(array_merge(array_intersect($shipping_methods, $rate_ids), array_intersect($shipping_methods, array_unique(array_map('wc_get_string_before_colon', $rate_ids)))));
@@ -1248,7 +1291,7 @@ function get_matching_rates($rate_ids, $shipping_methods)
  * @param  array $chosen_package_rate_ids Rate IDs as generated by shipping methods. Can be anything if a shipping method doesn't honor WC conventions.
  * @return array $canonical_rate_ids  Rate IDs in a canonical format.
  */
-function get_canonical_package_rate_ids($chosen_package_rate_ids)
+function wc_novalnet_get_canonical_package_rate_ids($chosen_package_rate_ids)
 {
 
     $shipping_packages  = WC()->shipping()->get_packages();
