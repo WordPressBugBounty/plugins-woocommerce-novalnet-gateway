@@ -1227,10 +1227,16 @@ class WC_Novalnet_Webhook
     public function validate_event_data()
     {
         try {
-            $json_input       = WP_REST_Server::get_raw_data();
-            $this->event_data = wc_novalnet_unserialize_data($json_input);
+            $json_input = WP_REST_Server::get_raw_data();
+            $this->event_data = json_decode($json_input, true, 512, JSON_BIGINT_AS_STRING);
+
+            if (! is_array($this->event_data) || JSON_ERROR_NONE !== json_last_error()) {
+                $this->display_message(array( 'message' => 'Received data is not in the JSON format' ));
+            }
         } catch (Exception $e) {
-            $this->display_message(array( 'message' => "Received data is not in the JSON format $e" ));
+            $this->display_message(array( 'message' => "Received data is not in the JSON format" ));
+            $novalnet_log = wc_novalnet_logger();
+            $novalnet_log->add('woocommerce-novalnet-gateway', 'Received data is not in the JSON format' . $e->getMessage());
         }
         // Your payment access key value.
         $this->payment_access_key = WC_Novalnet_Configuration::get_global_settings('key_password');
@@ -1286,8 +1292,9 @@ class WC_Novalnet_Webhook
         $json_data                      = wc_novalnet_serialize_data($logentry);
         $novalnet_log                   = wc_novalnet_logger();
         $novalnet_log->add('woocommerce-novalnet-gateway', 'Callback Generated Checksum: ' . $json_data);
+        $received_checksum = $this->event_data['event']['checksum'] ?? null;
 
-        if ($generated_checksum !== $this->event_data['event']['checksum']) {
+        if ($received_checksum === '' || ! is_string($received_checksum) || ! hash_equals((string) $generated_checksum, $received_checksum)) {
             $this->display_message(array( 'message' => 'While notifying some data has been changed. The hash check failed' ));
         }
 

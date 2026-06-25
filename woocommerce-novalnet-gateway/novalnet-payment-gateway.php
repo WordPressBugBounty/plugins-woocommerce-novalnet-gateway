@@ -6,7 +6,7 @@
  * Description: PCI compliant payment solution, covering a full scope of payment services and seamless integration for easy adaptability
  * Author:      Novalnet AG
  * Author URI:  https://www.novalnet.de
- * Version:     12.10.3
+ * Version:     12.10.4
  *
  * Requires at least: 5.0.0
  * Tested up to: 6.8.3
@@ -31,7 +31,7 @@ if (! class_exists('WC_Novalnet')) :
 
     // Define constants.
     if (! defined('NOVALNET_VERSION')) {
-        define('NOVALNET_VERSION', '12.10.3');
+        define('NOVALNET_VERSION', '12.10.4');
     }
     if (! defined('NN_PLUGIN_FILE')) {
         define('NN_PLUGIN_FILE', __FILE__);

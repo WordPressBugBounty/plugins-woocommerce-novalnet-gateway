@@ -445,10 +445,9 @@ class WC_Novalnet_Validation
      */
     public static function is_valid_checksum($data, $txn_secret, $access_key)
     {
-
         if (! empty($data['checksum']) && ! empty($data['tid']) && ! empty($data ['status']) && ! empty($txn_secret) && ! empty($access_key)) {
             $checksum = hash('sha256', $data['tid'] . $txn_secret . $data['status'] . strrev($access_key));
-            if ($checksum === $data['checksum']) {
+            if (hash_equals($checksum, $data['checksum'])) {
                 return true;
             }
         }

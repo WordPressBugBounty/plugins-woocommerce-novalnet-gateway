@@ -197,7 +197,7 @@ function wc_novalnet_unserialize_data($data, $need_as_array = true)
     }
 
     if (is_serialized($data)) {
-        return maybe_unserialize($data);
+        return unserialize($data, array( 'allowed_classes' => false ));
     }
 
     $result = json_decode($data, $need_as_array, 512, JSON_BIGINT_AS_STRING);

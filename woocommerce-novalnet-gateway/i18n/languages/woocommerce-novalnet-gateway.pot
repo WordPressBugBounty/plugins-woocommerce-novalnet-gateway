@@ -2,8 +2,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Novalnet Payment Gateway for WooCommerce - "
-"12.10.3\n"
-"POT-Creation-Date: 2026-03-17 11:06+0530\n"
+"12.10.4\n"
+"POT-Creation-Date: 2026-06-25 14:45+0530\n"
 "PO-Revision-Date: 2017-05-26 18:35+0530\n"
 "Last-Translator: Novalnet AG <sales@novalnet.de>\n"
 "Language-Team: Novalnet <sales@novalnet.de>\n"
@@ -226,7 +226,7 @@ msgstr ""
 
 #: includes/admin/class-wc-novalnet-admin.php:370
 #: includes/admin/class-wc-novalnet-admin.php:495
-#: includes/class-wc-novalnet-validation.php:608
+#: includes/class-wc-novalnet-validation.php:607
 msgid ""
 "Please enter the required fields under Novalnet API "
 "Configuration."
@@ -251,9 +251,9 @@ msgid ""
 msgstr ""
 
 #: includes/admin/class-wc-novalnet-admin.php:519
-#: includes/class-wc-novalnet-validation.php:511
-#: includes/class-wc-novalnet-validation.php:642
-#: includes/class-wc-novalnet-validation.php:648
+#: includes/class-wc-novalnet-validation.php:510
+#: includes/class-wc-novalnet-validation.php:641
+#: includes/class-wc-novalnet-validation.php:647
 #, php-format
 msgid ""
 "Minimum order amount should be greater than or equal to %s"
@@ -382,7 +382,7 @@ msgstr ""
 
 #: includes/admin/class-wc-novalnet-configuration.php:117
 #: includes/admin/class-wc-novalnet-configuration.php:144
-#: includes/class-wc-novalnet-validation.php:518
+#: includes/class-wc-novalnet-validation.php:517
 msgid ""
 "The billing address must be the same as the shipping address"
 msgstr ""
@@ -1418,26 +1418,26 @@ msgstr ""
 msgid "Please enter values in the required fields - %1$s"
 msgstr ""
 
-#: includes/class-wc-novalnet-validation.php:490
+#: includes/class-wc-novalnet-validation.php:489
 msgid "Please enter the valid birth date"
 msgstr ""
 
-#: includes/class-wc-novalnet-validation.php:492
+#: includes/class-wc-novalnet-validation.php:491
 msgid "You need to be at least 18 years old"
 msgstr ""
 
-#: includes/class-wc-novalnet-validation.php:500
+#: includes/class-wc-novalnet-validation.php:499
 msgid "Please enter your date of birth"
 msgstr ""
 
-#: includes/class-wc-novalnet-validation.php:611
+#: includes/class-wc-novalnet-validation.php:610
 #, php-format
 msgid ""
 " Novalnet API configuration can be adjusted <a "
 "href=\"%s\">here</a>."
 msgstr ""
 
-#: includes/class-wc-novalnet-validation.php:628
+#: includes/class-wc-novalnet-validation.php:627
 msgid ""
 "Please select atleast one of the instalment cycles to proceed"
 msgstr ""
@@ -1640,14 +1640,14 @@ msgid ""
 "amount %2$s on %3$s"
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:1410
+#: includes/class-wc-novalnet-webhook.php:1417
 #, php-format
 msgid ""
 "Subscription order reference not found in the shop for the "
 "subscription order: %d"
 msgstr ""
 
-#: includes/class-wc-novalnet-webhook.php:1538
+#: includes/class-wc-novalnet-webhook.php:1545
 #, php-format
 msgid " - [Order #%1$s]"
 msgstr ""
