@@ -200,7 +200,7 @@ Please check out our ssl certified [Demo Store](https://woocommercev12.novaldemo
 
 = Compatibility =   
 
-Novalnet payment plugin compatible for WooCommerce 4.0.0-10.9.1 and compatible for subscription 2.0.0-9.0.0.
+Novalnet payment plugin compatible for WooCommerce 4.0.0-10.9.4 and compatible for subscription 2.0.0-9.0.1.
 
 = Automatic Installation: =
 
